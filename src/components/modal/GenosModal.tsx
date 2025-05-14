@@ -1,0 +1,106 @@
+"use client";
+
+import React, { useEffect } from "react";
+import clsx from "clsx";
+import GenosButton from "../button/GenosButton";
+import { InboxArrowDownIcon } from "@heroicons/react/24/outline";
+
+type ModalSize = "md" | "lg" | "full";
+
+type GenosModalProps = {
+  show: boolean;
+  title: string;
+  onClose?: () => void;
+  onSubmit?: () => void;
+  onOpen?: () => void;
+  size?: ModalSize;
+  children: React.ReactNode;
+  submitLabel?: string;
+  cancelLabel?: string;
+};
+
+const sizeClasses = {
+  md: "max-w-md",
+  lg: "max-w-3xl",
+  full: "w-full h-full",
+};
+
+export default function GenosModal({
+  show,
+  title,
+  onClose,
+  onSubmit,
+  onOpen,
+  size = "md",
+  children,
+  submitLabel = "Submit",
+  cancelLabel = "Cancel",
+}: GenosModalProps) {
+  useEffect(() => {
+    if (show && onOpen) onOpen();
+  }, [show, onOpen]);
+
+  return (
+    <div
+      className={clsx(
+        "fixed inset-0 z-50 flex items-center justify-center transition-all duration-300",
+        show ? "opacity-100 visible" : "opacity-0 invisible"
+      )}
+    >
+      {/* Overlay */}
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Modal container */}
+      <div
+        className={clsx(
+          "bg-white dark:bg-gray-900 rounded-lg shadow-xl transform transition-all duration-300 relative",
+          size !== "full" && sizeClasses[size],
+          size === "full" && "w-full h-full m-0 rounded-none"
+        )}
+      >
+        {/* Modal Header */}
+        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="font-semibold text-gray-800 dark:text-white">
+            {title}
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-white cursor-pointer"
+          >
+            &times;
+          </button>
+        </div>
+
+        {/* Modal Content */}
+        <div className="p-4 overflow-y-auto max-h-[70vh]">{children}</div>
+
+        {/* Modal Footer */}
+        <div className="flex justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-700">
+          <GenosButton
+            label="Cancel"
+            color="gray"
+            onClick={onClose}
+            outlined
+            className=""
+            disabled
+            round="lg"
+          ></GenosButton>
+          {onSubmit && (
+            <GenosButton
+              label="Submit"
+              selfStart
+              color="primary"
+              onClick={onSubmit}
+              round="md"
+              size="md"
+              iconLeft={<InboxArrowDownIcon className="w-4 h-4" />}
+            ></GenosButton>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
