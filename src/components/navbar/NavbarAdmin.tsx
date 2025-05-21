@@ -13,6 +13,7 @@ type NavbarProps = {
   profileName: string;
   profileImage?: string;
   isSidebarOpen: boolean;
+  onLogout: () => void;
 };
 
 export default function NavbarAdmin({
@@ -20,6 +21,7 @@ export default function NavbarAdmin({
   onToggleSidebar,
   currentPage,
   profileName,
+  onLogout,
   profileImage = "/images/default-avatar.jpg",
 }: NavbarProps) {
   const [notifOpen, setNotifOpen] = useState(false);
@@ -116,7 +118,7 @@ export default function NavbarAdmin({
                 Akun
               </div>
               <div
-                onClick={() => setProfileOpen(false)}
+                onClick={() => onLogout()}
                 className="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm"
               >
                 Logout

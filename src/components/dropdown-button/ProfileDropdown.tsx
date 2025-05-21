@@ -7,7 +7,7 @@ export default function ProfileDropdown() {
   });
 
   const handleLogout = () => {
-    console.log("User logged out");
+    // console.log("User logged out");
     // Tambahkan logika logout seperti menghapus token atau mengarahkan ke halaman login
   };
 

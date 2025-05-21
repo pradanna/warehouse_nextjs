@@ -1,7 +1,7 @@
 "use client";
 import { forwardRef, useState } from "react";
 import clsx from "clsx";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { PencilIcon } from "@heroicons/react/24/outline";
 
 type Props = {
   label: string;
@@ -11,30 +11,30 @@ type Props = {
   icon_right?: React.ReactNode;
   className?: string;
   value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   placeholder?: string;
   name?: string;
-  type?: string;
   disabled?: boolean;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  rows?: number;
 };
 
-const GenosTextfield = forwardRef<HTMLInputElement, Props>(
+const GenosTextarea = forwardRef<HTMLTextAreaElement, Props>(
   (
     {
       label,
       is_icon_left = false,
       is_icon_right = false,
-      icon_left = <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />,
-      icon_right = <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />,
+      icon_left = <PencilIcon className="w-5 h-5 text-gray-400" />,
+      icon_right = <PencilIcon className="w-5 h-5 text-gray-400" />,
       className,
       value,
-      onKeyDown,
       onChange,
+      onKeyDown,
       placeholder,
       name,
-      type = "text",
       disabled = false,
+      rows = 3,
     },
     ref
   ) => {
@@ -42,7 +42,7 @@ const GenosTextfield = forwardRef<HTMLInputElement, Props>(
     const [isFocused, setIsFocused] = useState(false);
     const isControlled = value !== undefined && onChange !== undefined;
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       if (isControlled) {
         onChange?.(e);
       } else {
@@ -55,7 +55,7 @@ const GenosTextfield = forwardRef<HTMLInputElement, Props>(
 
     return (
       <div className={clsx("relative", className)}>
-        {/* Label Melayang */}
+        {/* Label melayang */}
         <label
           className={clsx(
             "absolute",
@@ -63,7 +63,7 @@ const GenosTextfield = forwardRef<HTMLInputElement, Props>(
             "text-xs bg-white transition-all duration-200 px-1 z-10",
             showFloatingLabel
               ? "top-0 -translate-y-1/2 text-gray-500"
-              : "top-1/2 -translate-y-1/2 text-gray-400"
+              : "top-3 -translate-y-1/2 text-gray-400"
           )}
         >
           {label}
@@ -71,20 +71,20 @@ const GenosTextfield = forwardRef<HTMLInputElement, Props>(
 
         <div
           className={clsx(
-            "flex items-center border rounded-md transition-all duration-200 w-full",
+            "flex border rounded-md transition-all duration-200 w-full",
             disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white",
             "border-light2 focus-within:border-primary-light2"
           )}
         >
           {/* Icon kiri */}
           {is_icon_left && (
-            <div className="pl-3 flex items-center pointer-events-none">
+            <div className="pl-3 pt-2 flex items-start pointer-events-none">
               {icon_left}
             </div>
           )}
 
-          <input
-            type={type}
+          <textarea
+            rows={rows}
             value={inputValue}
             onChange={handleChange}
             name={name}
@@ -95,13 +95,13 @@ const GenosTextfield = forwardRef<HTMLInputElement, Props>(
             disabled={disabled}
             ref={ref}
             className={clsx(
-              "py-2 px-3 bg-transparent focus:outline-none text-sm w-full"
+              "py-2 px-3 bg-transparent focus:outline-none text-sm w-full resize-none"
             )}
           />
 
           {/* Icon kanan */}
           {is_icon_right && (
-            <div className="pr-3 flex items-center pointer-events-none">
+            <div className="pr-3 pt-2 flex items-start pointer-events-none">
               {icon_right}
             </div>
           )}
@@ -111,4 +111,4 @@ const GenosTextfield = forwardRef<HTMLInputElement, Props>(
   }
 );
 
-export default GenosTextfield;
+export default GenosTextarea;

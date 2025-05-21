@@ -158,11 +158,7 @@ const UserTable = () => {
         totalRows={filteredUsers.length}
         currentPage={currentPage}
         onAddData={handleOpen}
-        ACTION_BUTTON={{
-          view: (row) => console.log("View", row),
-          edit: (row) => console.log("Edit", row),
-          delete: (row) => console.log("Delete", row),
-        }}
+        ACTION_BUTTON={{}}
         FILTER={
           <div className="flex gap-4 mb-4">
             <GenosSelect

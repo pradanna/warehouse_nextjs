@@ -27,6 +27,7 @@ import ProfileDropdown from "@/components/dropdown-button/ProfileDropdown";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import router from "next/router";
 import NavbarAdmin from "@/components/navbar/NavbarAdmin";
+import AuthGuard from "@/components/AuthGuard";
 
 export default function DashboardLayout({
   children,
@@ -51,6 +52,11 @@ export default function DashboardLayout({
     return null;
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    router.push("/login");
+  };
+
   const menuItems: SidebarItem[] = [
     {
       name: "Dashboard",
@@ -58,38 +64,45 @@ export default function DashboardLayout({
       icon: <ChartPieIcon className="h-5 w-5" />,
     },
     {
-      name: "asdas",
-      href: "/admin/a",
-      icon: <ChartPieIcon className="h-5 w-5" />,
+      name: "Unit",
+      href: "/admin/unit",
+      icon: <FolderIcon className="h-5 w-5" />,
     },
     {
-      name: "fa wawda",
-      href: "/admin/b",
-      icon: <ChartPieIcon className="h-5 w-5" />,
+      name: "Category",
+      href: "/admin/category",
+      icon: <ArchiveBoxIcon className="h-5 w-5" />,
     },
     {
-      name: "dasdwrerer",
-      href: "/admin/c",
-      icon: <ChartPieIcon className="h-5 w-5" />,
+      name: "Item",
+      href: "/admin/item",
+      icon: <ShoppingBagIcon className="h-5 w-5" />,
     },
     {
-      name: "Transactions",
-      icon: <ArrowsRightLeftIcon className="h-5 w-5" />,
-      children: [
-        {
-          name: "Sales",
-          href: "/admin/transactions/sales",
-          icon: <ChartPieIcon className="h-5 w-5" />,
-        },
-        {
-          name: "Purchases",
-          href: "/admin/transactions/purchases",
-          icon: <ChartPieIcon className="h-5 w-5" />,
-        },
-      ],
-      href: "",
+      name: "Outlet",
+      href: "/admin/outlet",
+      icon: <UserGroupIcon className="h-5 w-5" />,
     },
-    // ...lanjutkan sesuai struktur
+    {
+      name: "Supplier",
+      href: "/admin/supplier",
+      icon: <BanknotesIcon className="h-5 w-5" />,
+    },
+    {
+      name: "Inventory",
+      href: "/admin/inventory",
+      icon: <DocumentIcon className="h-5 w-5" />,
+    },
+    {
+      name: "purchases",
+      href: "/admin/purchases",
+      icon: <CreditCardIcon className="h-5 w-5" />,
+    },
+    {
+      name: "sales",
+      href: "/admin/sales",
+      icon: <CreditCardIcon className="h-5 w-5" />,
+    },
   ];
 
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -103,31 +116,34 @@ export default function DashboardLayout({
   const [queryClient] = useState(() => new QueryClient());
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <div className="flex h-screen">
-        {/* Sidebar */}
+    <AuthGuard>
+      <QueryClientProvider client={queryClient}>
+        <div className="flex h-screen">
+          {/* Sidebar */}
 
-        <Sidebar
-          menuItems={menuItems}
-          isSidebarOpen={isSidebarOpen}
-          logoExtended="/images/local/extend-genossys-logo.png"
-          logoSimple="/images/local/simple-genossys-logo.png"
-          path_active={pathname}
-        />
-
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col">
-          <NavbarAdmin
+          <Sidebar
+            menuItems={menuItems}
             isSidebarOpen={isSidebarOpen}
-            currentPage={currentPage}
-            profileName="Pradana"
-            profileImage="https://static-00.iconduck.com/assets.00/profile-circle-icon-2048x2048-cqe5466q.png"
-            onToggleSidebar={toggleSidebar}
+            logoExtended="/images/local/extend-genossys-logo.png"
+            logoSimple="/images/local/simple-genossys-logo.png"
+            path_active={pathname}
           />
-          {/* Nested Page Content */}
-          <div className="p-6 bg-light1 flex-1">{children}</div>
+
+          {/* Main Content */}
+          <div className="flex-1 flex flex-col">
+            <NavbarAdmin
+              isSidebarOpen={isSidebarOpen}
+              currentPage={currentPage}
+              profileName="Pradana"
+              profileImage="https://static-00.iconduck.com/assets.00/profile-circle-icon-2048x2048-cqe5466q.png"
+              onToggleSidebar={toggleSidebar}
+              onLogout={handleLogout}
+            />
+            {/* Nested Page Content */}
+            <div className="p-6 bg-light1 flex-1">{children}</div>
+          </div>
         </div>
-      </div>
-    </QueryClientProvider>
+      </QueryClientProvider>
+    </AuthGuard>
   );
 }

@@ -18,7 +18,6 @@ export const fetchCategories = async (): Promise<Category[]> => {
       throw new Error(`Error ${response.status}: ${response.statusText}`);
     }
     const data = await response.json(); // Ambil data dari response
-    console.log("Data kategori dari API:", data); // ✅ Log hasilnya sebelum return
 
     // Sorting by created_at ascending before returning
     return data.sort(

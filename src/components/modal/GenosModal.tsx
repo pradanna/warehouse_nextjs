@@ -20,8 +20,8 @@ type GenosModalProps = {
 };
 
 const sizeClasses = {
-  md: "max-w-md",
-  lg: "max-w-3xl",
+  md: "w-full max-w-md",
+  lg: "w-full max-w-3xl",
   full: "w-full h-full",
 };
 
@@ -49,7 +49,7 @@ export default function GenosModal({
     >
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/30 dark:bg-gray-800 "
         onClick={onClose}
       />
 
@@ -57,8 +57,7 @@ export default function GenosModal({
       <div
         className={clsx(
           "bg-white dark:bg-gray-900 rounded-lg shadow-xl transform transition-all duration-300 relative",
-          size !== "full" && sizeClasses[size],
-          size === "full" && "w-full h-full m-0 rounded-none"
+          sizeClasses[size]
         )}
       >
         {/* Modal Header */}
@@ -85,7 +84,6 @@ export default function GenosModal({
             onClick={onClose}
             outlined
             className=""
-            disabled
             round="lg"
           ></GenosButton>
           {onSubmit && (
