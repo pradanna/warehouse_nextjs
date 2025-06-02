@@ -1,15 +1,22 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import axios from "axios";
 import GenosTable from "@/components/table/GenosTable";
 import GenosTextfield from "@/components/form/GenosTextfield";
 import GenosModal from "@/components/modal/GenosModal";
 import { baseUrl, getToken } from "@/app/config/config";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
+import {
+  createUnit,
+  deleteUnit,
+  getUnit,
+  getUnitbyId,
+  updateUnit,
+} from "@/lib/api/unitApi";
+import AddUnitModal from "../../form/unit/AddUnitModal";
+import EditUnitModal from "../../form/unit/EditUnitModal";
 
 const UnitTable = () => {
   const [units, setUnits] = useState<any[]>([]);
-  const [filteredUnits, setFilteredUnits] = useState<any[]>([]);
   const [search, setSearch] = useState("");
 
   const [name, setName] = useState("");
@@ -38,16 +45,7 @@ const UnitTable = () => {
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.post(
-        baseUrl + "/unit",
-        { name: addValue },
-        {
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-          },
-        }
-      );
-      // handleClose();
+      const response = await createUnit({ name: addValue });
       setAddValue("");
       fetchUnit(currentPage); // refresh data
       inputRef.current?.focus();
@@ -84,12 +82,8 @@ const UnitTable = () => {
 
     console.log("ID untuk edit:", id);
     try {
-      const response = await axios.get(`${baseUrl}/unit/${id}`, {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      });
-      setEditValue(response.data.data.name);
+      const response = await getUnitbyId(id);
+      setEditValue(response.data.name);
       setIdForEdit(id);
 
       setTimeout(() => {
@@ -103,15 +97,7 @@ const UnitTable = () => {
 
   const handleSubmitEdit = async () => {
     try {
-      const response = await axios.put(
-        baseUrl + "/unit/" + idForEdit,
-        { name: editValue },
-        {
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-          },
-        }
-      );
+      const response = await updateUnit(idForEdit, editValue);
       // handleClose();
       setEditValue("");
       fetchUnit(currentPage); // refresh data
@@ -160,26 +146,19 @@ const UnitTable = () => {
     return () => clearTimeout(delayDebounce);
   }, [search, currentPage]);
 
-  const fetchUnit = async (page = 1) => {
+  const fetchUnit = async (page: number) => {
     setIsLoadingTable(true);
+
     try {
-      const response = await axios.get(
-        `${baseUrl}/unit?param=${search}&page=${page}&per_page=${limit}`,
-        {
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-          },
-        }
-      );
-      console.log(
-        "load sukses",
-        `${baseUrl}/unit?param=${search}&page=${page}&per_page=${limit}`
-      );
-      setUnits(response.data.data);
-      setTotalUnits(response.data.meta.total_rows);
-      console.log("load sukses", response.data.data);
-    } catch (err) {
-      console.error("Gagal mengambil data unit:", err);
+      const response = await getUnit(search, page, limit);
+
+      setUnits(response.data);
+      setTotalUnits(response.meta.total_rows);
+    } catch (err: any) {
+      toast.error(err.message, {
+        autoClose: 1000,
+      });
+      console.log(err);
     } finally {
       setIsLoadingTable(false);
     }
@@ -192,11 +171,7 @@ const UnitTable = () => {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`${baseUrl}/unit/${id}`, {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      });
+      const response = await deleteUnit(id);
 
       toast.success("Unit berhasil dihapus", {
         autoClose: 1000,
@@ -230,6 +205,7 @@ const UnitTable = () => {
         FILTER={
           <div className="flex gap-4 mb-4">
             <GenosTextfield
+              id="searh-unit"
               label="Cari Unit"
               placeholder="Nama unit"
               className="w-full"
@@ -245,41 +221,27 @@ const UnitTable = () => {
       />
 
       {isModalOpen && (
-        <GenosModal
-          title="Tambah Unit"
+        <AddUnitModal
+          show
+          addValue={addValue}
+          setAddValue={setAddValue}
+          inputRef={inputRef}
           onClose={handleClose}
           onSubmit={handleSubmit}
-          show
-          size="md"
-        >
-          <GenosTextfield
-            label="Nama Unit"
-            placeholder="Masukan Nama Unit"
-            value={addValue}
-            onChange={(e) => setAddValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            ref={inputRef}
-          />
-        </GenosModal>
+          onKeyDown={handleKeyDown}
+        />
       )}
 
       {isModalEditOpen && (
-        <GenosModal
-          title="Edit Unit"
+        <EditUnitModal
+          show
+          editValue={editValue}
+          setEditValue={setEditValue}
+          inputRef={inputEditRef}
           onClose={handleEditClose}
           onSubmit={handleSubmitEdit}
-          show
-          size="md"
-        >
-          <GenosTextfield
-            label="Nama Unit"
-            placeholder="Masukan Nama Unit"
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onKeyDown={handleKeyDownEdit}
-            ref={inputEditRef}
-          />
-        </GenosModal>
+          onKeyDown={handleKeyDownEdit}
+        />
       )}
     </div>
   );

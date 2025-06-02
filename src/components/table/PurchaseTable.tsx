@@ -182,7 +182,7 @@ const PurchaseTable = () => {
     []
   );
 
-  const handleDeleteCartItem = (inventory_id) => {
+  const handleDeleteCartItem = (inventory_id: string | number) => {
     const newCart = cartItems.filter(
       (item) => item.inventory_id !== inventory_id
     );
@@ -267,6 +267,7 @@ const PurchaseTable = () => {
         onChange={(val) => setSelectedSupplier(val)}
       />
       <GenosTextfield
+        id="search"
         label="Cari"
         placeholder="Cari berdasarkan ref# atau deskripsi"
         className="w-full"
@@ -324,12 +325,14 @@ const PurchaseTable = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <GenosTextfield
+                  id="tambah-qty"
                   label="Qty"
                   type="number"
                   value={quantity}
                   onChange={(e) => setQuantity(parseInt(e.target.value))}
                 />
                 <GenosTextfield
+                  id="tambah-harga"
                   label="Harga"
                   type="number"
                   value={price}
@@ -380,6 +383,7 @@ const PurchaseTable = () => {
               />
 
               <GenosTextfield
+                id="tambah-purchase-description"
                 label="Deskripsi"
                 placeholder="Deskripsi pembelian"
                 value={purchaseDescription}
@@ -396,6 +400,7 @@ const PurchaseTable = () => {
               </p>
 
               <GenosTextfield
+                id="tambah-purchase-tax"
                 label="Pajak (%)"
                 type="number"
                 value={taxPercent}

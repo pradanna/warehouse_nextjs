@@ -230,6 +230,7 @@ const OutletTable = () => {
         FILTER={
           <div className="flex gap-4 mb-4">
             <GenosTextfield
+              id="search-outlet"
               label="Cari Outlet"
               placeholder="Nama outlet"
               className="w-full"
@@ -250,6 +251,7 @@ const OutletTable = () => {
           size="md"
         >
           <GenosTextfield
+            id="tambah-nama-outlet"
             label="Nama Outlet"
             placeholder="Masukkan Nama Outlet"
             value={addName}
@@ -258,6 +260,7 @@ const OutletTable = () => {
             className="mb-3"
           />
           <GenosTextfield
+            id="tambah-alamat"
             label="Alamat"
             placeholder="Masukkan Alamat"
             value={addAddress}
@@ -266,6 +269,7 @@ const OutletTable = () => {
             className="mb-3"
           />
           <GenosTextfield
+            id="tambah-kontak"
             label="Kontak"
             placeholder="Masukkan Nomor Kontak"
             value={addContact}
@@ -290,6 +294,7 @@ const OutletTable = () => {
           size="md"
         >
           <GenosTextfield
+            id="edit-nama-outlet"
             label="Nama Outlet"
             placeholder="Masukkan Nama Outlet"
             value={editName}
@@ -298,6 +303,7 @@ const OutletTable = () => {
             className="mb-3"
           />
           <GenosTextfield
+            id="edit-alamat"
             label="Alamat"
             placeholder="Masukkan Alamat"
             value={editAddress}
@@ -306,6 +312,7 @@ const OutletTable = () => {
             className="mb-3"
           />
           <GenosTextfield
+            id="edit-kontak"
             label="Kontak"
             placeholder="Masukkan Nomor Kontak"
             value={editContact}

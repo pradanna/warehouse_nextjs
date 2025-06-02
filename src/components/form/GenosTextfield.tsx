@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 type Props = {
+  id: string;
   label: string;
   is_icon_left?: boolean;
   is_icon_right?: boolean;
@@ -22,6 +23,7 @@ type Props = {
 const GenosTextfield = forwardRef<HTMLInputElement, Props>(
   (
     {
+      id,
       label,
       is_icon_left = false,
       is_icon_right = false,
@@ -57,6 +59,7 @@ const GenosTextfield = forwardRef<HTMLInputElement, Props>(
       <div className={clsx("relative", className)}>
         {/* Label Melayang */}
         <label
+          htmlFor={id}
           className={clsx(
             "absolute",
             is_icon_left ? "left-10" : "left-1",
@@ -84,6 +87,7 @@ const GenosTextfield = forwardRef<HTMLInputElement, Props>(
           )}
 
           <input
+            id={id}
             type={type}
             value={inputValue}
             onChange={handleChange}

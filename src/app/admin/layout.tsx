@@ -28,6 +28,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import router from "next/router";
 import NavbarAdmin from "@/components/navbar/NavbarAdmin";
 import AuthGuard from "@/components/AuthGuard";
+import { useRouter } from "next/navigation";
 
 export default function DashboardLayout({
   children,
@@ -51,7 +52,7 @@ export default function DashboardLayout({
     }
     return null;
   };
-
+  const router = useRouter();
   const handleLogout = () => {
     localStorage.removeItem("access_token");
     router.push("/login");

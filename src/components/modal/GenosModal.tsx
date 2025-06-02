@@ -5,7 +5,7 @@ import clsx from "clsx";
 import GenosButton from "../button/GenosButton";
 import { InboxArrowDownIcon } from "@heroicons/react/24/outline";
 
-type ModalSize = "md" | "lg" | "full";
+type ModalSize = "md" | "lg" | "xl" | "full";
 
 type GenosModalProps = {
   show: boolean;
@@ -22,6 +22,7 @@ type GenosModalProps = {
 const sizeClasses = {
   md: "w-full max-w-md",
   lg: "w-full max-w-3xl",
+  xl: "w-full max-w-5xl",
   full: "w-full h-full",
 };
 

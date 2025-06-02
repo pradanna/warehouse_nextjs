@@ -90,6 +90,10 @@ export default function GenosTable({
   const isAllSelected =
     TABLE_ROWS.length > 0 && selectedRows.length === TABLE_ROWS.length;
 
+  const getNestedValue = (obj: any, path: string): any => {
+    return path.split(".").reduce((acc, part) => acc && acc[part], obj);
+  };
+
   const handleSelectAll = () => {
     if (isAllSelected) {
       setSelectedRows([]);
@@ -322,7 +326,7 @@ export default function GenosTable({
                       )}
                       {TABLE_HEAD.map((head) => (
                         <td key={head.key} className="p-3">
-                          {row[head.key]}
+                          {getNestedValue(row, head.key)}
                         </td>
                       ))}
                       {ACTION_BUTTON && (

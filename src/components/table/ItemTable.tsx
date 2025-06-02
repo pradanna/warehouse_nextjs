@@ -291,6 +291,7 @@ const ItemTable = () => {
             />
 
             <GenosTextfield
+              id="search-item"
               label="Cari Item"
               placeholder="Nama item"
               className="w-full"
@@ -319,6 +320,7 @@ const ItemTable = () => {
             className="mb-3"
           />
           <GenosTextfield
+            id="tambah-item"
             label="Nama Item"
             placeholder="Masukkan Nama Item"
             value={addName}
@@ -327,6 +329,7 @@ const ItemTable = () => {
             className="mb-3"
           />
           <GenosTextfield
+            id="tambah-deskripsi"
             label="Deskripsi"
             placeholder="Masukkan Deskripsi"
             value={addDescription}
@@ -359,6 +362,7 @@ const ItemTable = () => {
             className="mb-3"
           />
           <GenosTextfield
+            id="edit-item"
             label="Nama Item"
             placeholder="Masukkan Nama Item"
             value={editName}
@@ -367,6 +371,7 @@ const ItemTable = () => {
             className="mb-3"
           />
           <GenosTextfield
+            id="edit-deskripsi"
             label="Deskripsi"
             placeholder="Masukkan Deskripsi"
             value={editDescription}

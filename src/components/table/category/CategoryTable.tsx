@@ -5,7 +5,7 @@ import GenosTextfield from "@/components/form/GenosTextfield";
 import GenosModal from "@/components/modal/GenosModal";
 import { baseUrl, getToken } from "@/app/config/config";
 import { toast } from "react-toastify";
-import GenosTextarea from "../form/GenosTextArea";
+import GenosTextarea from "../../form/GenosTextArea";
 
 const CategoryTable = () => {
   const [categories, setCategories] = useState<any[]>([]);
@@ -234,6 +234,7 @@ const CategoryTable = () => {
         FILTER={
           <div className="flex gap-4 mb-4">
             <GenosTextfield
+              id="cari-kategori"
               label="Cari Kategori"
               placeholder="Nama kategori"
               className="w-full"
@@ -254,6 +255,7 @@ const CategoryTable = () => {
           size="md"
         >
           <GenosTextfield
+            id="tambah-nama-kategori"
             label="Nama Kategori"
             placeholder="Masukkan Nama Kategori"
             value={addName}
@@ -281,6 +283,7 @@ const CategoryTable = () => {
           size="md"
         >
           <GenosTextfield
+            id="edit-nama-kategori"
             label="Nama Kategori"
             placeholder="Masukkan Nama Kategori"
             value={editName}
