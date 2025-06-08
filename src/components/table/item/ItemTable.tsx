@@ -6,7 +6,17 @@ import GenosModal from "@/components/modal/GenosModal";
 import GenosSelect from "@/components/form/GenosSelect"; // asumsikan ada komponen Select
 import { baseUrl, getToken } from "@/app/config/config";
 import { toast } from "react-toastify";
-import GenosSearchSelect from "../form/GenosSearchSelect";
+import GenosSearchSelect from "../../form/GenosSearchSelect";
+import { getCategories } from "@/lib/api/categoryApi";
+import {
+  createItem,
+  deleteItem,
+  getItemById,
+  getItems,
+  updateItem,
+} from "@/lib/api/itemApi";
+import AddItemModal from "@/components/form/item/AddItemModal";
+import EdititemModal from "@/components/form/item/EditItemModal";
 
 interface Category {
   id: string;
@@ -41,7 +51,7 @@ const ItemTable = () => {
   const [categories, setCategories] = useState<Category[]>([]);
 
   // ADD
-  const [addCategoryId, setAddCategoryId] = useState<string | number>("");
+  const [addCategoryId, setAddCategoryId] = useState<string>("");
   const [addName, setAddName] = useState("");
   const [addDescription, setAddDescription] = useState("");
 
@@ -52,7 +62,7 @@ const ItemTable = () => {
 
   // EDIT
   const [editId, setEditId] = useState("");
-  const [editCategoryId, setEditCategoryId] = useState<string | number>("");
+  const [editCategoryId, setEditCategoryId] = useState<string>("");
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
 
@@ -81,10 +91,8 @@ const ItemTable = () => {
   // Fetch kategori
   const fetchCategories = async () => {
     try {
-      const res = await axios.get(`${baseUrl}/category?per_page=1000`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      setCategories(res.data.data);
+      const res = await getCategories(1, 1000, "");
+      setCategories(res.data);
     } catch (err) {
       console.error("Gagal fetch kategori:", err);
     }
@@ -94,14 +102,10 @@ const ItemTable = () => {
   const fetchItems = async (page = 1) => {
     setIsLoadingTable(true);
     try {
-      const res = await axios.get(
-        `${baseUrl}/item?param=${search}&page=${page}&per_page=${limit}`,
-        {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        }
-      );
-      setAllItems(res.data.data); // simpan semua data
-      setTotalItems(res.data.meta.total_rows);
+      const res = await getItems(search, page, limit);
+      setItems(res.data);
+      setAllItems(res.data); // simpan semua data
+      setTotalItems(res.meta.total_rows);
     } catch (err) {
       console.error("Gagal fetch items:", err);
     } finally {
@@ -166,15 +170,7 @@ const ItemTable = () => {
       return;
     }
     try {
-      const res = await axios.post(
-        `${baseUrl}/item`,
-        {
-          category_id: addCategoryId,
-          name: addName,
-          description: addDescription,
-        },
-        { headers: { Authorization: `Bearer ${getToken()}` } }
-      );
+      const res = await createItem(addCategoryId, addName, addDescription);
       toast.success(res.data.message || "Item berhasil ditambahkan", {
         autoClose: 1000,
       });
@@ -191,10 +187,9 @@ const ItemTable = () => {
     setEditId(id);
     setIsModalEditOpen(true);
     try {
-      const res = await axios.get(`${baseUrl}/item/${id}`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      const data = res.data.data;
+      const res = await getItemById(id);
+
+      const data = res.data;
       setEditCategoryId(data.category.id);
       setEditName(data.name);
       setEditDescription(data.description);
@@ -225,14 +220,11 @@ const ItemTable = () => {
       return;
     }
     try {
-      const res = await axios.put(
-        `${baseUrl}/item/${editId}`,
-        {
-          category_id: editCategoryId,
-          name: editName,
-          description: editDescription,
-        },
-        { headers: { Authorization: `Bearer ${getToken()}` } }
+      const res = await updateItem(
+        editId,
+        editCategoryId,
+        editName,
+        editDescription
       );
       toast.success(res.data.message || "Item berhasil diubah", {
         autoClose: 1000,
@@ -249,9 +241,7 @@ const ItemTable = () => {
   const handleDelete = async (id: string) => {
     if (!confirm("Yakin ingin menghapus item ini?")) return;
     try {
-      await axios.delete(`${baseUrl}/item/${id}`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      await deleteItem(id);
       toast.success("Item berhasil dihapus", { autoClose: 1000 });
       fetchItems(currentPage);
     } catch (err) {
@@ -301,90 +291,52 @@ const ItemTable = () => {
             />
           </div>
         }
-      />
+      ></GenosTable>
 
       {isModalOpen && (
-        <GenosModal
-          title="Tambah Item"
+        <AddItemModal
+          show
+          addCategoryId={addCategoryId}
+          addName={addName}
+          addDescription={addDescription}
+          inputRefName={inputRefName}
+          inputRefDescription={inputRefDescription}
           onClose={handleClose}
           onSubmit={handleSubmit}
-          show
-          size="md"
-        >
-          <GenosSearchSelect
-            label="Kategori"
-            options={categories.map((c) => ({ value: c.id, label: c.name }))}
-            value={addCategoryId}
-            onChange={(val) => setAddCategoryId(val)}
-            placeholder="Pilih kategori"
-            className="mb-3"
-          />
-          <GenosTextfield
-            id="tambah-item"
-            label="Nama Item"
-            placeholder="Masukkan Nama Item"
-            value={addName}
-            onChange={(e) => setAddName(e.target.value)}
-            ref={inputRefName}
-            className="mb-3"
-          />
-          <GenosTextfield
-            id="tambah-deskripsi"
-            label="Deskripsi"
-            placeholder="Masukkan Deskripsi"
-            value={addDescription}
-            onChange={(e) => setAddDescription(e.target.value)}
-            ref={inputRefDescription}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleSubmit();
-              }
-            }}
-          />
-        </GenosModal>
+          setAddCategoryId={setAddCategoryId}
+          setAddDescription={setAddDescription}
+          setAddName={setAddName}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleSubmit();
+            }
+          }}
+          categories={categories}
+        />
       )}
 
       {isModalEditOpen && (
-        <GenosModal
-          title="Edit Item"
+        <EdititemModal
+          show
+          editCategoryId={editCategoryId}
+          editName={editName}
+          editDescription={editDescription}
+          inputRefName={inputRefName}
+          inputRefDescription={inputRefDescription}
           onClose={handleEditClose}
           onSubmit={handleSubmitEdit}
-          show
-          size="md"
-        >
-          <GenosSearchSelect
-            label="Kategori"
-            value={editCategoryId}
-            onChange={(val) => setEditCategoryId(val)}
-            options={categories.map((c) => ({ value: c.id, label: c.name }))}
-            placeholder="Pilih Kategori"
-            className="mb-3"
-          />
-          <GenosTextfield
-            id="edit-item"
-            label="Nama Item"
-            placeholder="Masukkan Nama Item"
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            ref={inputEditRefName}
-            className="mb-3"
-          />
-          <GenosTextfield
-            id="edit-deskripsi"
-            label="Deskripsi"
-            placeholder="Masukkan Deskripsi"
-            value={editDescription}
-            onChange={(e) => setEditDescription(e.target.value)}
-            ref={inputEditRefDescription}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleSubmitEdit();
-              }
-            }}
-          />
-        </GenosModal>
+          setEditCategoryId={setEditCategoryId}
+          setEditDescription={setEditDescription}
+          setEditName={setEditName}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleSubmitEdit();
+            }
+          }}
+          categories={categories}
+        />
       )}
     </div>
   );

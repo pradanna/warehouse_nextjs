@@ -309,11 +309,13 @@ export default function GenosTable({
                         "transition-all duration-300 ease-in-out border-b border-light2 hover:bg-light2",
                         selectedRows.includes(row)
                           ? "bg-primary-light3"
+                          : below
+                          ? "bg-red-100"
+                          : above
+                          ? "bg-yellow-100"
                           : index % 2 === 0
                           ? "bg-white"
-                          : "bg-light1",
-                        below && "bg-red-100",
-                        above && "bg-yellow-100"
+                          : "bg-light1"
                       )}
                     >
                       {CHECKBOXS && (

@@ -6,6 +6,13 @@ import GenosModal from "@/components/modal/GenosModal";
 import { baseUrl, getToken } from "@/app/config/config";
 import { toast } from "react-toastify";
 import GenosTextarea from "../../form/GenosTextArea";
+import {
+  createCategory,
+  deleteCategory,
+  editCategory,
+  findCategoryById,
+} from "@/lib/api/categoryApi";
+import AddCategoryModal from "@/components/form/category/AddCategoryModal";
 
 const CategoryTable = () => {
   const [categories, setCategories] = useState<any[]>([]);
@@ -38,18 +45,8 @@ const CategoryTable = () => {
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.post(
-        baseUrl + "/category",
-        {
-          name: addName,
-          description: addDescription,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-          },
-        }
-      );
+      const response = await createCategory(addName, addDescription);
+
       setAddName("");
       setAddDescription("");
       fetchCategory(currentPage);
@@ -79,18 +76,17 @@ const CategoryTable = () => {
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
   const inputRefDeskripsiEdit = useRef<HTMLTextAreaElement>(null);
 
-  const handleEdit = async (id: string) => {
+  const handleGetEdit = async (id: string) => {
     setEditId(id);
     setIsModalEditOpen(true);
 
     try {
-      const response = await axios.get(`${baseUrl}/category/${id}`, {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      });
+      const response = await findCategoryById(id);
 
-      const { name, description } = response.data.data;
+      const { name, description } = response.data;
+      console.log("Nama kategori:", name);
+      console.log("Deskripsi kategori:", description);
+
       setEditName(name);
       setEditDescription(description);
 
@@ -112,18 +108,7 @@ const CategoryTable = () => {
 
   const handleSubmitEdit = async () => {
     try {
-      const response = await axios.put(
-        `${baseUrl}/category/${editId}`,
-        {
-          name: editName,
-          description: editDescription,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-          },
-        }
-      );
+      const response = await editCategory(editId, editName, editDescription);
       fetchCategory(currentPage);
       toast.success(response.data.message || "Kategori berhasil diperbarui", {
         autoClose: 1000,
@@ -196,11 +181,7 @@ const CategoryTable = () => {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`${baseUrl}/category/${id}`, {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      });
+      const response = await deleteCategory(id);
 
       toast.success("Kategori berhasil dihapus", {
         autoClose: 1000,
@@ -228,7 +209,7 @@ const CategoryTable = () => {
         onAddData={handleOpen}
         loading={isLoadingTable}
         ACTION_BUTTON={{
-          edit: (row) => handleEdit(row.id),
+          edit: (row) => handleGetEdit(row.id),
           delete: (row) => handleDelete(row.id),
         }}
         FILTER={
@@ -247,31 +228,18 @@ const CategoryTable = () => {
       />
 
       {isModalOpen && (
-        <GenosModal
-          title="Tambah Kategori"
+        <AddCategoryModal
+          show
+          addName={addName}
+          addDescription={addDescription}
+          setAddName={setAddName}
+          setAddDescription={setAddDescription}
           onClose={handleClose}
           onSubmit={handleSubmit}
-          show
-          size="md"
-        >
-          <GenosTextfield
-            id="tambah-nama-kategori"
-            label="Nama Kategori"
-            placeholder="Masukkan Nama Kategori"
-            value={addName}
-            onChange={(e) => setAddName(e.target.value)}
-            ref={inputRef}
-            className="mb-3"
-          />
-          <GenosTextarea
-            label="Deskripsi"
-            placeholder="Masukkan Deskripsi"
-            value={addDescription}
-            onKeyDown={handleKeyDown}
-            ref={inputRefDeskripsi}
-            onChange={(e) => setAddDescription(e.target.value)}
-          />
-        </GenosModal>
+          onKeyDown={handleKeyDown}
+          inputRef={inputRef}
+          ref={inputRefDeskripsi}
+        />
       )}
 
       {isModalEditOpen && (

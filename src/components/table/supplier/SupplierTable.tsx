@@ -5,12 +5,21 @@ import GenosTextfield from "@/components/form/GenosTextfield";
 import GenosModal from "@/components/modal/GenosModal";
 import { baseUrl, getToken } from "@/app/config/config";
 import { toast } from "react-toastify";
+import {
+  createSupplier,
+  deleteSupplier,
+  getSupplier,
+  getSupplierById,
+} from "@/lib/api/supplierApi";
+import AddSupplierModal from "@/components/form/supplier/AddSupplierModal";
+import EditCategoryModal from "@/components/form/category/EditCategoryModal";
+import EditSupplierModal from "@/components/form/supplier/EditSupplierModal";
 
-const OutletTable = () => {
-  const [outlets, setOutlets] = useState<any[]>([]);
+const SupplierTable = () => {
+  const [suppliers, setSuppliers] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalOutlets, setTotalOutlets] = useState(0);
+  const [totalSuppliers, setTotalSuppliers] = useState(0);
   const limit = 10;
   const [isLoadingTable, setIsLoadingTable] = useState(true);
 
@@ -40,29 +49,18 @@ const OutletTable = () => {
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.post(
-        baseUrl + "/outlet",
-        {
-          name: addName,
-          address: addAddress,
-          contact: addContact,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-          },
-        }
-      );
+      const response = await createSupplier(addName, addAddress, addContact);
       setAddName("");
       setAddAddress("");
       setAddContact("");
-      fetchOutlet(currentPage);
-      toast.success(response.data.message || "Outlet berhasil ditambahkan", {
+      fetchSupplier(currentPage);
+      toast.success(response.data.message || "Supplier berhasil ditambahkan", {
         autoClose: 1000,
       });
       inputRefName.current?.focus();
     } catch (err: any) {
-      const message = err.response?.data?.message || "Gagal menambahkan outlet";
+      const message =
+        err.response?.data?.message || "Gagal menambahkan supplier";
       toast.error(message, { autoClose: 1000 });
     }
   };
@@ -83,13 +81,9 @@ const OutletTable = () => {
     setIsModalEditOpen(true);
 
     try {
-      const response = await axios.get(`${baseUrl}/outlet/${id}`, {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      });
+      const response = await getSupplierById(id);
 
-      const { name, address, contact } = response.data.data;
+      const { name, address, contact } = response.data;
       setEditName(name);
       setEditAddress(address);
       setEditContact(contact);
@@ -99,7 +93,7 @@ const OutletTable = () => {
         inputEditRefName.current?.select();
       }, 50);
     } catch (err) {
-      console.error("Gagal mengambil data outlet:", err);
+      console.error("Gagal mengambil data supplier:", err);
     }
   };
 
@@ -114,7 +108,7 @@ const OutletTable = () => {
   const handleSubmitEdit = async () => {
     try {
       const response = await axios.put(
-        `${baseUrl}/outlet/${editId}`,
+        `${baseUrl}/supplier/${editId}`,
         {
           name: editName,
           address: editAddress,
@@ -126,37 +120,37 @@ const OutletTable = () => {
           },
         }
       );
-      fetchOutlet(currentPage);
-      toast.success(response.data.message || "Outlet berhasil diperbarui", {
+      fetchSupplier(currentPage);
+      toast.success(response.data.message || "Supplier berhasil diperbarui", {
         autoClose: 1000,
       });
       handleEditClose();
     } catch (err: any) {
-      const message = err.response?.data?.message || "Gagal mengubah outlet";
+      const message = err.response?.data?.message || "Gagal mengubah supplier";
       toast.error(message, { autoClose: 1000 });
     }
   };
 
   // TABEL
   const TABLE_HEAD = [
-    { key: "name", label: "Nama Outlet", sortable: true },
+    { key: "name", label: "Nama Supplier", sortable: true },
     { key: "address", label: "Alamat", sortable: false },
     { key: "contact", label: "Kontak", sortable: false },
   ];
 
   const TABLE_ROWS = useMemo(() => {
-    return outlets.map((item) => ({
+    return suppliers.map((item) => ({
       id: item.id,
       name: item.name,
       address: item.address,
       contact: item.contact,
     }));
-  }, [outlets]);
+  }, [suppliers]);
 
   // FETCH
   useEffect(() => {
     const delay = setTimeout(() => {
-      fetchOutlet(currentPage);
+      fetchSupplier(currentPage);
     }, 300);
 
     return () => clearTimeout(delay);
@@ -166,46 +160,37 @@ const OutletTable = () => {
     setCurrentPage(1);
   }, [search]);
 
-  const fetchOutlet = async (page = 1) => {
+  const fetchSupplier = async (page = 1) => {
     setIsLoadingTable(true);
     try {
-      const response = await axios.get(
-        `${baseUrl}/outlet?param=${search}&page=${page}&per_page=${limit}`,
-        {
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-          },
-        }
-      );
+      const response = await getSupplier(search, page, limit);
 
-      setOutlets(response.data.data);
-      setTotalOutlets(response.data.meta.total_rows);
+      console.log(response.data);
+
+      setSuppliers(response.data);
+      setTotalSuppliers(response.meta.total_rows);
     } catch (err) {
-      console.error("Gagal mengambil outlet:", err);
+      console.error("Gagal mengambil supplier:", err);
     } finally {
       setIsLoadingTable(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    const confirmDelete = window.confirm("Yakin ingin menghapus outlet ini?");
+    const confirmDelete = window.confirm("Yakin ingin menghapus supplier ini?");
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`${baseUrl}/outlet/${id}`, {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      });
+      await deleteSupplier(id);
 
-      toast.success("Outlet berhasil dihapus", {
+      toast.success("Supplier berhasil dihapus", {
         autoClose: 1000,
       });
 
-      fetchOutlet(currentPage);
+      fetchSupplier(currentPage);
     } catch (err) {
-      console.error("Gagal menghapus outlet:", err);
-      toast.error("Gagal menghapus outlet", {
+      console.error("Gagal menghapus supplier:", err);
+      toast.error("Gagal menghapus supplier", {
         autoClose: 1000,
       });
     }
@@ -218,7 +203,7 @@ const OutletTable = () => {
         TABLE_ROWS={TABLE_ROWS}
         PAGINATION
         rowsPerPage={limit}
-        totalRows={totalOutlets}
+        totalRows={totalSuppliers}
         currentPage={currentPage}
         onPageChange={(page) => setCurrentPage(page)}
         onAddData={handleOpen}
@@ -230,9 +215,9 @@ const OutletTable = () => {
         FILTER={
           <div className="flex gap-4 mb-4">
             <GenosTextfield
-              id="search-outlet"
-              label="Cari Outlet"
-              placeholder="Nama outlet"
+              id="search-supplier"
+              label="Cari Supplier"
+              placeholder="Nama supplier"
               className="w-full"
               is_icon_left={true}
               value={search}
@@ -243,92 +228,40 @@ const OutletTable = () => {
       />
 
       {isModalOpen && (
-        <GenosModal
-          title="Tambah Outlet"
+        <AddSupplierModal
           onClose={handleClose}
           onSubmit={handleSubmit}
+          setAddAddress={setAddAddress}
+          setAddContact={setAddContact}
+          setAddName={setAddName}
           show
-          size="md"
-        >
-          <GenosTextfield
-            id="tambah-nama-outlet"
-            label="Nama Outlet"
-            placeholder="Masukkan Nama Outlet"
-            value={addName}
-            onChange={(e) => setAddName(e.target.value)}
-            ref={inputRefName}
-            className="mb-3"
-          />
-          <GenosTextfield
-            id="tambah-alamat"
-            label="Alamat"
-            placeholder="Masukkan Alamat"
-            value={addAddress}
-            onChange={(e) => setAddAddress(e.target.value)}
-            ref={inputRefAddress}
-            className="mb-3"
-          />
-          <GenosTextfield
-            id="tambah-kontak"
-            label="Kontak"
-            placeholder="Masukkan Nomor Kontak"
-            value={addContact}
-            onChange={(e) => setAddContact(e.target.value)}
-            ref={inputRefContact}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleSubmit();
-              }
-            }}
-          />
-        </GenosModal>
+          addName={addName}
+          addAddress={addAddress}
+          addContact={addContact}
+          inputRefName={inputRefName}
+          inputRefAddress={inputRefAddress}
+          inputRefContact={inputRefContact}
+        />
       )}
 
       {isModalEditOpen && (
-        <GenosModal
-          title="Edit Outlet"
+        <EditSupplierModal
+          show
+          editName={editName}
+          editAddress={editAddress}
+          editContact={editContact}
+          inputEditRefName={inputEditRefName}
+          inputEditRefAddress={inputEditRefAddress}
+          inputEditRefContact={inputEditRefContact}
           onClose={handleEditClose}
           onSubmit={handleSubmitEdit}
-          show
-          size="md"
-        >
-          <GenosTextfield
-            id="edit-nama-outlet"
-            label="Nama Outlet"
-            placeholder="Masukkan Nama Outlet"
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            ref={inputEditRefName}
-            className="mb-3"
-          />
-          <GenosTextfield
-            id="edit-alamat"
-            label="Alamat"
-            placeholder="Masukkan Alamat"
-            value={editAddress}
-            onChange={(e) => setEditAddress(e.target.value)}
-            ref={inputEditRefAddress}
-            className="mb-3"
-          />
-          <GenosTextfield
-            id="edit-kontak"
-            label="Kontak"
-            placeholder="Masukkan Nomor Kontak"
-            value={editContact}
-            onChange={(e) => setEditContact(e.target.value)}
-            ref={inputEditRefContact}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleSubmitEdit();
-              }
-            }}
-          />
-        </GenosModal>
+          setEditAddress={setEditAddress}
+          setEditContact={setEditContact}
+          setEditName={setEditName}
+        />
       )}
     </div>
   );
 };
 
-export default OutletTable;
+export default SupplierTable;

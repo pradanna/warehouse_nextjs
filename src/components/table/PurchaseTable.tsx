@@ -9,6 +9,13 @@ import { toast } from "react-toastify";
 import GenosSearchSelect from "../form/GenosSearchSelect";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import GenosButton from "../button/GenosButton";
+import { getInventory } from "@/lib/api/inventoryApi";
+import { createPurchases, getPurchases } from "@/lib/api/purchaseApi";
+import { getSupplier } from "@/lib/api/supplierApi";
+import {
+  getSupplierFromLocal,
+  saveSupplierToLocal,
+} from "@/lib/localstorage/supplierDB";
 
 const PurchaseTable = () => {
   const [data, setData] = useState([]);
@@ -23,6 +30,7 @@ const PurchaseTable = () => {
   const [purchaseItems, setPurchaseItems] = useState([]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalSupplierOpen, setIsModalSupplierOpen] = useState(false);
   const [selectedCart, setSelectedCart] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedInventory, setSelectedInventory] = useState(null);
@@ -47,23 +55,21 @@ const PurchaseTable = () => {
   const discountAmount = (subTotal * discountPercent) / 100;
   const taxAmount = (subTotal * taxPercent) / 100;
   const totalAmount = subTotal - discountAmount + taxAmount;
+  const [supplierName, setSupplierName] = useState<string>("");
+  const [isFromTambah, setIsFromTambah] = useState(false);
+
   const fetchPurchases = async () => {
     setIsLoading(true);
     try {
-      const res = await axios.get(`${baseUrl}/purchase`, {
-        params: {
-          page: currentPage,
-          per_page: limit,
-          search: search,
-          supplier_id: selectedSupplier,
-        },
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      });
+      const res = await getPurchases(
+        currentPage,
+        limit,
+        search,
+        selectedSupplier
+      );
 
-      setData(res.data.data);
-      setTotalItems(res.data.total);
+      setData(res.data);
+      setTotalItems(res.total);
     } catch (err) {
       toast.error("Gagal mengambil data purchase");
     } finally {
@@ -74,13 +80,10 @@ const PurchaseTable = () => {
   useEffect(() => {
     const fetchInventories = async () => {
       try {
-        const res = await axios.get(`${baseUrl}/inventory`, {
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-          },
-        });
+        const res = await getInventory(1, 1000);
         // Sesuaikan dengan struktur data dari API
-        setInventories(res.data.data);
+        setInventories(res.data);
+        console.log("Inventories:", res.data);
       } catch (error) {
         console.error("Gagal memuat inventory:", error);
         toast.error("Gagal memuat data inventory");
@@ -92,20 +95,21 @@ const PurchaseTable = () => {
 
   const fetchSuppliers = async () => {
     try {
-      const res = await axios.get(`${baseUrl}/supplier`, {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      });
-      setSuppliers(res.data.data);
+      const res = await getSupplier("", 1, 1000);
+      setSuppliers(res.data);
     } catch (err) {
       toast.error("Gagal mengambil data supplier");
     }
   };
 
   const handleOpen = () => {
-    setIsModalOpen(true);
-    // setTimeout(() => inputRefName.current?.focus(), 100);
+    const supplier = getSupplierFromLocal();
+    setIsFromTambah(true);
+    if (!supplier) {
+      setIsModalSupplierOpen(true);
+    } else {
+      setIsModalOpen(true);
+    }
   };
   const handleClose = () => {
     setIsModalOpen(false);
@@ -239,9 +243,7 @@ const PurchaseTable = () => {
     console.log("Payload sebelum dikirim:", payload);
 
     try {
-      await axios.post(`${baseUrl}/purchase`, payload, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      const response = await createPurchases(payload);
       toast.success("Data pembelian berhasil disimpan");
       setCartItems([]);
       localStorage.removeItem("purchase_cart");
@@ -250,6 +252,25 @@ const PurchaseTable = () => {
     } catch (error) {
       console.error(error);
       toast.error("Gagal menyimpan data pembelian");
+    }
+  };
+
+  const handleSetSupplier = () => {
+    console.log("handleSetSupplier");
+
+    const selectedSupplier = suppliers.find((s) => s.id === supplierId);
+    if (selectedSupplier) {
+      saveSupplierToLocal(selectedSupplier.id, selectedSupplier.name);
+
+      const savedSupplier = getSupplierFromLocal();
+      if (savedSupplier) {
+        setSupplierName(savedSupplier.name);
+      }
+    }
+    setIsModalSupplierOpen(false);
+
+    if (isFromTambah) {
+      setIsModalOpen(true);
     }
   };
 
@@ -277,6 +298,19 @@ const PurchaseTable = () => {
       />
     </div>
   );
+
+  const handleChangeSupplier = () => {
+    setIsFromTambah(false);
+    setIsModalSupplierOpen(true);
+  };
+
+  // AMBIL DATA SUPPLIER
+  useEffect(() => {
+    const supplier = getSupplierFromLocal();
+    if (supplier) {
+      setSupplierName(supplier.name);
+    }
+  }, []);
 
   return (
     <div className="flex gap-4">
@@ -308,14 +342,22 @@ const PurchaseTable = () => {
                 label="Item"
                 placeholder="Pilih item"
                 className="w-full"
-                options={inventories.map((item) => ({
-                  value: item.id,
-                  label: `${item.name} - ${item.unit || "-"}`,
+                options={inventories.map((inv: any) => ({
+                  value: inv.item.id,
+                  label: `${inv.item.name} - ${inv.unit.name || "-"}`,
                 }))}
                 value={selectedItem}
                 onChange={(itemId) => {
-                  console.log(selectedItem);
-                  const inv = inventories.find((i) => i.id === itemId);
+                  console.log("selectedItem " + selectedItem);
+                  console.log("itemId " + itemId);
+
+                  console.log("Semua ID inventories:");
+                  inventories.forEach((i) => console.log(i.item.id));
+
+                  console.log("ItemId yang dicari:", itemId);
+
+                  const inv = inventories.find((i) => i.item.id === itemId);
+                  console.log("INV" + inv);
                   setSelectedItem(itemId);
                   setSelectedInventory(inv);
                   setPrice(inv?.price || 0);
@@ -360,14 +402,6 @@ const PurchaseTable = () => {
             onClose={() => setIsPurchaseModalOpen(false)}
           >
             <div className="flex flex-col gap-4">
-              <GenosSearchSelect
-                label="Supplier"
-                placeholder="Pilih supplier"
-                className="w-full"
-                options={suppliers.map((s) => ({ value: s.id, label: s.name }))}
-                value={supplierId}
-                onChange={setSupplierId}
-              />
               <GenosSelect
                 label="Payment Type"
                 options={[
@@ -442,14 +476,49 @@ const PurchaseTable = () => {
         )}
       </div>
 
+      {isModalSupplierOpen && (
+        <GenosModal
+          show
+          title={"Pilih Supplier"}
+          onClose={() => setIsModalSupplierOpen(false)}
+          onSubmit={handleSetSupplier}
+        >
+          <GenosSearchSelect
+            label="Supplier"
+            placeholder="Pilih supplier"
+            className="w-full"
+            options={suppliers.map((s) => ({ value: s.id, label: s.name }))}
+            value={supplierId}
+            onChange={setSupplierId}
+          />
+        </GenosModal>
+      )}
       <div className="w-[300px] border border-light2 rounded-lg p-4">
         <div className="flex flex-col gap-3 mt-3">
+          {supplierName && (
+            <div className="flex items-center justify-between p-2 border border-gray-200 rounded bg-gray-50 mb-3">
+              <div>
+                <p className="text-xs text-gray-500">Supplier</p>
+                <p className="font-semibold text-gray-800">{supplierName}</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleChangeSupplier} // ganti dengan fungsi yang kamu punya
+                className="text-gray-400 hover:text-red-500 text-lg font-bold px-2 cursor-pointer"
+              >
+                &times;
+              </button>
+            </div>
+          )}
+
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-semibold">Item Pembelian</h3>
+
             <span className="text-sm text-gray-500">
               {cartItems.length} item
             </span>
           </div>
+
           <div className="divide-y divide-gray-200 max-h-[400px] overflow-y-auto">
             {cartItems.map((item, index) => (
               <div
