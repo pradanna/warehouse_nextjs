@@ -8,7 +8,7 @@ import OutletPage from "../master-data/Outlet";
 import OutletTable from "@/components/table/outlet/OutletTable";
 import ItemTable from "@/components/table/item/ItemTable";
 import InventoryTable from "@/components/table/inventory/InventoryTable";
-import PurchaseTable from "@/components/table/PurchaseTable";
+import PurchaseTable from "@/components/table/purchase/PurchaseTable";
 
 export default function ItemPage() {
   return (

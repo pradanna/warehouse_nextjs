@@ -5,7 +5,7 @@ import clsx from "clsx";
 import GenosButton from "../button/GenosButton";
 import { InboxArrowDownIcon } from "@heroicons/react/24/outline";
 
-type ModalSize = "md" | "lg" | "xl" | "full";
+type ModalSize = "md" | "lg" | "xl" | "full" | "xl2";
 
 type GenosModalProps = {
   show: boolean;
@@ -17,12 +17,14 @@ type GenosModalProps = {
   children: React.ReactNode;
   submitLabel?: string;
   cancelLabel?: string;
+  withCloseButton?: boolean;
 };
 
 const sizeClasses = {
   md: "w-full max-w-md",
   lg: "w-full max-w-3xl",
   xl: "w-full max-w-5xl",
+  xl2: "w-full max-w-7xl",
   full: "w-full h-full",
 };
 
@@ -36,6 +38,7 @@ export default function GenosModal({
   children,
   submitLabel = "Submit",
   cancelLabel = "Cancel",
+  withCloseButton = true,
 }: GenosModalProps) {
   useEffect(() => {
     if (show && onOpen) onOpen();
@@ -57,7 +60,7 @@ export default function GenosModal({
       {/* Modal container */}
       <div
         className={clsx(
-          "bg-white dark:bg-gray-900 rounded-lg shadow-xl transform transition-all duration-300 relative",
+          "bg-gray-50 dark:bg-gray-900 rounded-lg shadow-xl transform transition-all duration-300 relative",
           sizeClasses[size]
         )}
       >
@@ -79,14 +82,16 @@ export default function GenosModal({
 
         {/* Modal Footer */}
         <div className="flex justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-700">
-          <GenosButton
-            label="Cancel"
-            color="gray"
-            onClick={onClose}
-            outlined
-            className=""
-            round="lg"
-          ></GenosButton>
+          {withCloseButton && (
+            <GenosButton
+              label="Cancel"
+              color="gray"
+              onClick={onClose}
+              outlined
+              className=""
+              round="lg"
+            ></GenosButton>
+          )}
           {onSubmit && (
             <GenosButton
               label="Submit"

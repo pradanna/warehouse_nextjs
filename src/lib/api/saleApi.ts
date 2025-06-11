@@ -1,14 +1,14 @@
 import { baseUrl, getToken } from "@/app/config/config";
 import axios from "axios";
 
-export async function getPurchases(
+export async function getSales(
   currentPage: number,
   limit: number,
   search: string,
   selectedSupplier: any
 ) {
   try {
-    const res = await axios.get(`${baseUrl}/purchase`, {
+    const res = await axios.get(`${baseUrl}/sale`, {
       params: {
         page: currentPage,
         per_page: limit,
@@ -26,9 +26,9 @@ export async function getPurchases(
   }
 }
 
-export async function createPurchases(payload: any) {
+export async function createSales(payload: any) {
   try {
-    const response = await axios.post(`${baseUrl}/purchase`, payload, {
+    const response = await axios.post(`${baseUrl}/sale`, payload, {
       headers: { Authorization: `Bearer ${getToken()}` },
     });
     return response.data;
@@ -37,13 +37,13 @@ export async function createPurchases(payload: any) {
   }
 }
 
-export async function updatePurchases() {}
+export async function updateSales() {}
 
-export async function deletePurchases() {}
+export async function deleteSales() {}
 
-export async function getPurchasesById(id: any) {
+export async function getSalesById(id: any) {
   try {
-    const response = await axios.get(`${baseUrl}/purchase/${id}`, {
+    const response = await axios.get(`${baseUrl}/sale/${id}`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     });
     return response.data;

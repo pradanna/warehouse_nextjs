@@ -277,7 +277,7 @@ const ItemTable = () => {
                 label: c.name,
               }))}
               value={selectedCategory}
-              onChange={(val) => setSelectedCategory(val)}
+              onChange={(val: any) => setSelectedCategory(val)}
             />
 
             <GenosTextfield

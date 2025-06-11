@@ -11,7 +11,7 @@ type Props = {
   icon_left?: React.ReactNode;
   icon_right?: React.ReactNode;
   className?: string;
-  value?: string;
+  value?: string | number;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   name?: string;

@@ -10,8 +10,8 @@ type Option = {
 type Props = {
   label: string;
   options: Option[];
-  value?: string | number;
-  onChange?: (value: string | number) => void;
+  value?: string | number | null;
+  onChange?: (value: string | number | null) => void;
   placeholder?: string;
   className?: string;
   name?: string;

@@ -67,8 +67,8 @@ const InventoryTable = () => {
   }>({});
 
   // Filter States
-  const [itemId, setItemId] = useState<string | number>("");
-  const [unitId, setUnitId] = useState<string | number>("");
+  const [itemId, setItemId] = useState<string | number | null>("");
+  const [unitId, setUnitId] = useState<string | number | null>("");
   const [sku, setSku] = useState("");
   const [description, setDescription] = useState("");
 
