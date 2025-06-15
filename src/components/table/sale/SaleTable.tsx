@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import GenosSearchSelect from "@/components/form/GenosSearchSelect";
 import { PrinterIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import GenosButton from "@/components/button/GenosButton";
-import { getSales, getSalesById } from "@/lib/api/saleApi";
+import { createSalePayment, getSales, getSalesById } from "@/lib/api/saleApi";
 import { getInventory } from "@/lib/api/inventoryApi";
 import { getOutlet } from "@/lib/api/outletApi";
 import {
@@ -26,6 +26,7 @@ import GenosDropdown from "@/components/button/GenosDropdown";
 import { formatTanggalIndo } from "@/lib/helper";
 import { generateSalePDF } from "@/components/PDF/printSalePDF";
 import { generateSaleExcel } from "@/components/excel/printSaleExcel";
+import SaleDetailModal from "@/components/form/sale/saleDetail";
 
 const SaleTable = () => {
   const [data, setData] = useState([]);
@@ -78,6 +79,12 @@ const SaleTable = () => {
   const [modalViewId, setModalViewId] = useState<any>();
   const [saleDetail, setSaleDetail] = useState<any>();
   const [isModalViewOpen, setModalViewOpen] = useState(false);
+
+  const [isPayFromDetaildModalOpen, setPayFromDetaildModalOpen] =
+    useState(false);
+
+  const [saleId, setSaleId] = useState<string | null>(null);
+  const [payAmount, setPayAmount] = useState(0);
 
   const fetchSales = async () => {
     setIsLoading(true);
@@ -240,7 +247,7 @@ const SaleTable = () => {
     try {
       const response = await getSalesById(id);
       if (response === undefined) {
-        toast.error("Gagal mengambil data pembelian");
+        toast.error("Gagal mengambil data penjualan");
       } else {
         setModalViewOpen(true);
 
@@ -249,11 +256,11 @@ const SaleTable = () => {
       }
     } catch (error) {
       console.error(error);
-      toast.error("Gagal mengambil data pembelian");
+      toast.error("Gagal mengambil data penjualan");
     }
   };
 
-  //   SAVE PURCHASES
+  //   SAVE saleS
   const handleOpenSaveSale = () => {
     console.log("handleOpenSaveSale");
 
@@ -346,7 +353,7 @@ const SaleTable = () => {
       setPaymentMetodModalOpen(false);
     } catch (error) {
       console.error(error);
-      toast.error("Gagal menyimpan data pembelian");
+      toast.error("Gagal menyimpan data penjualan");
     }
   };
 
@@ -417,6 +424,56 @@ const SaleTable = () => {
     generateSaleExcel(saleDetail);
   };
 
+  const handleSavePayCredit = async () => {
+    const today = new Date().toISOString().slice(0, 10);
+
+    const payload = {
+      sale_id: saleId,
+      date: today,
+      description: "Installments / Pembayaran Cicilan",
+      payment_type: paymentMetode,
+      amount: payAmount,
+    };
+
+    console.log("Payload sebelum dikirim:", payload);
+
+    try {
+      const response = await createSalePayment(payload);
+      console.log("Response dari API:", response);
+
+      if (response.success === false) {
+        if (response.message) {
+          toast.error(response.message);
+        } else {
+          toast.error("Gagal melakukan pembayaran");
+        }
+      } else {
+        toast.success("Data penjualan berhasil disimpan");
+
+        handleView(saleId);
+        setPayFromDetaildModalOpen(false);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Gagal melakukan pembayaran");
+    }
+  };
+
+  const gotoDetailPayment = () => {
+    setPayAmount(
+      saleDetail.data.total -
+        saleDetail.data.payments.reduce(
+          (acc: number, cur: any) => acc + cur.amount,
+          0
+        )
+    );
+    setPayFromDetaildModalOpen(true);
+  };
+
+  const closeDetailPayment = () => {
+    setPayFromDetaildModalOpen(false);
+  };
+
   return (
     <div className="flex gap-4">
       <div className="flex-grow">
@@ -433,7 +490,10 @@ const SaleTable = () => {
           onAddData={handleOpen}
           handleExportSelected={exportToExcel}
           ACTION_BUTTON={{
-            view: (row) => handleView(row.id),
+            view: (row) => {
+              setSaleId(row.id);
+              handleView(row.id);
+            },
           }}
         />
 
@@ -441,7 +501,7 @@ const SaleTable = () => {
           <GenosModal
             show
             title={
-              selectedCart ? "Edit Item Pembelian" : "Tambah Item Pembelian"
+              selectedCart ? "Edit Item Penjualan" : "Tambah Item Penjualan"
             }
             onClose={() => setIsModalOpen(false)}
             onSubmit={handleSaveCart}
@@ -526,7 +586,7 @@ const SaleTable = () => {
               <GenosTextfield
                 id="tambah-sale-description"
                 label="Deskripsi"
-                placeholder="Deskripsi pembelian"
+                placeholder="Deskripsi penjualan"
                 value={saleDescription}
                 onChange={(e) => setSaleDescription(e.target.value)}
               />
@@ -644,202 +704,20 @@ const SaleTable = () => {
 
         {/* MODAL DETAIL / VIEW */}
         {isModalViewOpen && (
-          <GenosModal
-            show
-            title="Detail Pembelian"
+          <SaleDetailModal
+            show={isModalViewOpen}
             onClose={() => setModalViewOpen(false)}
-            size="xl2"
-            withCloseButton={false}
-          >
-            {/* Header Info */}
-            <div className="flex flex-col md:flex-row justify-between align-bottom gap-4 mb-4">
-              <div className=" p-4 rounded-md w-full md:w-auto flex-1">
-                <p className="text-xs font-light">Nomor Referensi</p>
-                <p className="text-lg font-bold">
-                  {saleDetail.data.reference_number}
-                </p>
-              </div>
-
-              <div className="flex flex-col  justify-end align-bottom">
-                <GenosDropdown
-                  iconLeft={<PrinterIcon className="w-5 h-5" />}
-                  round="md"
-                  color="gray"
-                  outlined
-                  align="right"
-                  options={[
-                    {
-                      label: "Download PDF",
-                      icon: (
-                        <i className="fa-regular fa-file-pdf text-red-500" />
-                      ),
-                      onClick: () => handleDownloadPDF(),
-                    },
-                    {
-                      label: "Download Excel",
-                      icon: (
-                        <i className="fa-regular fa-file-excel text-green-500" />
-                      ),
-                      onClick: () => handleDownloadExcel(),
-                    },
-                  ]}
-                />
-              </div>
-            </div>
-
-            {/* Main Info Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 text-sm text-gray-600 mb-5">
-              {/* Deskripsi (8 cols) */}
-              <div className="md:col-span-2 bg-white border border-gray-200 p-4 rounded-md">
-                <p className="text-xs font-light">Tanggal Pembelian</p>
-                <p className="font-bold">
-                  {formatTanggalIndo(saleDetail.data.date)}
-                </p>
-              </div>
-              <div className="md:col-span-6 bg-white border border-gray-200 p-4 rounded-md">
-                <p className="font-medium text-xs">Deskripsi</p>
-                <p className="font-bold">{saleDetail.data.description}</p>
-              </div>
-
-              {/* Outlet (4 cols) */}
-              <div className="md:col-span-4 bg-white border border-gray-200 p-4 rounded-md">
-                <p className="font-medium text-xs">Outlet</p>
-                <p className="font-bold">{saleDetail.data.outlet?.name}</p>
-              </div>
-
-              {/* Daftar Item (8 cols) */}
-              <div className="md:col-span-8 bg-white border border-gray-200 p-4 rounded-md">
-                <h2 className="text-md font-semibold text-gray-700 mb-2">
-                  Daftar Item
-                </h2>
-                <hr className="my-4 border-gray-200" />
-                <div className="overflow-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead className="text-gray-700 font-medium">
-                      <tr>
-                        <th className="p-2">Nama</th>
-                        <th className="p-2">Qty</th>
-                        <th className="p-2">Unit</th>
-                        <th className="p-2">Harga</th>
-                        <th className="p-2">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {saleDetail.data.items.map((item: any, index: number) => (
-                        <tr key={index} className="border-b border-gray-100">
-                          <td className="p-2 font-bold text-xs">{item.name}</td>
-                          <td className="p-2 text-xs">{item.quantity}</td>
-                          <td className="p-2 text-xs">{item.unit}</td>
-                          <td className="p-2 text-xs">
-                            Rp {item.price.toLocaleString("id-ID")}
-                          </td>
-                          <td className="p-2 text-xs">
-                            Rp {item.total.toLocaleString("id-ID")}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Jenis Pembayaran + Ringkasan (4 cols) */}
-              <div className="md:col-span-4 flex flex-col gap-4">
-                {/* Jenis Pembayaran */}
-                <div className="bg-white border border-gray-200 p-4 rounded-md">
-                  <p className="font-medium text-xs">Jenis Pembayaran</p>
-                  <p className="font-bold">{saleDetail.data.payment_type}</p>
-                </div>
-
-                {/* Ringkasan */}
-                <div className="bg-white border border-gray-200 p-4 rounded-md">
-                  <p className="text-sm font-semibold text-gray-700 mb-2">
-                    Ringkasan
-                  </p>
-                  <div className="flex justify-between">
-                    <span className="text-xs">Sub Total</span>
-                    <span className="text-xs">
-                      Rp {saleDetail.data.sub_total.toLocaleString("id-ID")}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs">Diskon</span>
-                    <span className="text-xs">
-                      Rp {saleDetail.data.discount.toLocaleString("id-ID")}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs">Pajak</span>
-                    <span className="text-xs">
-                      Rp {saleDetail.data.tax.toLocaleString("id-ID")}
-                    </span>
-                  </div>
-                  <hr className="my-4 border-gray-200" />
-                  <div className="flex justify-between font-semibold text-green-700 mt-2 text-lg">
-                    <span>Total</span>
-                    <span>
-                      Rp {saleDetail.data.total.toLocaleString("id-ID")}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Pembayaran History (Full) */}
-              <div className="md:col-span-12 bg-white border border-gray-200 p-4 rounded-md">
-                <h2 className="text-md font-semibold text-gray-700 mb-2">
-                  Pembayaran{" "}
-                  <span
-                    className={`inline-block text-xs font-semibold px-3 py-1 rounded-full ${
-                      saleDetail.data.payment_status === "paid"
-                        ? "bg-green-100 text-green-700"
-                        : saleDetail.data.payment_status === "partial"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : "bg-gray-100 text-gray-700"
-                    }`}
-                  >
-                    {saleDetail.data.payment_status}
-                  </span>
-                </h2>
-                <hr className="my-4 border-gray-200" />
-                <table className="w-full text-sm text-left">
-                  <thead className="text-gray-700 font-medium">
-                    <tr>
-                      <th className="p-2">Tanggal</th>
-                      <th className="p-2">Jumlah</th>
-                      <th className="p-2">Deskripsi</th>
-                      <th className="p-2">Metode Pembayaran</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {saleDetail.data.payments.map(
-                      (payment: any, index: number) => (
-                        <tr key={index} className="border-b border-gray-100">
-                          <td className="p-2 text-sm">{payment.date}</td>
-                          <td className="p-2 text-sm">
-                            Rp {payment.amount.toLocaleString("id-ID")}
-                          </td>
-                          <td className="p-2 text-sm">{payment.description}</td>
-                          <td className="p-2 text-sm">
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                payment.payment_type === "digital"
-                                  ? "bg-blue-100 text-blue-700"
-                                  : payment.payment_type === "cash"
-                                  ? "bg-green-100 text-green-700"
-                                  : "bg-gray-100 text-gray-600"
-                              }`}
-                            >
-                              {payment.payment_type}
-                            </span>
-                          </td>
-                        </tr>
-                      )
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </GenosModal>
+            saleDetail={saleDetail}
+            handleDownloadPDF={handleDownloadPDF}
+            handleDownloadExcel={handleDownloadExcel}
+            gotoDetailPayment={gotoDetailPayment}
+            saleId={saleId}
+            handleView={() => handleView(saleId)}
+            isPayFromDetaildModalOpen={isPayFromDetaildModalOpen}
+            setPayFromDetaildModalOpen={setPayFromDetaildModalOpen}
+            payAmount={payAmount}
+            setPayAmount={setPayAmount}
+          />
         )}
       </div>
 
@@ -861,7 +739,7 @@ const SaleTable = () => {
             </div>
           )}
           <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold">Item Pembelian</h3>
+            <h3 className="font-semibold">Item Penjualan</h3>
             <span className="text-sm text-gray-500">
               {cartItems.length} item
             </span>

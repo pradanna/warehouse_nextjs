@@ -36,6 +36,21 @@ export async function createSales(payload: any) {
     console.error(error);
   }
 }
+export async function createSalePayment(payload: any) {
+  try {
+    const response = await axios.post(`${baseUrl}/sale-payment`, payload, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    });
+    return response.data;
+  } catch (error: any) {
+    return {
+      success: false,
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || "Terjadi kesalahan",
+      data: error.response?.data || null,
+    };
+  }
+}
 
 export async function updateSales() {}
 

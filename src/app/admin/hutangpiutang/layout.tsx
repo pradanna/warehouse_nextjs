@@ -1,13 +1,9 @@
 "use client";
 import {
-  ArchiveBoxIcon,
   BanknotesIcon,
   CurrencyDollarIcon,
-  FolderIcon,
   HandRaisedIcon,
   ReceiptRefundIcon,
-  ShoppingBagIcon,
-  UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Link from "next/link";
@@ -15,29 +11,14 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 const tabs = [
   {
-    name: "Unit",
-    href: "/admin/master-data/unit",
-    icon: FolderIcon,
+    name: "Hutang",
+    href: "/admin/hutangpiutang/hutang",
+    icon: ReceiptRefundIcon,
   },
   {
-    name: "Category",
-    href: "/admin/master-data/category",
-    icon: ArchiveBoxIcon,
-  },
-  {
-    name: "Item",
-    href: "/admin/master-data/item",
-    icon: ShoppingBagIcon,
-  },
-  {
-    name: "Outlet",
-    href: "/admin/master-data/outlet",
-    icon: UserGroupIcon,
-  },
-  {
-    name: "Supplier",
-    href: "/admin/master-data/supplier",
-    icon: BanknotesIcon,
+    name: "Piutang",
+    href: "/admin/hutangpiutang/piutang",
+    icon: CurrencyDollarIcon,
   },
 ];
 
@@ -64,7 +45,7 @@ export default function HutangPiutangTabs({
               key={tab.name}
               onClick={() => router.push(tab.href)}
               className={clsx(
-                "flex items-center gap-2 px-6 py-3 rounded-md transition-all font-semibold cursor-pointer",
+                "flex items-center gap-2 px-6 py-3 rounded-md transition-all font-semibold",
                 isActive
                   ? "bg-primary-color text-white "
                   : "bg-white text-gray-600 hover:bg-primary/10 border border-gray-200"

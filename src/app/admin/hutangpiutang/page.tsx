@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function Page() {
-  redirect("/admin/master-data/unit");
+  redirect("/admin/hutangpiutang/hutang");
 }

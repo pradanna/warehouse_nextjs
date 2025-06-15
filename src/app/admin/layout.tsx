@@ -5,6 +5,7 @@ import Link from "next/link";
 import NotificationDropdown from "@/components/dropdown-button/NotificationDropdown";
 import { usePathname } from "next/navigation";
 import Sidebar, { SidebarItem } from "@/components/sidebar/Sidebar";
+import "react-datepicker/dist/react-datepicker.css";
 import {
   BellIcon,
   ChartPieIcon,
@@ -22,6 +23,9 @@ import {
   XMarkIcon,
   ChevronRightIcon,
   ArrowRightIcon,
+  PresentationChartBarIcon,
+  ShoppingCartIcon,
+  AdjustmentsHorizontalIcon,
 } from "@heroicons/react/24/outline";
 import ProfileDropdown from "@/components/dropdown-button/ProfileDropdown";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -65,44 +69,35 @@ export default function DashboardLayout({
       icon: <ChartPieIcon className="h-5 w-5" />,
     },
     {
-      name: "Unit",
-      href: "/admin/unit",
+      name: "Master Data",
+      href: "/admin/master-data",
       icon: <FolderIcon className="h-5 w-5" />,
     },
-    {
-      name: "Category",
-      href: "/admin/category",
-      icon: <ArchiveBoxIcon className="h-5 w-5" />,
-    },
-    {
-      name: "Item",
-      href: "/admin/item",
-      icon: <ShoppingBagIcon className="h-5 w-5" />,
-    },
-    {
-      name: "Outlet",
-      href: "/admin/outlet",
-      icon: <UserGroupIcon className="h-5 w-5" />,
-    },
-    {
-      name: "Supplier",
-      href: "/admin/supplier",
-      icon: <BanknotesIcon className="h-5 w-5" />,
-    },
+
     {
       name: "Inventory",
       href: "/admin/inventory",
-      icon: <DocumentIcon className="h-5 w-5" />,
+      icon: <ShoppingCartIcon className="h-5 w-5" />,
     },
     {
-      name: "purchases",
+      name: "Purchases",
       href: "/admin/purchases",
       icon: <CreditCardIcon className="h-5 w-5" />,
     },
     {
-      name: "sales",
+      name: "Sales",
       href: "/admin/sales",
-      icon: <CreditCardIcon className="h-5 w-5" />,
+      icon: <PresentationChartBarIcon className="h-5 w-5" />,
+    },
+    {
+      name: "Hutang Piutang",
+      href: "/admin/hutangpiutang",
+      icon: <CurrencyDollarIcon className="h-5 w-5" />,
+    },
+    {
+      name: "Penyesuaian Stok",
+      href: "/admin/inventory-adjusment",
+      icon: <AdjustmentsHorizontalIcon className="h-5 w-5" />,
     },
   ];
 
@@ -125,8 +120,8 @@ export default function DashboardLayout({
           <Sidebar
             menuItems={menuItems}
             isSidebarOpen={isSidebarOpen}
-            logoExtended="/images/local/extend-genossys-logo.png"
-            logoSimple="/images/local/simple-genossys-logo.png"
+            logoExtended="/images/local/logo_panjang.png"
+            logoSimple="/images/local/logo_pendek.png"
             path_active={pathname}
           />
 

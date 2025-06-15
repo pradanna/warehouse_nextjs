@@ -18,17 +18,21 @@ import GenosPagination from "../pagination/GenosPagination";
 import { motion } from "framer-motion";
 import GenosCheckbox from "../form/GenosCheckbox";
 import GenosButton from "../button/GenosButton";
+import { formatRupiah } from "@/lib/helper";
 
 type TableHead = {
   key: string;
   label: string;
   sortable?: boolean;
+  type?: "text" | "currency" | "number" | string;
+  fontWeight?: "normal" | "medium" | "semibold" | "bold" | string;
 };
 
 type ActionType = {
   view?: (row: any) => void;
   edit?: (row: any) => void;
   delete?: (row: any) => void;
+  collapse?: boolean | ((row: any) => React.ReactNode);
 };
 
 type GenosTableProps = {
@@ -86,6 +90,10 @@ export default function GenosTable({
   handleDeleteSelected,
   handleExportSelected,
 }: GenosTableProps) {
+  const [expandedRowIndex, setExpandedRowIndex] = useState<number | null>(null);
+  const toggleExpandRow = (index: number) => {
+    setExpandedRowIndex(expandedRowIndex === index ? null : index);
+  };
   const [selectedRows, setSelectedRows] = useState<any[]>([]);
   const isAllSelected =
     TABLE_ROWS.length > 0 && selectedRows.length === TABLE_ROWS.length;
@@ -233,140 +241,203 @@ export default function GenosTable({
 
       <div className="overflow-auto min-h-[495px]">
         <div className="w-full">
-          {loading ? (
-            <div className="p-4 text-center text-gray-500 min-h-[495px]">
-              Loading data...
-            </div>
-          ) : TABLE_ROWS.length === 0 ? (
-            <div className="p-4 text-center text-gray-500 min-h-[495px]">
-              No data available...!
-            </div>
-          ) : (
-            <table
-              className={clsx(
-                "w-full table-auto border-collapse transition-all duration-300 ease-in-out",
-                fontSizeMap[fontSize]
-              )}
-            >
-              <thead>
-                <tr className="border-b border-light2">
-                  {CHECKBOXS && (
-                    <th className="text-center">
-                      <GenosCheckbox
-                        checked={isAllSelected}
-                        onChange={handleSelectAll}
-                      />
-                    </th>
-                  )}
-                  {TABLE_HEAD.map((head) => (
-                    <th
-                      key={head.key}
-                      className={clsx(
-                        "p-3 text-left font-semibold",
-                        head.sortable && "cursor-pointer"
+          <table
+            className={clsx(
+              "w-full table-auto border-collapse transition-all duration-300 ease-in-out",
+              fontSizeMap[fontSize]
+            )}
+          >
+            <thead>
+              <tr className="border-b border-light2">
+                {CHECKBOXS && (
+                  <th className="text-center">
+                    <GenosCheckbox
+                      checked={isAllSelected}
+                      onChange={handleSelectAll}
+                    />
+                  </th>
+                )}
+                {TABLE_HEAD.map((head) => (
+                  <th
+                    key={head.key}
+                    className={clsx(
+                      "p-3 text-left font-semibold",
+                      head.sortable && "cursor-pointer"
+                    )}
+                    onClick={() =>
+                      SORT && head.sortable && handleSort(head.key)
+                    }
+                  >
+                    <div className="flex items-center gap-1">
+                      {head.label}
+                      {SORT && head.sortable && (
+                        <div className="flex flex-col ml-1 leading-none justify-center items-center transition-all duration-300 ease-in-out">
+                          <ChevronUpIcon
+                            className={clsx(
+                              "w-2 h-2 text-gray-400 transition-all duration-300 ease-in-out",
+                              sortKey === head.key &&
+                                sortOrder === "asc" &&
+                                "text-primary-color w-3 h-3"
+                            )}
+                          />
+                          <ChevronDownIcon
+                            className={clsx(
+                              "w-2 h-2 text-gray-400 transition-all duration-300 ease-in-out",
+                              sortKey === head.key &&
+                                sortOrder === "desc" &&
+                                "text-primary-color w-3 h-3"
+                            )}
+                          />
+                        </div>
                       )}
-                      onClick={() =>
-                        SORT && head.sortable && handleSort(head.key)
-                      }
-                    >
-                      <div className="flex items-center gap-1">
-                        {head.label}
-                        {SORT && head.sortable && (
-                          <div className="flex flex-col ml-1 leading-none justify-center items-center transition-all duration-300 ease-in-out">
-                            <ChevronUpIcon
-                              className={clsx(
-                                "w-2 h-2 text-gray-400 transition-all duration-300 ease-in-out",
-                                sortKey === head.key &&
-                                  sortOrder === "asc" &&
-                                  "text-primary-color w-3 h-3"
-                              )}
-                            />
-                            <ChevronDownIcon
-                              className={clsx(
-                                "w-2 h-2 text-gray-400 transition-all duration-300 ease-in-out",
-                                sortKey === head.key &&
-                                  sortOrder === "desc" &&
-                                  "text-primary-color w-3 h-3"
-                              )}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </th>
-                  ))}
-                  {ACTION_BUTTON && <th className="p-3">Action</th>}
+                    </div>
+                  </th>
+                ))}
+                {ACTION_BUTTON && <th className="p-3">Action</th>}
+              </tr>
+            </thead>
+            <tbody className="transition-all duration-300 ease-in-out">
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan={
+                      TABLE_HEAD.length +
+                      (CHECKBOXS ? 1 : 0) +
+                      (ACTION_BUTTON ? 1 : 0)
+                    }
+                    className="text-center py-10 text-gray-500"
+                  >
+                    Loading data...
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="transition-all duration-300 ease-in-out">
-                {paginatedRows.map((row, index) => {
+              ) : TABLE_ROWS.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={
+                      TABLE_HEAD.length +
+                      (CHECKBOXS ? 1 : 0) +
+                      (ACTION_BUTTON ? 1 : 0)
+                    }
+                    className="text-center py-10 text-gray-500"
+                  >
+                    No data available...!
+                  </td>
+                </tr>
+              ) : (
+                paginatedRows.map((row: any, index: number) => {
                   const below = isBelowStock?.(row);
                   const above = isAboveStock?.(row);
 
                   return (
-                    <tr
-                      key={index}
-                      className={clsx(
-                        "transition-all duration-300 ease-in-out border-b border-light2 hover:bg-light2",
-                        selectedRows.includes(row)
-                          ? "bg-primary-light3"
-                          : below
-                          ? "bg-red-100"
-                          : above
-                          ? "bg-yellow-100"
-                          : index % 2 === 0
-                          ? "bg-white"
-                          : "bg-light1"
+                    <React.Fragment key={index}>
+                      <tr
+                        className={clsx(
+                          "transition-all duration-300 ease-in-out border-b border-light2 hover:bg-light2",
+                          selectedRows.includes(row)
+                            ? "bg-primary-light3"
+                            : below
+                            ? "bg-red-100"
+                            : above
+                            ? "bg-yellow-100"
+                            : index % 2 === 0
+                            ? "bg-white"
+                            : "bg-light1"
+                        )}
+                      >
+                        {CHECKBOXS && (
+                          <td className="text-center">
+                            <GenosCheckbox
+                              checked={selectedRows.includes(row)}
+                              onChange={() => handleSelectRow(row)}
+                            />
+                          </td>
+                        )}
+                        {TABLE_HEAD.map((head) => (
+                          <td
+                            key={head.key}
+                            className={`p-3 ${
+                              head.fontWeight ? `font-${head.fontWeight}` : ""
+                            }`}
+                          >
+                            {head.type === "currency"
+                              ? formatRupiah(getNestedValue(row, head.key))
+                              : getNestedValue(row, head.key)}
+                          </td>
+                        ))}
+                        {ACTION_BUTTON && (
+                          <td className="p-3">
+                            <div className="flex items-center justify-center gap-4">
+                              {ACTION_BUTTON.view && (
+                                <button
+                                  onClick={() => ACTION_BUTTON.view?.(row)}
+                                  className="text-gray-800 hover:text-success-base cursor-pointer transition-all duration-300"
+                                >
+                                  <EyeIcon className="h-5 w-5" />
+                                </button>
+                              )}
+                              {ACTION_BUTTON.edit && (
+                                <button
+                                  onClick={() => ACTION_BUTTON.edit?.(row)}
+                                  className="text-gray-800 hover:text-warning-base cursor-pointer transition-all duration-300"
+                                >
+                                  <PencilSquareIcon className="h-5 w-5" />
+                                </button>
+                              )}
+                              {ACTION_BUTTON.delete && (
+                                <button
+                                  onClick={() => ACTION_BUTTON.delete?.(row)}
+                                  className="text-gray-800 hover:text-danger-base cursor-pointer transition-all duration-300"
+                                >
+                                  <TrashIcon className="h-5 w-5" />
+                                </button>
+                              )}
+                              {ACTION_BUTTON.collapse && (
+                                <button
+                                  onClick={() => toggleExpandRow(index)}
+                                  className="text-gray-800 hover:text-primary-color cursor-pointer transition-all duration-300"
+                                >
+                                  {expandedRowIndex === index ? (
+                                    <ChevronUpIcon className="h-5 w-5" />
+                                  ) : (
+                                    <ChevronDownIcon className="h-5 w-5" />
+                                  )}
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                      {expandedRowIndex === index && (
+                        <React.Fragment>
+                          <tr className="bg-light2 transition-all duration-300 ease-in-out">
+                            <td
+                              colSpan={
+                                TABLE_HEAD.length +
+                                (CHECKBOXS ? 1 : 0) +
+                                (ACTION_BUTTON ? 1 : 0)
+                              }
+                              className="p-4 text-sm text-gray-700"
+                            >
+                              {typeof ACTION_BUTTON?.collapse === "function" ? (
+                                ACTION_BUTTON.collapse(row)
+                              ) : (
+                                <div className="space-y-1">
+                                  <strong>Detail Data:</strong>
+                                  <pre className="text-xs bg-gray-50 p-2 rounded border border-gray-200 whitespace-pre-wrap break-words">
+                                    {JSON.stringify(row, null, 2)}
+                                  </pre>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        </React.Fragment>
                       )}
-                    >
-                      {CHECKBOXS && (
-                        <td className="text-center">
-                          <GenosCheckbox
-                            checked={selectedRows.includes(row)}
-                            onChange={() => handleSelectRow(row)}
-                          />
-                        </td>
-                      )}
-                      {TABLE_HEAD.map((head) => (
-                        <td key={head.key} className="p-3">
-                          {getNestedValue(row, head.key)}
-                        </td>
-                      ))}
-                      {ACTION_BUTTON && (
-                        <td className="p-3">
-                          <div className="flex items-center justify-center gap-4">
-                            {ACTION_BUTTON.view && (
-                              <button
-                                onClick={() => ACTION_BUTTON.view?.(row)}
-                                className="text-gray-800 hover:text-success-base cursor-pointer transition-all duration-300"
-                              >
-                                <EyeIcon className="h-5 w-5" />
-                              </button>
-                            )}
-                            {ACTION_BUTTON.edit && (
-                              <button
-                                onClick={() => ACTION_BUTTON.edit?.(row)}
-                                className="text-gray-800 hover:text-warning-base cursor-pointer transition-all duration-300"
-                              >
-                                <PencilSquareIcon className="h-5 w-5" />
-                              </button>
-                            )}
-                            {ACTION_BUTTON.delete && (
-                              <button
-                                onClick={() => ACTION_BUTTON.delete?.(row)}
-                                className="text-gray-800 hover:text-danger-base cursor-pointer transition-all duration-300"
-                              >
-                                <TrashIcon className="h-5 w-5" />
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      )}
-                    </tr>
+                    </React.Fragment>
                   );
-                })}
-              </tbody>
-            </table>
-          )}
+                })
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
       {PAGINATION && (

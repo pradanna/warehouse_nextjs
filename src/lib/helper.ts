@@ -21,3 +21,18 @@ export const formatTanggalIndo = (tanggal: string): string => {
 
   return `${tanggalNum} ${bulan} ${tahun}`;
 };
+
+export const formatRupiah = (value: number): string => {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(value);
+};
+
+export function addOneDay(date: Date | null): Date | null {
+  if (!date) return null;
+  const newDate = new Date(date);
+  newDate.setDate(newDate.getDate() + 1);
+  return newDate;
+}

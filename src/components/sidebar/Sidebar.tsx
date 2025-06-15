@@ -61,7 +61,9 @@ export default function Sidebar({
         {menuItems.map((item) => {
           const hasChildren = item.children && item.children.length > 0;
           const isOpen = open === item.name;
-          const isActive = path_active === item.href;
+          const isActive =
+            path_active === item.href ||
+            path_active.startsWith(`${item.href}/`);
 
           return (
             <li key={item.name}>
@@ -109,7 +111,7 @@ export default function Sidebar({
                             >
                               <div
                                 className={`flex items-center gap-3 text-sm rounded-l-full rounded-r-none px-3 py-2 transition-colors duration-200 ${
-                                  path_active === child.href
+                                  isActive
                                     ? "bg-primary-color text-white"
                                     : "hover:bg-primary-light3"
                                 }`}

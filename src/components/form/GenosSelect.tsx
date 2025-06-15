@@ -29,7 +29,7 @@ export default function GenosSelect({
 }: Props) {
   return (
     <div className={clsx("flex flex-col", className)}>
-      <label className="mb-1 text-sm text-gray-700">{label}</label>
+      <label className="mb-1 text-xs text-gray-700">{label}</label>
       <div
         className={clsx(
           "relative border rounded-md px-3 py-2 bg-white transition-all duration-200",

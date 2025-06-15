@@ -11,6 +11,7 @@ import { XMarkIcon } from "@heroicons/react/24/solid";
 import GenosButton from "../../button/GenosButton";
 import { getInventory } from "@/lib/api/inventoryApi";
 import {
+  createPurchasePayment,
   createPurchases,
   getPurchases,
   getPurchasesById,
@@ -35,6 +36,7 @@ import GenosDropdown from "@/components/button/GenosDropdown";
 import { PrinterIcon } from "@heroicons/react/24/outline";
 import { generatePurchasePDF } from "@/components/PDF/printPurchasePDF";
 import { generatePurchaseExcel } from "@/components/excel/printPurchaseExcel";
+import PurchaseDetailModal from "@/components/form/purchase/purchaseDetail";
 
 const PurchaseTable = () => {
   const [data, setData] = useState([]);
@@ -61,6 +63,8 @@ const PurchaseTable = () => {
   // State tambahan untuk modal simpan purchase
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [isPaymentMetodModalOpen, setPaymentMetodModalOpen] = useState(false);
+  const [isPayFromDetaildModalOpen, setPayFromDetaildModalOpen] =
+    useState(false);
   const [isModalViewOpen, setModalViewOpen] = useState(false);
   const [modalViewId, setModalViewId] = useState<any>();
   const [supplierId, setSupplierId] = useState<string | null | number>(null);
@@ -80,8 +84,11 @@ const PurchaseTable = () => {
   const taxAmount = (subTotal * taxPercent) / 100;
   const totalAmount = subTotal - discountAmount + taxAmount;
   const [dpAmount, setDpAmount] = useState(0);
+  const [payAmount, setPayAmount] = useState(0);
   const [supplierName, setSupplierName] = useState<string | null>("");
   const [isFromTambah, setIsFromTambah] = useState(false);
+
+  const [purchaseId, setPurchaseId] = useState<string | null>(null);
 
   const fetchPurchases = async () => {
     setIsLoading(true);
@@ -371,6 +378,21 @@ const PurchaseTable = () => {
     setPaymentMetodModalOpen(true);
   };
 
+  const gotoDetailPayment = () => {
+    setPayAmount(
+      purchaseDetail.data.total -
+        purchaseDetail.data.payments.reduce(
+          (acc: number, cur: any) => acc + cur.amount,
+          0
+        )
+    );
+    setPayFromDetaildModalOpen(true);
+  };
+
+  const closeDetailPayment = () => {
+    setPayFromDetaildModalOpen(false);
+  };
+
   // AMBIL DATA SUPPLIER
   useEffect(() => {
     const supplier = getSupplierFromLocal();
@@ -421,7 +443,9 @@ const PurchaseTable = () => {
           FILTER={FILTER}
           onAddData={handleOpen}
           ACTION_BUTTON={{
-            view: (row) => handleView(row.id),
+            view: (row) => {
+              handleView(row.id), setPurchaseId(row.id);
+            },
           }}
         />
 
@@ -575,6 +599,46 @@ const PurchaseTable = () => {
         )}
       </div>
 
+      {/* MODAL PILIH SUPPLIER */}
+      {isModalSupplierOpen && (
+        <GenosModal
+          show
+          title={"Pilih Supplier"}
+          onClose={() => setIsModalSupplierOpen(false)}
+          onSubmit={handleSetSupplier}
+        >
+          <GenosSearchSelect
+            label="Supplier"
+            placeholder="Pilih supplier"
+            className="w-full"
+            options={suppliers.map((s: any) => ({
+              value: s.id,
+              label: s.name,
+            }))}
+            value={supplierId}
+            onChange={setSupplierId}
+          />
+        </GenosModal>
+      )}
+
+      {/* MODAL DETAIL / VIEW */}
+      {isModalViewOpen && (
+        <PurchaseDetailModal
+          show
+          onClose={() => setModalViewOpen(false)}
+          purchaseDetail={purchaseDetail}
+          handleDownloadPDF={handleDownloadPDF}
+          handleDownloadExcel={handleDownloadExcel}
+          gotoDetailPayment={gotoDetailPayment}
+          purchaseId={purchaseId}
+          handleView={() => handleView(purchaseId)}
+          isPayFromDetaildModalOpen={isPayFromDetaildModalOpen}
+          setPayFromDetaildModalOpen={setPayFromDetaildModalOpen}
+          payAmount={payAmount}
+          setPayAmount={setPayAmount}
+        />
+      )}
+
       {/* MODAL METODE PEMBAYARAN */}
       {isPaymentMetodModalOpen && (
         <GenosModal
@@ -612,227 +676,6 @@ const PurchaseTable = () => {
         </GenosModal>
       )}
 
-      {/* MODAL PILIH SUPPLIER */}
-      {isModalSupplierOpen && (
-        <GenosModal
-          show
-          title={"Pilih Supplier"}
-          onClose={() => setIsModalSupplierOpen(false)}
-          onSubmit={handleSetSupplier}
-        >
-          <GenosSearchSelect
-            label="Supplier"
-            placeholder="Pilih supplier"
-            className="w-full"
-            options={suppliers.map((s: any) => ({
-              value: s.id,
-              label: s.name,
-            }))}
-            value={supplierId}
-            onChange={setSupplierId}
-          />
-        </GenosModal>
-      )}
-
-      {/* MODAL DETAIL / VIEW */}
-      {isModalViewOpen && (
-        <GenosModal
-          show
-          title="Detail Pembelian"
-          onClose={() => setModalViewOpen(false)}
-          size="xl2"
-          withCloseButton={false}
-        >
-          {/* Header Info */}
-          <div className="flex flex-col md:flex-row justify-between align-bottom gap-4 mb-4">
-            <div className=" p-4 rounded-md w-full md:w-auto flex-1">
-              <p className="text-xs font-light">Nomor Referensi</p>
-              <p className="text-lg font-bold">
-                {purchaseDetail.data.reference_number}
-              </p>
-            </div>
-
-            <div className="flex flex-col  justify-end align-bottom">
-              <GenosDropdown
-                iconLeft={<PrinterIcon className="w-5 h-5" />}
-                round="md"
-                color="gray"
-                outlined
-                align="right"
-                options={[
-                  {
-                    label: "Download PDF",
-                    icon: <i className="fa-regular fa-file-pdf text-red-500" />,
-                    onClick: () => handleDownloadPDF(),
-                  },
-                  {
-                    label: "Download Excel",
-                    icon: (
-                      <i className="fa-regular fa-file-excel text-green-500" />
-                    ),
-                    onClick: () => handleDownloadExcel(),
-                  },
-                ]}
-              />
-            </div>
-          </div>
-
-          {/* Main Info Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 text-sm text-gray-600 mb-5">
-            {/* Deskripsi (8 cols) */}
-            <div className="md:col-span-2 bg-white border border-gray-200 p-4 rounded-md">
-              <p className="text-xs font-light">Tanggal Pembelian</p>
-              <p className="font-bold">
-                {formatTanggalIndo(purchaseDetail.data.date)}
-              </p>
-            </div>
-            <div className="md:col-span-6 bg-white border border-gray-200 p-4 rounded-md">
-              <p className="font-medium text-xs">Deskripsi</p>
-              <p className="font-bold">{purchaseDetail.data.description}</p>
-            </div>
-
-            {/* Supplier (4 cols) */}
-            <div className="md:col-span-4 bg-white border border-gray-200 p-4 rounded-md">
-              <p className="font-medium text-xs">Supplier</p>
-              <p className="font-bold">{purchaseDetail.data.supplier?.name}</p>
-            </div>
-
-            {/* Daftar Item (8 cols) */}
-            <div className="md:col-span-8 bg-white border border-gray-200 p-4 rounded-md">
-              <h2 className="text-md font-semibold text-gray-700 mb-2">
-                Daftar Item
-              </h2>
-              <hr className="my-4 border-gray-200" />
-              <div className="overflow-auto">
-                <table className="w-full text-sm text-left">
-                  <thead className="text-gray-700 font-medium">
-                    <tr>
-                      <th className="p-2">Nama</th>
-                      <th className="p-2">Qty</th>
-                      <th className="p-2">Unit</th>
-                      <th className="p-2">Harga</th>
-                      <th className="p-2">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {purchaseDetail.data.items.map(
-                      (item: any, index: number) => (
-                        <tr key={index} className="border-b border-gray-100">
-                          <td className="p-2 font-bold text-xs">{item.name}</td>
-                          <td className="p-2 text-xs">{item.quantity}</td>
-                          <td className="p-2 text-xs">{item.unit}</td>
-                          <td className="p-2 text-xs">
-                            Rp {item.price.toLocaleString("id-ID")}
-                          </td>
-                          <td className="p-2 text-xs">
-                            Rp {item.total.toLocaleString("id-ID")}
-                          </td>
-                        </tr>
-                      )
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Jenis Pembayaran + Ringkasan (4 cols) */}
-            <div className="md:col-span-4 flex flex-col gap-4">
-              {/* Jenis Pembayaran */}
-              <div className="bg-white border border-gray-200 p-4 rounded-md">
-                <p className="font-medium text-xs">Jenis Pembayaran</p>
-                <p className="font-bold">{purchaseDetail.data.payment_type}</p>
-              </div>
-
-              {/* Ringkasan */}
-              <div className="bg-white border border-gray-200 p-4 rounded-md">
-                <p className="text-sm font-semibold text-gray-700 mb-2">
-                  Ringkasan
-                </p>
-                <div className="flex justify-between">
-                  <span className="text-xs">Sub Total</span>
-                  <span className="text-xs">
-                    Rp {purchaseDetail.data.sub_total.toLocaleString("id-ID")}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-xs">Diskon</span>
-                  <span className="text-xs">
-                    Rp {purchaseDetail.data.discount.toLocaleString("id-ID")}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-xs">Pajak</span>
-                  <span className="text-xs">
-                    Rp {purchaseDetail.data.tax.toLocaleString("id-ID")}
-                  </span>
-                </div>
-                <hr className="my-4 border-gray-200" />
-                <div className="flex justify-between font-semibold text-green-700 mt-2 text-lg">
-                  <span>Total</span>
-                  <span>
-                    Rp {purchaseDetail.data.total.toLocaleString("id-ID")}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Pembayaran History (Full) */}
-            <div className="md:col-span-12 bg-white border border-gray-200 p-4 rounded-md">
-              <h2 className="text-md font-semibold text-gray-700 mb-2">
-                Pembayaran{" "}
-                <span
-                  className={`inline-block text-xs font-semibold px-3 py-1 rounded-full ${
-                    purchaseDetail.data.payment_status === "paid"
-                      ? "bg-green-100 text-green-700"
-                      : purchaseDetail.data.payment_status === "partial"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-gray-100 text-gray-700"
-                  }`}
-                >
-                  {purchaseDetail.data.payment_status}
-                </span>
-              </h2>
-              <hr className="my-4 border-gray-200" />
-              <table className="w-full text-sm text-left">
-                <thead className="text-gray-700 font-medium">
-                  <tr>
-                    <th className="p-2">Tanggal</th>
-                    <th className="p-2">Jumlah</th>
-                    <th className="p-2">Deskripsi</th>
-                    <th className="p-2">Metode Pembayaran</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {purchaseDetail.data.payments.map(
-                    (payment: any, index: number) => (
-                      <tr key={index} className="border-b border-gray-100">
-                        <td className="p-2 text-sm">{payment.date}</td>
-                        <td className="p-2 text-sm">
-                          Rp {payment.amount.toLocaleString("id-ID")}
-                        </td>
-                        <td className="p-2 text-sm">{payment.description}</td>
-                        <td className="p-2 text-sm">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                              payment.payment_type === "digital"
-                                ? "bg-blue-100 text-blue-700"
-                                : payment.payment_type === "cash"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-600"
-                            }`}
-                          >
-                            {payment.payment_type}
-                          </span>
-                        </td>
-                      </tr>
-                    )
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </GenosModal>
-      )}
       <div className="w-[300px] border border-light2 rounded-lg p-4">
         <div className="flex flex-col gap-3 mt-3">
           {supplierName && (
