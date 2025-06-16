@@ -40,25 +40,10 @@ const SaleTableReport = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [SaleItems, setSaleItems] = useState([]);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedCart, setSelectedCart] = useState(null);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [selectedInventory, setSelectedInventory] = useState<any>(null);
-  const [unit, setUnit] = useState("-");
-  const [quantity, setQuantity] = useState(1);
-  const [price, setPrice] = useState(0);
-  const [isSaving, setIsSaving] = useState(false);
   const [cartItems, setCartItems] = useState<any>([]);
-  const [paymentMetode, setPaymentMetode] = useState("cash");
-  const [inventories, setInventories] = useState([]);
 
   // State tambahan untuk modal simpan sale
-  const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
   const [outletId, setOutletId] = useState<string | null | number>(null);
-  const [paymentType, setPaymentType] = useState("cash");
-  const [saleDescription, setSaleDescription] = useState("");
 
   const [discountPercent, setDiscountPercent] = useState(0);
   const [taxPercent, setTaxPercent] = useState(0);
@@ -71,13 +56,7 @@ const SaleTableReport = () => {
   const taxAmount = (subTotal * taxPercent) / 100;
   const totalAmount = subTotal - discountAmount + taxAmount;
 
-  const [isModalOutletOpen, setIsModalOutletOpen] = useState(false);
-
-  const [outletName, setOutletName] = useState<string | null>("");
   const [param, setparam] = useState<string>("");
-  const [isFromTambah, setIsFromTambah] = useState(false);
-  const [isPaymentMetodModalOpen, setPaymentMetodModalOpen] = useState(false);
-  const [dpAmount, setDpAmount] = useState(0);
 
   const [modalViewId, setModalViewId] = useState<any>();
   const [saleDetail, setSaleDetail] = useState<any>();
@@ -183,13 +162,6 @@ const SaleTableReport = () => {
   };
 
   // AMBIL DATA SUPPLIER
-  useEffect(() => {
-    const outlet = getOutletFromLocal();
-    if (outlet) {
-      setOutletId(outlet.id);
-      setOutletName(outlet.name);
-    }
-  }, []);
 
   const handleDownloadPDF = () => {
     generateSalePDF(saleDetail);

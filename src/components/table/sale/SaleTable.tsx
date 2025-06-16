@@ -489,7 +489,6 @@ const SaleTable = () => {
           loading={isLoading}
           FILTER={FILTER}
           onAddData={handleOpen}
-          handleExportSelected={exportToExcel}
           ACTION_BUTTON={{
             view: (row) => {
               setSaleId(row.id);
