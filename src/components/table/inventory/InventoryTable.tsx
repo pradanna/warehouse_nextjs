@@ -71,6 +71,7 @@ const InventoryTable = () => {
   const [unitId, setUnitId] = useState<string | number | null>("");
   const [sku, setSku] = useState("");
   const [description, setDescription] = useState("");
+  const [param, setparam] = useState("");
 
   const TABLE_HEAD = useMemo(
     () => [
@@ -101,7 +102,7 @@ const InventoryTable = () => {
   const fetchInventory = async () => {
     setIsLoadingTable(true);
     try {
-      const res = await getInventory(currentPage, limit);
+      const res = await getInventory(param, currentPage, limit);
       console.log(res.data);
       setTABLE_ROWS(res.data);
       setTotalItems(res.total);

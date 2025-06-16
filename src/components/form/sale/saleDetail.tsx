@@ -29,7 +29,7 @@ const SaleDetailModal = ({
   saleDetail: any;
   handleDownloadPDF: () => void;
   handleDownloadExcel: () => void;
-  gotoDetailPayment: () => void;
+  gotoDetailPayment?: () => void;
   handleView: (saleId: string | null) => Promise<void>;
   isPayFromDetaildModalOpen: boolean;
   setPayFromDetaildModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -226,12 +226,14 @@ const SaleDetailModal = ({
                   {saleDetail.data.payment_status}
                 </span>
               </h2>
-              <GenosButton
-                label="Tambah Pembayaran"
-                color="success"
-                round="sm"
-                onClick={gotoDetailPayment}
-              />
+              {gotoDetailPayment && (
+                <GenosButton
+                  label="Tambah Pembayaran"
+                  color="success"
+                  round="sm"
+                  onClick={gotoDetailPayment}
+                />
+              )}
             </div>
             <hr className="my-4 border-gray-200" />
             <table className="w-full text-sm text-left">

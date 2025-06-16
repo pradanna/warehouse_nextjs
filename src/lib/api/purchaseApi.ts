@@ -12,7 +12,7 @@ export async function getPurchases(
       params: {
         page: currentPage,
         per_page: limit,
-        search: search,
+        param: search,
         supplier_id: selectedSupplier,
       },
       headers: {

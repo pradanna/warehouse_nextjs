@@ -26,6 +26,7 @@ import {
   PresentationChartBarIcon,
   ShoppingCartIcon,
   AdjustmentsHorizontalIcon,
+  ChartBarSquareIcon,
 } from "@heroicons/react/24/outline";
 import ProfileDropdown from "@/components/dropdown-button/ProfileDropdown";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -95,9 +96,14 @@ export default function DashboardLayout({
       icon: <CurrencyDollarIcon className="h-5 w-5" />,
     },
     {
-      name: "Penyesuaian Stok",
-      href: "/admin/inventory-adjusment",
+      name: "Penyesuaian",
+      href: "/admin/inventory-adjustment",
       icon: <AdjustmentsHorizontalIcon className="h-5 w-5" />,
+    },
+    {
+      name: "Laporan",
+      href: "/admin/report",
+      icon: <ChartBarSquareIcon className="h-5 w-5" />,
     },
   ];
 

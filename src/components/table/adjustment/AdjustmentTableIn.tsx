@@ -59,7 +59,7 @@ const AdjustmentTableIn = ({
   const [inventories, setInventories] = useState<any>();
   const [selectedItem, setSelectedItem] = useState<any>();
   const [selectedInventory, setSelectedInventory] = useState<any>();
-
+  const [param, setparam] = useState<string>("");
   const TABLE_HEAD = useMemo(
     () => [
       { key: "item.name", label: "Nama Barang", sortable: true, type: "text" },
@@ -166,7 +166,7 @@ const AdjustmentTableIn = ({
   useEffect(() => {
     const fetchInventories = async () => {
       try {
-        const res = await getInventory(1, 1000);
+        const res = await getInventory(param, 1, 1000);
         // Sesuaikan dengan struktur data dari API
         setInventories(res.data);
         console.log("Inventories:", res.data);

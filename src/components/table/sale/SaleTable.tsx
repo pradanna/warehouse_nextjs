@@ -72,6 +72,7 @@ const SaleTable = () => {
   const [isModalOutletOpen, setIsModalOutletOpen] = useState(false);
 
   const [outletName, setOutletName] = useState<string | null>("");
+  const [param, setparam] = useState<string>("");
   const [isFromTambah, setIsFromTambah] = useState(false);
   const [isPaymentMetodModalOpen, setPaymentMetodModalOpen] = useState(false);
   const [dpAmount, setDpAmount] = useState(0);
@@ -103,7 +104,7 @@ const SaleTable = () => {
   useEffect(() => {
     const fetchInventories = async () => {
       try {
-        const res = await getInventory(1, 1000);
+        const res = await getInventory(param, 1, 1000);
         // Sesuaikan dengan struktur data dari API
         setInventories(res.data);
       } catch (error) {

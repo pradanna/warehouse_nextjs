@@ -15,33 +15,34 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 const tabs = [
   {
-    name: "Unit",
-    href: "/admin/master-data/unit",
-    icon: FolderIcon,
+    name: "Stok Saat Ini",
+    href: "/admin/report/current-stock",
+    icon: ArchiveBoxIcon, // Bisa juga CubeIcon untuk alternatif
   },
   {
-    name: "Category",
-    href: "/admin/master-data/category",
-    icon: ArchiveBoxIcon,
-  },
-  {
-    name: "Item",
-    href: "/admin/master-data/item",
+    name: "Perpindahan Stock",
+    href: "/admin/report/stock-movement",
     icon: ShoppingBagIcon,
   },
+
   {
-    name: "Outlet",
-    href: "/admin/master-data/outlet",
-    icon: UserGroupIcon,
+    name: "Riwayat Penyesuaian",
+    href: "/admin/report/stock-adjustment-history",
+    icon: ReceiptRefundIcon,
   },
   {
-    name: "Supplier",
-    href: "/admin/master-data/supplier",
+    name: "Laporan Pembelian",
+    href: "/admin/report/purchase",
+    icon: CurrencyDollarIcon,
+  },
+  {
+    name: "Laporan Penjualan",
+    href: "/admin/report/sales",
     icon: BanknotesIcon,
   },
 ];
 
-export default function MasterDataTabs({
+export default function ReportTabs({
   children,
 }: {
   children: React.ReactNode;

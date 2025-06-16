@@ -1,10 +1,14 @@
 import { baseUrl, getToken } from "@/app/config/config";
 import axios from "axios";
 
-export async function getInventory(currentPage: number, limit: number) {
+export async function getInventory(
+  param: string,
+  currentPage: number,
+  limit: number
+) {
   try {
     const response = await axios.get(
-      `${baseUrl}/inventory?page=${currentPage}&per_page=${limit}`,
+      `${baseUrl}/inventory?param=${param}&page=${currentPage}&per_page=${limit}`,
       {
         headers: { Authorization: `Bearer ${getToken()}` },
       }

@@ -29,6 +29,7 @@ const AdjustmentTable = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [qty, setQty] = useState<string | number>(0);
   const [deskripsi, setDeskripsi] = useState<string>("");
+  const [param, setparam] = useState<string>("");
   const [totalSisaAdjustment, setTotalSisaAdjustment] = useState(0);
 
   const [modalViewId, setModalViewId] = useState<any>();
@@ -172,7 +173,7 @@ const AdjustmentTable = () => {
   useEffect(() => {
     const fetchInventories = async () => {
       try {
-        const res = await getInventory(1, 1000);
+        const res = await getInventory(param, 1, 1000);
         // Sesuaikan dengan struktur data dari API
         setInventories(res.data);
         console.log("Inventories:", res.data);

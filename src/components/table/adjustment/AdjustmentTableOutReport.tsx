@@ -26,7 +26,7 @@ type Props = {
   setDateTo: (value: Date | null) => void;
 };
 
-const AdjustmentTableOut = ({
+const AdjustmentTableOutReport = ({
   search,
   setSearch,
   dateFrom,
@@ -127,46 +127,6 @@ const AdjustmentTableOut = ({
     }
   }, [AdjustmentOutDetail]);
 
-  const handleOpenModalAdd = () => {
-    setModalAddOpen(true);
-  };
-
-  const handleSaveAdjustmentOut = async () => {
-    const payload = {
-      inventory_id: selectedInventory.id,
-      type: "out",
-      quantity: qty,
-      deskripsi,
-      date: new Date().toISOString().slice(0, 10),
-    };
-
-    console.log("Payload:", payload);
-
-    try {
-      const res = await createAdjustment(payload);
-
-      console.log("Response:", res);
-
-      if (res !== undefined) {
-        toast.success("Penyesuaian berhasil disimpan"),
-          {
-            autoClose: 1000,
-          };
-        setModalAddOpen(false);
-        FetchAdjustment();
-      } else {
-        toast.error("Penyesuaian gagal disimpan", {
-          autoClose: 1000,
-        });
-      }
-    } catch (err: any) {
-      console.log(err);
-      toast.error(err, {
-        autoClose: 1000,
-      });
-    }
-  };
-
   useEffect(() => {
     const fetchInventories = async () => {
       try {
@@ -194,7 +154,6 @@ const AdjustmentTableOut = ({
         currentPage={currentPage}
         onPageChange={setCurrentPage}
         loading={isLoadingTable}
-        onAddData={handleOpenModalAdd}
         fontSize="xs"
         FILTER
         ACTION_BUTTON={{
@@ -215,7 +174,6 @@ const AdjustmentTableOut = ({
           show
           title={"Penyesuaian Stok Keluar"}
           onClose={() => setModalAddOpen(false)}
-          onSubmit={handleSaveAdjustmentOut}
         >
           <GenosSearchSelect
             label="Item"
@@ -272,4 +230,4 @@ const AdjustmentTableOut = ({
     </>
   );
 };
-export default AdjustmentTableOut;
+export default AdjustmentTableOutReport;

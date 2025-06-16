@@ -10,9 +10,9 @@ import {
   createAdjustment,
   getAdjustment,
   getAdjustmentById,
+  getAdjustmentIn,
   getAdjustmentOut,
 } from "@/lib/api/adjustmentApi";
-import GenosSelect from "@/components/form/GenosSelect";
 import GenosTextfield from "@/components/form/GenosTextfield";
 import GenosSearchSelect from "@/components/form/GenosSearchSelect";
 import { getInventory } from "@/lib/api/inventoryApi";
@@ -26,7 +26,7 @@ type Props = {
   setDateTo: (value: Date | null) => void;
 };
 
-const AdjustmentTableOut = ({
+const AdjustmentTableInReport = ({
   search,
   setSearch,
   dateFrom,
@@ -46,24 +46,19 @@ const AdjustmentTableOut = ({
   const [adjustmentData, setAdjustmentData] = useState<Adjustment[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
-  const [type, setType] = useState("");
+
   const [TABLE_ROWS, setTABLE_ROWS] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [qty, setQty] = useState<string | number>(0);
   const [deskripsi, setDeskripsi] = useState<string>("");
-  const [totalSisaAdjustment, setTotalSisaAdjustment] = useState(0);
 
-  const [modalViewId, setModalViewId] = useState<any>();
-  const [isModalViewOpen, setModalViewOpen] = useState(false);
-  const [debtDetail, setAdjustmentDetail] = useState<any>();
-  const [AdjustmentOutDetail, setAdjustmentOutDetail] = useState<any>();
+  const [AdjustmentInDetail, setAdjustmentInDetail] = useState<any>();
   const [isModalAddOpen, setModalAddOpen] = useState(false);
 
   const [inventories, setInventories] = useState<any>();
   const [selectedItem, setSelectedItem] = useState<any>();
   const [selectedInventory, setSelectedInventory] = useState<any>();
   const [param, setparam] = useState<string>("");
-
   const TABLE_HEAD = useMemo(
     () => [
       { key: "item.name", label: "Nama Barang", sortable: true, type: "text" },
@@ -100,7 +95,7 @@ const AdjustmentTableOut = ({
     setIsLoadingTable(true);
 
     try {
-      const res = await getAdjustmentOut(
+      const res = await getAdjustmentIn(
         currentPage,
         limit,
         search,
@@ -122,50 +117,10 @@ const AdjustmentTableOut = ({
   }, [search, dateFrom, dateTo, currentPage]);
 
   useEffect(() => {
-    if (AdjustmentOutDetail) {
-      console.log("AdjustmentOut detail updated:", AdjustmentOutDetail);
+    if (AdjustmentInDetail) {
+      console.log("AdjustmentIn detail updated:", AdjustmentInDetail);
     }
-  }, [AdjustmentOutDetail]);
-
-  const handleOpenModalAdd = () => {
-    setModalAddOpen(true);
-  };
-
-  const handleSaveAdjustmentOut = async () => {
-    const payload = {
-      inventory_id: selectedInventory.id,
-      type: "out",
-      quantity: qty,
-      deskripsi,
-      date: new Date().toISOString().slice(0, 10),
-    };
-
-    console.log("Payload:", payload);
-
-    try {
-      const res = await createAdjustment(payload);
-
-      console.log("Response:", res);
-
-      if (res !== undefined) {
-        toast.success("Penyesuaian berhasil disimpan"),
-          {
-            autoClose: 1000,
-          };
-        setModalAddOpen(false);
-        FetchAdjustment();
-      } else {
-        toast.error("Penyesuaian gagal disimpan", {
-          autoClose: 1000,
-        });
-      }
-    } catch (err: any) {
-      console.log(err);
-      toast.error(err, {
-        autoClose: 1000,
-      });
-    }
-  };
+  }, [AdjustmentInDetail]);
 
   useEffect(() => {
     const fetchInventories = async () => {
@@ -194,9 +149,7 @@ const AdjustmentTableOut = ({
         currentPage={currentPage}
         onPageChange={setCurrentPage}
         loading={isLoadingTable}
-        onAddData={handleOpenModalAdd}
         fontSize="xs"
-        FILTER
         ACTION_BUTTON={{
           collapse: (row) => (
             <div className="grid grid-cols-2 gap-2">
@@ -208,68 +161,9 @@ const AdjustmentTableOut = ({
             </div>
           ),
         }}
+        FILTER
       ></GenosTable>
-
-      {isModalAddOpen && (
-        <GenosModal
-          show
-          title={"Penyesuaian Stok Keluar"}
-          onClose={() => setModalAddOpen(false)}
-          onSubmit={handleSaveAdjustmentOut}
-        >
-          <GenosSearchSelect
-            label="Item"
-            placeholder="Pilih item"
-            className="w-full mb-5"
-            options={inventories.map((inv: any) => ({
-              value: inv.item.id,
-              label: `${inv.item.name} - ${inv.unit.name || "-"}`,
-            }))}
-            value={selectedItem}
-            onChange={(itemId: any) => {
-              console.log("selectedItem " + selectedItem);
-              console.log("itemId " + itemId);
-
-              console.log("Semua ID inventories:");
-              inventories.forEach((i: any) => console.log(i.item.id));
-
-              console.log("ItemId yang dicari:", itemId);
-
-              const inv = inventories.find(
-                (i: any) => i.item.id === itemId
-              ) as any;
-              console.log("INV", inv);
-              console.log("inv.item.name", inv.item.name);
-              setSelectedItem(itemId);
-              setSelectedInventory(inv);
-
-              // setUnit(inv?.unit.name || "-");
-            }}
-          />
-
-          <GenosTextfield
-            id="jumlah-barang"
-            label="Jumlah barang "
-            type="number"
-            className="mb-5"
-            value={qty}
-            onChange={(e) => {
-              setQty(e.target.value);
-            }}
-          />
-
-          <GenosTextfield
-            id="deskripsi-barang"
-            label="Deskripsi "
-            type="text"
-            value={deskripsi}
-            onChange={(e) => {
-              setDeskripsi(e.target.value);
-            }}
-          />
-        </GenosModal>
-      )}
     </>
   );
 };
-export default AdjustmentTableOut;
+export default AdjustmentTableInReport;

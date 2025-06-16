@@ -17,7 +17,7 @@ type Props = {
 const GenosDatepicker = forwardRef<HTMLInputElement, Props>(
   (
     { id, label, selected, onChange, className, name, disabled = false },
-    ref
+    ref: any
   ) => {
     const [isFocused, setIsFocused] = useState(false);
     const showFloatingLabel = isFocused || selected;

@@ -17,7 +17,7 @@ interface PurchaseDetailModalProps {
   purchaseId: string | null;
   handleDownloadPDF: () => void;
   handleDownloadExcel: () => void;
-  gotoDetailPayment: () => void;
+  gotoDetailPayment?: () => void;
   handleView: (purchaseId: string | null) => Promise<void>;
   isPayFromDetaildModalOpen: boolean;
   setPayFromDetaildModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -237,13 +237,14 @@ export default function PurchaseDetailModal({
                   {purchaseDetail.data.payment_status}
                 </span>
               </h2>
-
-              <GenosButton
-                label="Tambah Pembayaran"
-                color="success"
-                round="sm"
-                onClick={gotoDetailPayment}
-              />
+              {gotoDetailPayment && (
+                <GenosButton
+                  label="Tambah Pembayaran"
+                  color="success"
+                  round="sm"
+                  onClick={gotoDetailPayment}
+                />
+              )}
             </div>
             <hr className="my-4 border-gray-200" />
             <table className="w-full text-sm text-left">

@@ -86,6 +86,7 @@ const PurchaseTable = () => {
   const [dpAmount, setDpAmount] = useState(0);
   const [payAmount, setPayAmount] = useState(0);
   const [supplierName, setSupplierName] = useState<string | null>("");
+  const [param, setparam] = useState<string>("");
   const [isFromTambah, setIsFromTambah] = useState(false);
 
   const [purchaseId, setPurchaseId] = useState<string | null>(null);
@@ -112,7 +113,7 @@ const PurchaseTable = () => {
   useEffect(() => {
     const fetchInventories = async () => {
       try {
-        const res = await getInventory(1, 1000);
+        const res = await getInventory(param, 1, 1000);
         // Sesuaikan dengan struktur data dari API
         setInventories(res.data);
         console.log("Inventories:", res.data);

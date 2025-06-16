@@ -45,6 +45,7 @@ type GenosTableProps = {
   handleDeleteSelected?: () => void;
   PAGINATION?: boolean;
   FILTER?: React.ReactNode;
+  RIGHT_DIV?: React.ReactNode;
   ACTION_BUTTON?: ActionType;
   fontSize?: "xs" | "sm" | "md" | "lg" | "xl";
   currentPage?: number;
@@ -67,6 +68,13 @@ const fontSizeMap = {
   xl: "text-xl",
 };
 
+const state = {
+  neutral: "",
+  warning: "text-warning",
+  danger: "text-danger",
+  success: "text-success",
+};
+
 export default function GenosTable({
   TABLE_HEAD,
   TABLE_ROWS,
@@ -86,7 +94,7 @@ export default function GenosTable({
   error,
   isBelowStock,
   isAboveStock,
-
+  RIGHT_DIV,
   handleDeleteSelected,
   handleExportSelected,
 }: GenosTableProps) {
@@ -236,6 +244,7 @@ export default function GenosTable({
           ) : (
             <div></div>
           )}
+          {RIGHT_DIV ? RIGHT_DIV : <div></div>}
         </div>
       </div>
 
