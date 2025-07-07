@@ -1,24 +1,17 @@
+// components/wrapper/ItemClientWrapper.tsx
 "use client";
 
-import GenosTextfield from "@/components/form/GenosTextfield";
+import dynamic from "next/dynamic";
 import GenosPanel from "@/components/panel/GenosPanel";
-import UnitTable from "@/components/table/unit/UnitTable";
-import React from "react";
-import OutletTable from "@/components/table/outlet/OutletTable";
-import ItemTable from "@/components/table/item/ItemTable";
-import InventoryTable from "@/components/table/inventory/InventoryTable";
-import PurchaseTable from "@/components/table/purchase/PurchaseTable";
 
-export default function ItemPage() {
+const ItemTable = dynamic(() => import("@/components/table/item/ItemTable"), {
+  ssr: false,
+});
+
+export default function ItemClientWrapper() {
   return (
-    <div>
-      <GenosPanel
-        title="Data Item"
-        subtitle="Daftar data Item"
-        className="mt-3"
-      >
-        <ItemTable />
-      </GenosPanel>
-    </div>
+    <GenosPanel title="Data Item" subtitle="Daftar data Item" className="mt-3">
+      <ItemTable />
+    </GenosPanel>
   );
 }

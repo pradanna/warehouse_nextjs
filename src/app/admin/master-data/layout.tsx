@@ -56,7 +56,7 @@ export default function MasterDataTabs({
 
   return (
     <div>
-      <div className="flex gap-4  p-2 rounded-xl">
+      <div className="flex gap-4  rounded-xl">
         {tabs.map((tab) => {
           const isActive = active === tab.href;
           return (
@@ -76,7 +76,7 @@ export default function MasterDataTabs({
           );
         })}
       </div>
-      <div className="p-6 bg-light1 flex-1">{children}</div>
+      <div className="bg-light1 flex-1">{children}</div>
     </div>
   );
 }

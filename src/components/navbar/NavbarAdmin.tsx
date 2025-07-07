@@ -49,7 +49,7 @@ export default function NavbarAdmin({
       {/* Right - Notification & Profile */}
       <div className="flex items-center gap-4">
         {/* Notification */}
-        <div className="relative">
+        {/* <div className="relative">
           <button
             onClick={() => setNotifOpen((prev) => !prev)}
             className="p-1 cursor-pointer hover:bg-gray-100 rounded-full transition "
@@ -83,7 +83,7 @@ export default function NavbarAdmin({
               </div>
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* Profile Dropdown */}
         <div className="relative">
@@ -100,12 +100,12 @@ export default function NavbarAdmin({
             />
           </button>
           {profileOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-md border z-50">
-              <div className="p-4 border-b">
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-md border border-gray-200 z-50">
+              <div className="p-4 border-b border-gray-200">
                 <p className="font-semibold text-gray-800">{profileName}</p>
                 <p className="text-sm text-gray-500">Admin</p>
               </div>
-              <div
+              {/* <div
                 onClick={() => setProfileOpen(false)}
                 className="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm"
               >
@@ -116,10 +116,10 @@ export default function NavbarAdmin({
                 className="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm"
               >
                 Akun
-              </div>
+              </div> */}
               <div
                 onClick={() => onLogout()}
-                className="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm"
+                className="px-4 py-2 hover:bg-red-50 cursor-pointer text-sm text-red-500 "
               >
                 Logout
               </div>

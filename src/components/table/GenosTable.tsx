@@ -5,7 +5,6 @@ import React, { useState } from "react";
 import {
   ChevronUpIcon,
   ChevronDownIcon,
-  MagnifyingGlassCircleIcon,
   EyeIcon,
   PencilSquareIcon,
   TrashIcon,
@@ -13,12 +12,11 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import GenosTextfield from "../form/GenosTextfield";
 import GenosPagination from "../pagination/GenosPagination";
-import { motion } from "framer-motion";
 import GenosCheckbox from "../form/GenosCheckbox";
 import GenosButton from "../button/GenosButton";
 import { formatRupiah } from "@/lib/helper";
+import { ClipLoader } from "react-spinners";
 
 type TableHead = {
   key: string;
@@ -316,7 +314,15 @@ export default function GenosTable({
                     }
                     className="text-center py-10 text-gray-500"
                   >
-                    Loading data...
+                    <div className="flex  items-center justify-center">
+                      <ClipLoader
+                        color="#3B82F6"
+                        className="h-10 w-10 me-3"
+                        loading={true}
+                        size={30}
+                      />{" "}
+                      <span> Loading data...</span>
+                    </div>
                   </td>
                 </tr>
               ) : TABLE_ROWS.length === 0 ? (

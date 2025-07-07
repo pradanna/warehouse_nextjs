@@ -3,6 +3,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import NotificationDropdown from "@/components/dropdown-button/NotificationDropdown";
+import "@/app/globals.css";
 import { usePathname } from "next/navigation";
 import Sidebar, { SidebarItem } from "@/components/sidebar/Sidebar";
 import "react-datepicker/dist/react-datepicker.css";
@@ -136,7 +137,7 @@ export default function DashboardLayout({
             <NavbarAdmin
               isSidebarOpen={isSidebarOpen}
               currentPage={currentPage}
-              profileName="Pradana"
+              profileName="admin"
               profileImage="https://static-00.iconduck.com/assets.00/profile-circle-icon-2048x2048-cqe5466q.png"
               onToggleSidebar={toggleSidebar}
               onLogout={handleLogout}

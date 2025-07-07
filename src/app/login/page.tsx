@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { baseUrl } from "../config/config";
+import "@/app/globals.css";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,8 +29,26 @@ export default function LoginPage() {
       toast.success("Login berhasil!");
       router.push("/admin/dashboard");
     } catch (error: any) {
-      console.error(error);
-      toast.error("Login gagal. Username atau password salah.");
+      console.error("Login error:", error);
+
+      if (error.response) {
+        // Error dari server (4xx / 5xx)
+        const status = error.response.status;
+
+        if (status === 401) {
+          toast.error("Login gagal. Username atau password salah.");
+        } else if (status >= 500) {
+          toast.error("Terjadi kesalahan pada server. Coba lagi nanti.");
+        } else {
+          toast.error("Gagal login. Cek kembali data Anda.");
+        }
+      } else if (error.request) {
+        // Gagal terhubung ke server (network error)
+        toast.error("Tidak dapat terhubung ke server. Periksa koneksi Anda.");
+      } else {
+        // Error lainnya
+        toast.error("Terjadi kesalahan. Silakan coba lagi.");
+      }
     } finally {
       setLoading(false);
     }
