@@ -3,7 +3,6 @@
 import GenosModal from "@/components/modal/GenosModal";
 import { RefObject } from "react";
 import GenosTextfield from "../GenosTextfield";
-import GenosTextarea from "../GenosTextArea";
 import GenosSearchSelect from "../GenosSearchSelect";
 
 type EditCategorytModalProps = {

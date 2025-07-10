@@ -3,11 +3,8 @@
 import GenosDatepicker from "@/components/form/GenosDatepicker";
 import GenosTextfield from "@/components/form/GenosTextfield";
 import GenosPanel from "@/components/panel/GenosPanel";
-import AdjustmentTableIn from "@/components/table/adjustment/AdjustmentTableIn";
 import AdjustmentTableInReport from "@/components/table/adjustment/AdjustmentTableInReport";
-import AdjustmentTableOut from "@/components/table/adjustment/AdjustmentTableOut";
 import AdjustmentTableOutReport from "@/components/table/adjustment/AdjustmentTableOutReport";
-import CategoryTable from "@/components/table/category/CategoryTable";
 import React, { useState } from "react";
 
 export default function Stock_Adjustment_HistoryPage() {

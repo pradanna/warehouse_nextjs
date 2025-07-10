@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import GenosTable from "@/components/table/GenosTable";
 import GenosTextfield from "@/components/form/GenosTextfield";
-import GenosModal from "@/components/modal/GenosModal";
-import { baseUrl, getToken } from "@/app/config/config";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-toastify";
 import {
   createUnit,

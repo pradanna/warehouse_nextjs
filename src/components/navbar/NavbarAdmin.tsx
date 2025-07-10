@@ -1,10 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import {
-  BellIcon,
-  ArrowRightIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 
 type NavbarProps = {

@@ -14,7 +14,7 @@ export const generateSalePDF = (data: any) => {
   // Judul di samping logo
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.text("KOPI JODI", 32, 16); // posisi di kanan logo
+  doc.text(" JODI", 32, 16); // posisi di kanan logo
 
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
@@ -43,26 +43,33 @@ export const generateSalePDF = (data: any) => {
   const rightX = pageWidth - 12;
 
   let y = 40; // posisi Y awal
-  const lineSpacing = 4; // jarak antar baris yang lebih kecil
+  const lineSpacing = 6; // jarak antar baris yang lebih kecil
 
   // Baris 1
-  doc.text(`Nomor Referensi: ${data.data.reference_number}`, leftX, y);
-  doc.text(`Outlet: ${data.data.outlet.name}`, rightX, y, {
+  doc.text(`SHIP TO: `, leftX, y);
+  doc.text(`Invoice No : : ${data.data.reference_number}`, rightX, y, {
     align: "right",
   });
+
+  // doc.text(`Nomor Referensi: ${data.data.reference_number}`, leftX, y);
+  // doc.text(`Outlet: ${data.data.outlet.name}`, rightX, y, {
+  //   align: "right",
+  // });
 
   y += lineSpacing;
 
   // Baris 2
-  doc.text(`Tanggal Penjualan: ${data.data.date}`, leftX, y);
-  doc.text(`Jenis Pembayaran: ${data.data.payment_type}`, rightX, y, {
+  doc.setLineWidth(0.5); // ketebalan garis
+  doc.line(leftX, y - 4, leftX + 100, y - 4);
+  doc.text(`${data.data.outlet.name}`, leftX, y);
+  doc.text(`Tanggal Penjualan: ${data.data.date}`, rightX, y, {
     align: "right",
   });
 
   y += lineSpacing;
 
   // Baris 3
-  doc.text(`Deskripsi: ${data.data.description}`, leftX, y);
+  doc.text(`${data.data.outlet.address}`, leftX, y);
   let statusText = "";
   let statusColor: [number, number, number] = [0, 0, 0]; // default hitam
 
@@ -102,7 +109,7 @@ export const generateSalePDF = (data: any) => {
     headStyles: { fillColor: [245, 245, 245], textColor: 20 },
   });
 
-  let finalY = (doc as any).lastAutoTable.finalY || 90;
+  const finalY = (doc as any).lastAutoTable.finalY || 90;
 
   // --- Riwayat Pembayaran (KIRI)
   doc.text("Riwayat Pembayaran", leftX, finalY + 10);

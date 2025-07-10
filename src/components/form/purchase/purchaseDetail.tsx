@@ -57,7 +57,7 @@ export default function PurchaseDetailModal({
     const payload = {
       purchase_id: purchaseId,
       date: today,
-      description: "Installments / Pembayaran Cicilan",
+      description: "Installments / Pembayaran Tempo",
       payment_type: paymentMetode,
       amount: payAmount,
     };

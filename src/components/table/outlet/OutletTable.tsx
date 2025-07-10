@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import axios from "axios";
 import GenosTable from "@/components/table/GenosTable";
 import GenosTextfield from "@/components/form/GenosTextfield";
-import GenosModal from "@/components/modal/GenosModal";
-import { baseUrl, getToken } from "@/app/config/config";
 import { toast } from "react-toastify";
 import {
   createOutlet,

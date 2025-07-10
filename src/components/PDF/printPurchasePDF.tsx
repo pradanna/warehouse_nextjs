@@ -14,7 +14,7 @@ export const generatePurchasePDF = (data: any) => {
   // Judul di samping logo
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.text("KOPI JODI", 32, 16); // posisi di kanan logo
+  doc.text(" JODI", 32, 16); // posisi di kanan logo
 
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");
@@ -102,7 +102,7 @@ export const generatePurchasePDF = (data: any) => {
     headStyles: { fillColor: [245, 245, 245], textColor: 20 },
   });
 
-  let finalY = (doc as any).lastAutoTable.finalY || 90;
+  const finalY = (doc as any).lastAutoTable.finalY || 90;
 
   // --- Riwayat Pembayaran (KIRI)
   doc.text("Riwayat Pembayaran", leftX, finalY + 10);

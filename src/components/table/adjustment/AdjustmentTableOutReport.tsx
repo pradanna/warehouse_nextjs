@@ -2,17 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import GenosTable from "../GenosTable";
 import { toast } from "react-toastify";
 import GenosModal from "@/components/modal/GenosModal";
-import { addOneDay, formatTanggalIndo } from "@/lib/helper";
-import GenosDropdown from "@/components/button/GenosDropdown";
-import { PrinterIcon } from "@heroicons/react/24/outline";
+import { addOneDay } from "@/lib/helper";
 
-import {
-  createAdjustment,
-  getAdjustment,
-  getAdjustmentById,
-  getAdjustmentOut,
-} from "@/lib/api/adjustmentApi";
-import GenosSelect from "@/components/form/GenosSelect";
+import { getAdjustmentOut } from "@/lib/api/adjustmentApi";
 import GenosTextfield from "@/components/form/GenosTextfield";
 import GenosSearchSelect from "@/components/form/GenosSearchSelect";
 import { getInventory } from "@/lib/api/inventoryApi";

@@ -1,37 +1,20 @@
 "use client";
 import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import NotificationDropdown from "@/components/dropdown-button/NotificationDropdown";
 import "@/app/globals.css";
 import { usePathname } from "next/navigation";
 import Sidebar, { SidebarItem } from "@/components/sidebar/Sidebar";
 import "react-datepicker/dist/react-datepicker.css";
 import {
-  BellIcon,
   ChartPieIcon,
-  ArchiveBoxIcon,
   FolderIcon,
-  ArrowsRightLeftIcon,
-  ShoppingBagIcon,
-  ArrowLeftIcon,
   CreditCardIcon,
-  DocumentIcon,
-  BanknotesIcon,
-  ReceiptRefundIcon,
   CurrencyDollarIcon,
-  UserGroupIcon,
-  XMarkIcon,
-  ChevronRightIcon,
-  ArrowRightIcon,
   PresentationChartBarIcon,
   ShoppingCartIcon,
   AdjustmentsHorizontalIcon,
   ChartBarSquareIcon,
 } from "@heroicons/react/24/outline";
-import ProfileDropdown from "@/components/dropdown-button/ProfileDropdown";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import router from "next/router";
 import NavbarAdmin from "@/components/navbar/NavbarAdmin";
 import AuthGuard from "@/components/AuthGuard";
 import { useRouter } from "next/navigation";

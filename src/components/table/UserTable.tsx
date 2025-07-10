@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import GenosTable from "./GenosTable";
-import GenosPagination from "../pagination/GenosPagination";
 import GenosTextfield from "../form/GenosTextfield";
 import GenosSelect from "../form/GenosSelect";
 import GenosModal from "../modal/GenosModal";
@@ -174,6 +173,7 @@ const UserTable = () => {
             />
 
             <GenosTextfield
+              id="search-user"
               label="Search by Name"
               className="w-"
               type="text"
@@ -183,6 +183,7 @@ const UserTable = () => {
             />
 
             <GenosTextfield
+              id="min-age"
               label="Minimum Age"
               type="number"
               placeholder="Min Age"
@@ -207,12 +208,10 @@ const UserTable = () => {
           onClose={handleClose}
           onSubmit={handleSubmit}
           show
-          children={
-            <div>
-              <p>test</p>
-            </div>
-          }
         >
+          <div>
+            <p>test</p>
+          </div>
           {/* Form atau konten modal */}
         </GenosModal>
       )}

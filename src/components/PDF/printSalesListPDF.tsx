@@ -9,7 +9,7 @@ export const generateSalesListPDF = (data: any[]) => {
   doc.addImage("/images/local/logojodi.png", "PNG", 10, 10, 18, 18);
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.text("KOPI JODI", 32, 16);
+  doc.text(" JODI", 32, 16);
 
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");

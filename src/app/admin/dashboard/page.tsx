@@ -1,15 +1,6 @@
 "use client";
-import { useState } from "react";
-import {
-  BanknotesIcon,
-  MagnifyingGlassIcon,
-  ShoppingCartIcon,
-} from "@heroicons/react/24/outline";
-import GenosButton from "@/components/button/GenosButton";
+import { BanknotesIcon, ShoppingCartIcon } from "@heroicons/react/24/outline";
 import GenosPanel from "@/components/panel/GenosPanel";
-import GenosTable from "@/components/table/GenosTable";
-import GenosTextfield from "@/components/form/GenosTextfield";
-import UserTable from "@/components/table/UserTable";
 import CardDashboard from "@/components/card/CardDashboard";
 import { ArchiveBoxIcon } from "@heroicons/react/24/outline";
 import HutangTable from "@/components/table/dashboard/hutangTable";

@@ -1,7 +1,6 @@
 "use client";
 
 import GenosPanel from "@/components/panel/GenosPanel";
-import CategoryTable from "@/components/table/category/CategoryTable";
 import PurchaseTableReport from "@/components/table/purchase/PurchaseTableReport";
 import React from "react";
 

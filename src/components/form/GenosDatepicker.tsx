@@ -68,5 +68,5 @@ const GenosDatepicker = forwardRef<HTMLInputElement, Props>(
     );
   }
 );
-
+GenosDatepicker.displayName = "GenosDatepicker";
 export default GenosDatepicker;

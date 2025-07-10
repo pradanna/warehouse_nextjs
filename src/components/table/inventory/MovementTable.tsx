@@ -1,28 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import axios from "axios";
+import { useEffect, useMemo, useState } from "react";
 import GenosTable from "@/components/table/GenosTable";
-import GenosTextfield from "@/components/form/GenosTextfield";
-import GenosModal from "@/components/modal/GenosModal";
-import GenosSelect from "@/components/form/GenosSelect";
-import { baseUrl, getToken } from "@/app/config/config";
 import { toast } from "react-toastify";
-import GenosSearchSelect from "../../form/GenosSearchSelect";
-import {
-  createInventory,
-  deleteInventory,
-  getInventory,
-  getInventoryById,
-  updateInventory,
-} from "@/lib/api/inventoryApi";
-import { getItems } from "@/lib/api/itemApi";
-import { getUnit } from "@/lib/api/unitApi";
-import { getOutlet } from "@/lib/api/outletApi";
-import AddInventoryModal from "@/components/form/inventory/AddInventoryModal";
-import EditInventoryModal from "@/components/form/inventory/EditInventoryModal";
 import GenosDropdown from "@/components/button/GenosDropdown";
 import { PrinterIcon } from "@heroicons/react/24/outline";
-import { generatePurchasePDF } from "@/components/PDF/printPurchasePDF";
-import { generatePurchaseExcel } from "@/components/excel/printPurchaseExcel";
 import { generateCurrentStockPDF } from "@/components/PDF/printCurrentStock";
 import { generateCurrentStockExcel } from "@/components/excel/printCurrentStockExcel";
 import { getMovements } from "@/lib/api/movementApi";

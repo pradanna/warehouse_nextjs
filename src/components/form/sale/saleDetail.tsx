@@ -49,12 +49,10 @@ const SaleDetailModal = ({
     const payload = {
       sale_id: saleId,
       date: today,
-      description: "Installments / Pembayaran Cicilan",
+      description: "Installments / Pembayaran Tempo",
       payment_type: paymentMetode,
       amount: payAmount,
     };
-
-    console.log("Payload sebelum dikirim:", payload);
 
     try {
       const response = await createSalePayment(payload);

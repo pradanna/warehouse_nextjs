@@ -3,7 +3,6 @@
 import GenosDatepicker from "@/components/form/GenosDatepicker";
 import GenosTextfield from "@/components/form/GenosTextfield";
 import GenosPanel from "@/components/panel/GenosPanel";
-import AdjustmentTable from "@/components/table/adjustment/AdjustmentTable";
 import AdjustmentTableIn from "@/components/table/adjustment/AdjustmentTableIn";
 import AdjustmentTableOut from "@/components/table/adjustment/AdjustmentTableOut";
 import { useState } from "react";

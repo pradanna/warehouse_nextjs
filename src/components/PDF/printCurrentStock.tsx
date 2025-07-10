@@ -10,7 +10,7 @@ export const generateCurrentStockPDF = (data: any[]) => {
 
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.text("KOPI JODI", 32, 16);
+  doc.text(" JODI", 32, 16);
 
   doc.setFontSize(11);
   doc.setFont("helvetica", "normal");

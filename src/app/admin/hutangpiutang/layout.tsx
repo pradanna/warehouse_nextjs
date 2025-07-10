@@ -1,12 +1,9 @@
 "use client";
 import {
-  BanknotesIcon,
   CurrencyDollarIcon,
-  HandRaisedIcon,
   ReceiptRefundIcon,
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 const tabs = [
@@ -37,7 +34,7 @@ export default function HutangPiutangTabs({
 
   return (
     <div>
-      <div className="flex gap-4  p-2 rounded-xl">
+      <div className="flex gap-4   rounded-xl ">
         {tabs.map((tab) => {
           const isActive = active === tab.href;
           return (
@@ -45,7 +42,7 @@ export default function HutangPiutangTabs({
               key={tab.name}
               onClick={() => router.push(tab.href)}
               className={clsx(
-                "flex items-center gap-2 px-6 py-3 rounded-md transition-all font-semibold",
+                "flex items-center gap-2 px-6 py-3 rounded-md transition-all font-semibold cursor-pointer",
                 isActive
                   ? "bg-primary-color text-white "
                   : "bg-white text-gray-600 hover:bg-primary/10 border border-gray-200"
@@ -57,7 +54,7 @@ export default function HutangPiutangTabs({
           );
         })}
       </div>
-      <div className="p-6 bg-light1 flex-1">{children}</div>
+      <div className=" bg-light1 flex-1">{children}</div>
     </div>
   );
 }

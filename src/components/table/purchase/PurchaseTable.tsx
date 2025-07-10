@@ -1,17 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import axios from "axios";
+import { useEffect, useMemo, useState } from "react";
 import GenosTable from "@/components/table/GenosTable";
 import GenosTextfield from "@/components/form/GenosTextfield";
 import GenosModal from "@/components/modal/GenosModal";
 import GenosSelect from "@/components/form/GenosSelect";
-import { baseUrl, getToken } from "@/app/config/config";
 import { toast } from "react-toastify";
 import GenosSearchSelect from "../../form/GenosSearchSelect";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import GenosButton from "../../button/GenosButton";
 import { getInventory } from "@/lib/api/inventoryApi";
 import {
-  createPurchasePayment,
   createPurchases,
   getPurchases,
   getPurchasesById,
@@ -28,12 +25,6 @@ import {
   getItemsFromLocal,
   setItemsToLocal,
 } from "@/lib/localstorage/purchaseCartDB";
-import { formatTanggalIndo } from "@/lib/helper";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import * as XLSX from "xlsx";
-import GenosDropdown from "@/components/button/GenosDropdown";
-import { PrinterIcon } from "@heroicons/react/24/outline";
 import { generatePurchasePDF } from "@/components/PDF/printPurchasePDF";
 import { generatePurchaseExcel } from "@/components/excel/printPurchaseExcel";
 import PurchaseDetailModal from "@/components/form/purchase/purchaseDetail";
@@ -445,7 +436,8 @@ const PurchaseTable = () => {
           onAddData={handleOpen}
           ACTION_BUTTON={{
             view: (row) => {
-              handleView(row.id), setPurchaseId(row.id);
+              handleView(row.id);
+              setPurchaseId(row.id);
             },
           }}
         />
@@ -529,7 +521,7 @@ const PurchaseTable = () => {
                 label="Jenis Pembayaran"
                 options={[
                   { label: "Bayar Lunas", value: "cash" },
-                  { label: "Cicilan", value: "installment" },
+                  { label: "Tempo", value: "installment" },
                 ]}
                 value={paymentType}
                 onChange={(e) => {

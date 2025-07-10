@@ -3,14 +3,10 @@ import {
   ArchiveBoxIcon,
   BanknotesIcon,
   CurrencyDollarIcon,
-  FolderIcon,
-  HandRaisedIcon,
   ReceiptRefundIcon,
   ShoppingBagIcon,
-  UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 const tabs = [
@@ -57,7 +53,7 @@ export default function ReportTabs({
 
   return (
     <div>
-      <div className="flex gap-4  p-2 rounded-xl">
+      <div className="flex gap-4  rounded-xl">
         {tabs.map((tab) => {
           const isActive = active === tab.href;
           return (
@@ -77,7 +73,7 @@ export default function ReportTabs({
           );
         })}
       </div>
-      <div className="p-6 bg-light1 flex-1">{children}</div>
+      <div className=" bg-light1 flex-1">{children}</div>
     </div>
   );
 }

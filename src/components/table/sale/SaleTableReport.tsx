@@ -1,29 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import axios from "axios";
+import { useEffect, useMemo, useState } from "react";
 import GenosTable from "@/components/table/GenosTable";
 import GenosTextfield from "@/components/form/GenosTextfield";
-import GenosModal from "@/components/modal/GenosModal";
-import GenosSelect from "@/components/form/GenosSelect";
-import { baseUrl, getToken } from "@/app/config/config";
 import { toast } from "react-toastify";
-import GenosSearchSelect from "@/components/form/GenosSearchSelect";
-import { PrinterIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import GenosButton from "@/components/button/GenosButton";
-import { createSalePayment, getSales, getSalesById } from "@/lib/api/saleApi";
-import { getInventory } from "@/lib/api/inventoryApi";
-import { getOutlet } from "@/lib/api/outletApi";
-import {
-  getOutletFromLocal,
-  saveOutletToLocal,
-} from "@/lib/localstorage/outletDB";
-import {
-  clearItemsFromLocal,
-  getItemsFromLocal,
-  SaleCartItem,
-  setItemsToLocal,
-} from "@/lib/localstorage/saleCartDB";
+import { PrinterIcon } from "@heroicons/react/24/outline";
+import { getSales, getSalesById } from "@/lib/api/saleApi";
 import GenosDropdown from "@/components/button/GenosDropdown";
-import { formatTanggalIndo } from "@/lib/helper";
 import { generateSalePDF } from "@/components/PDF/printSalePDF";
 import { generateSaleExcel } from "@/components/excel/printSaleExcel";
 import SaleDetailModal from "@/components/form/sale/saleDetail";

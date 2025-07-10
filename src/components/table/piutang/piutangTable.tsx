@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import GenosTable from "../GenosTable";
 import { toast } from "react-toastify";
-import GenosModal from "@/components/modal/GenosModal";
-import { formatTanggalIndo } from "@/lib/helper";
-import GenosDropdown from "@/components/button/GenosDropdown";
-import { PrinterIcon } from "@heroicons/react/24/outline";
 import { getSalesById } from "@/lib/api/saleApi";
 import { generateSalePDF } from "@/components/PDF/printSalePDF";
 import { generateSaleExcel } from "@/components/excel/printSaleExcel";
@@ -144,7 +140,8 @@ const PiutangTable = () => {
         loading={isLoadingTable}
         ACTION_BUTTON={{
           view: (row) => {
-            handleView(row.id), setSaleId(row.id);
+            handleView(row.id);
+            setSaleId(row.id);
           },
         }}
       ></GenosTable>

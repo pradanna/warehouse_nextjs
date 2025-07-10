@@ -115,4 +115,5 @@ const GenosTextfield = forwardRef<HTMLInputElement, Props>(
   }
 );
 
+GenosTextfield.displayName = "GenosTextfield";
 export default GenosTextfield;

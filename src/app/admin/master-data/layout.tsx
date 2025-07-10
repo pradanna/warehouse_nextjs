@@ -2,15 +2,11 @@
 import {
   ArchiveBoxIcon,
   BanknotesIcon,
-  CurrencyDollarIcon,
   FolderIcon,
-  HandRaisedIcon,
-  ReceiptRefundIcon,
   ShoppingBagIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 const tabs = [

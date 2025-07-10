@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import axios from "axios";
 import GenosTable from "@/components/table/GenosTable";
 import GenosTextfield from "@/components/form/GenosTextfield";
-import GenosModal from "@/components/modal/GenosModal";
-import GenosSelect from "@/components/form/GenosSelect"; // asumsikan ada komponen Select
-import { baseUrl, getToken } from "@/app/config/config";
 import { toast } from "react-toastify";
 import GenosSearchSelect from "../../form/GenosSearchSelect";
 import { getCategories } from "@/lib/api/categoryApi";

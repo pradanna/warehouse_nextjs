@@ -1,19 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import axios from "axios";
+import { useEffect, useMemo, useState } from "react";
 import GenosTable from "@/components/table/GenosTable";
 import GenosTextfield from "@/components/form/GenosTextfield";
-import GenosModal from "@/components/modal/GenosModal";
-import GenosSelect from "@/components/form/GenosSelect";
-import { baseUrl, getToken } from "@/app/config/config";
 import { toast } from "react-toastify";
-import GenosSearchSelect from "../../form/GenosSearchSelect";
-import {
-  createInventory,
-  deleteInventory,
-  getInventory,
-  getInventoryById,
-  updateInventory,
-} from "@/lib/api/inventoryApi";
+import { getInventory } from "@/lib/api/inventoryApi";
 import { getItems } from "@/lib/api/itemApi";
 import { getUnit } from "@/lib/api/unitApi";
 import GenosDropdown from "@/components/button/GenosDropdown";

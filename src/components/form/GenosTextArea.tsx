@@ -110,5 +110,5 @@ const GenosTextarea = forwardRef<HTMLTextAreaElement, Props>(
     );
   }
 );
-
+GenosTextarea.displayName = "GenosTextarea";
 export default GenosTextarea;

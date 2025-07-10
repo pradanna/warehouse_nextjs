@@ -2,10 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import GenosTable from "../GenosTable";
 import { getDebt, getDebtById } from "@/lib/api/hutangApi";
 import { toast } from "react-toastify";
-import GenosModal from "@/components/modal/GenosModal";
-import { formatTanggalIndo } from "@/lib/helper";
-import GenosDropdown from "@/components/button/GenosDropdown";
-import { PrinterIcon } from "@heroicons/react/24/outline";
 import { getPurchasesById } from "@/lib/api/purchaseApi";
 import { generatePurchasePDF } from "@/components/PDF/printPurchasePDF";
 import { generatePurchaseExcel } from "@/components/excel/printPurchaseExcel";
@@ -147,7 +143,8 @@ const HutangTable = () => {
         loading={isLoadingTable}
         ACTION_BUTTON={{
           view: (row) => {
-            handleView(row.id), setPurchaseId(row.id);
+            handleView(row.id);
+            setPurchaseId(row.id);
           },
         }}
       ></GenosTable>

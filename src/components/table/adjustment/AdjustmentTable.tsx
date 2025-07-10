@@ -153,10 +153,9 @@ const AdjustmentTable = () => {
       console.log("Response:", res);
 
       if (res !== undefined) {
-        toast.success("Penyesuaian berhasil disimpan"),
-          {
-            autoClose: 1000,
-          };
+        toast.success("Penyesuaian berhasil disimpan", {
+          autoClose: 1000,
+        });
       } else {
         toast.error("Penyesuaian gagal disimpan", {
           autoClose: 1000,
