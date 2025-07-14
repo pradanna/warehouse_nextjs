@@ -1,30 +1,17 @@
 import { baseUrl, getToken } from "@/app/config/config";
 import axios from "axios";
+import { apiGet } from "./apiClient";
 
-export async function getDebt(
+export const getDebt = (
   currentPage: number,
   limit: number,
-  supplier_id: string,
-  status: any
-) {
-  try {
-    const res = await axios.get(`${baseUrl}/debt`, {
-      params: {
-        page: currentPage,
-        per_page: limit,
-        supplier_id: supplier_id,
-        status: status,
-      },
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
-
-    return res.data;
-  } catch (err) {
-    console.error("Gagal mengambil data inventory:", err);
-  }
-}
+  param: { supplier_id: string; status: any }
+) =>
+  apiGet("/debt", {
+    page: currentPage,
+    per_page: limit,
+    param,
+  });
 
 export async function createDebt(payload: any) {
   try {
