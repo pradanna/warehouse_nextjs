@@ -5,7 +5,9 @@ import { apiGet } from "./apiClient";
 export const getDebt = (
   currentPage: number,
   limit: number,
-  param: { supplier_id: string; status: any }
+  param,
+  supplier_id,
+  status
 ) =>
   apiGet("/debt", {
     page: currentPage,

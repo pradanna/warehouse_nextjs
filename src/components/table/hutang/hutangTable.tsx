@@ -69,7 +69,13 @@ const HutangTable = () => {
     setIsLoadingTable(true);
 
     try {
-      const res = await getDebt(currentPage, limit, supplier_id, status);
+      const res = await getDebt(
+        currentPage,
+        limit,
+        { supplier_id: "string", status: "any" },
+        supplier_id,
+        status
+      );
       setDebtData(res.data);
       setTABLE_ROWS(res.data);
       setTotalItems(res.total);

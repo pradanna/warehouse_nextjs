@@ -1,18 +1,30 @@
 import { baseUrl, getToken } from "@/app/config/config";
 import axios from "axios";
-import { apiGet } from "./apiClient";
 
-// GET inventory adjustment
-export const getAdjustment = (
+export async function getAdjustment(
   currentPage: number,
   limit: number,
-  param: { param: string; type: any }
-) =>
-  apiGet("/inventory-adjustment", {
-    page: currentPage,
-    per_page: limit,
-    param,
-  });
+  param: string,
+  type: any
+) {
+  try {
+    const res = await axios.get(`${baseUrl}/inventory-adjustment`, {
+      params: {
+        page: currentPage,
+        per_page: limit,
+        param: param,
+        type: type,
+      },
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+
+    return res.data;
+  } catch (err) {
+    console.error("Gagal mengambil data inventory:", err);
+  }
+}
 
 export async function getAdjustmentIn(
   currentPage: number,
