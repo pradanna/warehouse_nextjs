@@ -189,6 +189,7 @@ const InventoryTable = () => {
           const outletId = priceObj.outlet?.id;
           if (outletId) {
             outletPricesObj[outletId] = priceObj.price;
+            console.log("Price " + priceObj.price);
           } else {
             console.warn("Ditemukan harga tanpa outlet id:", priceObj);
           }
@@ -241,7 +242,7 @@ const InventoryTable = () => {
 
   const handleSubmitEdit = async () => {
     try {
-      const pricesArray = Object.entries(editOutletPrices).map(
+      const pricesArray = Object.entries(outletPrices).map(
         ([outlet_id, price]) => ({
           outlet_id,
           price,
@@ -380,6 +381,7 @@ const InventoryTable = () => {
           setOutletPrices={setOutletPrices}
           onClose={handleEditClose}
           onSubmit={handleSubmitEdit}
+          outletPriceObj={editOutletPrices}
         />
       )}
     </>

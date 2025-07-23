@@ -1,5 +1,6 @@
 import { baseUrl, getToken } from "@/app/config/config";
 import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
 export async function getCategories(
   page: number,
@@ -7,7 +8,7 @@ export async function getCategories(
   search: string
 ) {
   try {
-    const response = await axios.get(
+    const response = await axiosInstance.get(
       `${baseUrl}/category?param=${search}&page=${page}&per_page=${limit}`,
       {
         headers: {
@@ -24,7 +25,7 @@ export async function getCategories(
 
 export async function createCategory(addName: string, addDescription: string) {
   try {
-    const response = await axios.post(
+    const response = await axiosInstance.post(
       baseUrl + "/category",
       {
         name: addName,
@@ -62,7 +63,7 @@ export async function editCategory(
   editDescription: string
 ) {
   try {
-    const response = await axios.put(
+    const response = await axiosInstance.put(
       `${baseUrl}/category/${editId}`,
       {
         name: editName,
@@ -82,7 +83,7 @@ export async function editCategory(
 }
 export async function deleteCategory(id: string) {
   try {
-    const response = await axios.delete(`${baseUrl}/category/${id}`, {
+    const response = await axiosInstance.delete(`${baseUrl}/category/${id}`, {
       headers: {
         Authorization: `Bearer ${getToken()}`,
       },

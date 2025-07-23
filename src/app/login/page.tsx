@@ -24,8 +24,11 @@ export default function LoginPage() {
       });
 
       const { access_token } = response.data.data;
+      const { refresh_token } = response.data.data;
 
       localStorage.setItem("access_token", access_token);
+      localStorage.setItem("refresh_token", refresh_token);
+
       toast.success("Login berhasil!");
       router.push("/admin/dashboard");
     } catch (error: any) {

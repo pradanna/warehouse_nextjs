@@ -1,6 +1,7 @@
 import { baseUrl, getToken } from "@/app/config/config";
 import axios from "axios";
 import { apiGet } from "./apiClient";
+import axiosInstance from "./axiosInstance";
 
 export const getDebt = (
   currentPage: number,
@@ -17,7 +18,7 @@ export const getDebt = (
 
 export async function createDebt(payload: any) {
   try {
-    const response = await axios.post(`${baseUrl}/debt`, payload, {
+    const response = await axiosInstance.post(`${baseUrl}/debt`, payload, {
       headers: { Authorization: `Bearer ${getToken()}` },
     });
     return response.data;
@@ -32,7 +33,7 @@ export async function deleteDebt() {}
 
 export async function getDebtById(id: any) {
   try {
-    const response = await axios.get(`${baseUrl}/debt/${id}`, {
+    const response = await axiosInstance.get(`${baseUrl}/debt/${id}`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     });
     return response.data;

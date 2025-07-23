@@ -1,5 +1,11 @@
-import { baseUrl, getToken } from "@/app/config/config";
+import {
+  baseUrl,
+  getRefreshToken,
+  getToken,
+  setToken,
+} from "@/app/config/config";
 import axios from "axios";
+import { refreshToken } from "./auth";
 
 export async function getAdjustment(
   currentPage: number,
@@ -21,8 +27,38 @@ export async function getAdjustment(
     });
 
     return res.data;
-  } catch (err) {
-    console.error("Gagal mengambil data inventory:", err);
+  } catch (err: any) {
+    if (err.response?.status === 401) {
+      try {
+        // Refresh token
+        const refreshRes = await refreshToken(getRefreshToken());
+        const newAccessToken = refreshRes.data.access_token;
+
+        // Simpan token baru
+        setToken(newAccessToken);
+
+        // Coba ulangi request
+        const retryRes = await axios.get(`${baseUrl}/inventory-adjustment`, {
+          params: {
+            page: currentPage,
+            per_page: limit,
+            param: param,
+            type: type,
+          },
+          headers: {
+            Authorization: `Bearer ${newAccessToken}`,
+          },
+        });
+
+        return retryRes.data;
+      } catch (refreshErr) {
+        console.error("Gagal refresh token saat getAdjustment:", refreshErr);
+        throw refreshErr;
+      }
+    } else {
+      console.error("Gagal mengambil data inventory:", err);
+      throw err;
+    }
   }
 }
 
@@ -38,9 +74,9 @@ export async function getAdjustmentIn(
       params: {
         page: currentPage,
         per_page: limit,
-        param: param,
-        date_start: date_start,
-        date_end: date_end,
+        param,
+        date_start,
+        date_end,
         type: "in",
       },
       headers: {
@@ -49,8 +85,40 @@ export async function getAdjustmentIn(
     });
 
     return res.data;
-  } catch (err) {
-    console.error("Gagal mengambil data inventory:", err);
+  } catch (err: any) {
+    if (err.response?.status === 401) {
+      try {
+        // Refresh token
+        const refreshRes = await refreshToken(getRefreshToken());
+        const newAccessToken = refreshRes.data.access_token;
+
+        // Simpan token baru
+        setToken(newAccessToken);
+
+        // Retry request
+        const retryRes = await axios.get(`${baseUrl}/inventory-adjustment`, {
+          params: {
+            page: currentPage,
+            per_page: limit,
+            param,
+            date_start,
+            date_end,
+            type: "in",
+          },
+          headers: {
+            Authorization: `Bearer ${newAccessToken}`,
+          },
+        });
+
+        return retryRes.data;
+      } catch (refreshErr) {
+        console.error("Gagal refresh token saat getAdjustmentIn:", refreshErr);
+        throw refreshErr;
+      }
+    } else {
+      console.error("Gagal mengambil data inventory:", err);
+      throw err;
+    }
   }
 }
 
@@ -66,9 +134,9 @@ export async function getAdjustmentOut(
       params: {
         page: currentPage,
         per_page: limit,
-        param: param,
-        date_start: date_start,
-        date_end: date_end,
+        param,
+        date_start,
+        date_end,
         type: "out",
       },
       headers: {
@@ -77,8 +145,40 @@ export async function getAdjustmentOut(
     });
 
     return res.data;
-  } catch (err) {
-    console.error("Gagal mengambil data inventory:", err);
+  } catch (err: any) {
+    if (err.response?.status === 401) {
+      try {
+        // Refresh token
+        const refreshRes = await refreshToken(getRefreshToken());
+        const newAccessToken = refreshRes.data.access_token;
+
+        // Simpan token baru
+        setToken(newAccessToken);
+
+        // Retry request
+        const retryRes = await axios.get(`${baseUrl}/inventory-adjustment`, {
+          params: {
+            page: currentPage,
+            per_page: limit,
+            param,
+            date_start,
+            date_end,
+            type: "out",
+          },
+          headers: {
+            Authorization: `Bearer ${newAccessToken}`,
+          },
+        });
+
+        return retryRes.data;
+      } catch (refreshErr) {
+        console.error("Gagal refresh token saat getAdjustmentOut:", refreshErr);
+        throw refreshErr;
+      }
+    } else {
+      console.error("Gagal mengambil data inventory:", err);
+      throw err;
+    }
   }
 }
 
@@ -91,9 +191,36 @@ export async function createAdjustment(payload: any) {
         headers: { Authorization: `Bearer ${getToken()}` },
       }
     );
+
     return response.data;
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      try {
+        // Refresh token
+        const refreshRes = await refreshToken(getRefreshToken());
+        const newAccessToken = refreshRes.data.access_token;
+
+        // Simpan token baru
+        setToken(newAccessToken);
+
+        // Retry request
+        const retryRes = await axios.post(
+          `${baseUrl}/inventory-adjustment`,
+          payload,
+          {
+            headers: { Authorization: `Bearer ${newAccessToken}` },
+          }
+        );
+
+        return retryRes.data;
+      } catch (refreshErr) {
+        console.error("Gagal refresh token saat createAdjustment:", refreshErr);
+        throw refreshErr;
+      }
+    } else {
+      console.error("Gagal membuat adjustment:", error);
+      throw error;
+    }
   }
 }
 
@@ -107,7 +234,31 @@ export async function getAdjustmentById(id: any) {
       headers: { Authorization: `Bearer ${getToken()}` },
     });
     return response.data;
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    if (error.response?.status === 401) {
+      try {
+        const refreshRes = await refreshToken(getRefreshToken());
+        const newAccessToken = refreshRes.data.access_token;
+        setToken(newAccessToken);
+
+        // Retry
+        const retryRes = await axios.get(
+          `${baseUrl}/inventory-adjustment/${id}`,
+          {
+            headers: { Authorization: `Bearer ${newAccessToken}` },
+          }
+        );
+        return retryRes.data;
+      } catch (refreshErr) {
+        console.error(
+          "Gagal refresh token saat getAdjustmentById:",
+          refreshErr
+        );
+        throw refreshErr;
+      }
+    } else {
+      console.error("Gagal mengambil data adjustment:", error);
+      throw error;
+    }
   }
 }

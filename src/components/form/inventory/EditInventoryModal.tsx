@@ -1,7 +1,7 @@
 "use client";
 
 import GenosModal from "@/components/modal/GenosModal";
-import { RefObject } from "react";
+import { RefObject, useEffect, useState } from "react";
 import GenosTextfield from "../GenosTextfield";
 import GenosTextarea from "../GenosTextArea";
 import GenosSearchSelect from "../GenosSearchSelect";
@@ -32,6 +32,8 @@ type EditInventorytModalProps = {
   setEditMaxStock: (maxStock: number) => void;
   outletPrices: { [outletId: string]: number };
   setOutletPrices: (outletPrices: { [outletId: string]: number }) => void;
+  outletPriceObj: { [outletId: string]: number };
+
   onClose: () => void;
   onSubmit: () => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
@@ -58,10 +60,19 @@ export default function EditInventoryModal({
   setEditMaxStock,
   outletPrices,
   setOutletPrices,
+  outletPriceObj,
   onClose,
   onSubmit,
+
   onKeyDown,
 }: EditInventorytModalProps) {
+  console.log("outletPriceObj =", JSON.stringify(outletPriceObj, null, 2));
+  const [localPrices, setLocalPrices] = useState<{ [key: string]: number }>({});
+
+  useEffect(() => {
+    setLocalPrices(outletPriceObj);
+  }, [outletPriceObj]);
+
   return (
     <GenosModal
       title="Edit Inventory"
@@ -149,18 +160,18 @@ export default function EditInventoryModal({
                         {outlet.address}
                       </div>
                       <GenosTextfield
-                        id={(
-                          "edit-harga-" + outletPrices[outlet.id] || ""
-                        ).toString()}
+                        id={`edit-harga-${outlet.id}`}
                         label="Harga"
                         type="number"
-                        value={outletPrices[outlet.id]?.toString() || ""}
+                        value={localPrices[outlet.id]?.toString() || ""}
                         onChange={(e) => {
-                          const updated = {
-                            ...outletPrices,
+                          const newPrices = {
+                            ...localPrices,
                             [outlet.id]: Number(e.target.value),
                           };
-                          setOutletPrices(updated);
+
+                          setLocalPrices(newPrices);
+                          setOutletPrices(newPrices);
                         }}
                       />
                     </div>

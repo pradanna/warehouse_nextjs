@@ -1,9 +1,10 @@
 import { baseUrl, getToken } from "@/app/config/config";
 import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
 export async function getUnit(search: string, page: number, limit: number) {
   try {
-    const response = await axios.get(
+    const response = await axiosInstance.get(
       `${baseUrl}/unit?param=${search}&page=${page}&per_page=${limit}`,
       {
         headers: {
@@ -21,7 +22,7 @@ export async function getUnit(search: string, page: number, limit: number) {
 
 export async function createUnit(unitData: any) {
   try {
-    const response = await axios.post(baseUrl + "/unit", unitData, {
+    const response = await axiosInstance.post(baseUrl + "/unit", unitData, {
       headers: {
         Authorization: `Bearer ${getToken()}`,
       },
@@ -36,7 +37,7 @@ export async function createUnit(unitData: any) {
 
 export async function updateUnit(unitId: string, unitData: any) {
   try {
-    const response = await axios.put(
+    const response = await axiosInstance.put(
       baseUrl + "/unit/" + unitId,
       { name: unitData },
       {
@@ -54,7 +55,7 @@ export async function updateUnit(unitId: string, unitData: any) {
 
 export async function deleteUnit(unitId: string) {
   try {
-    const response = await axios.delete(`${baseUrl}/unit/${unitId}`, {
+    const response = await axiosInstance.delete(`${baseUrl}/unit/${unitId}`, {
       headers: {
         Authorization: `Bearer ${getToken()}`,
       },
@@ -67,7 +68,7 @@ export async function deleteUnit(unitId: string) {
 
 export async function getUnitbyId(unitId: string) {
   try {
-    const response = await axios.get(`${baseUrl}/unit/${unitId}`, {
+    const response = await axiosInstance.get(`${baseUrl}/unit/${unitId}`, {
       headers: {
         Authorization: `Bearer ${getToken()}`,
       },

@@ -1,9 +1,10 @@
 import { baseUrl, getToken } from "@/app/config/config";
 import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
 export async function getItems(search: string, page: number, limit: number) {
   try {
-    const res = await axios.get(
+    const res = await axiosInstance.get(
       `${baseUrl}/item?param=${search}&page=${page}&per_page=${limit}`,
       {
         headers: { Authorization: `Bearer ${getToken()}` },
@@ -22,7 +23,7 @@ export async function createItem(
   addDescription: string
 ) {
   try {
-    const res = await axios.post(
+    const res = await axiosInstance.post(
       `${baseUrl}/item`,
       {
         category_id: addCategoryId,
@@ -45,7 +46,7 @@ export async function updateItem(
   editDescription: string
 ) {
   try {
-    const res = await axios.put(
+    const res = await axiosInstance.put(
       `${baseUrl}/item/${editId}`,
       {
         category_id: editCategoryId,
@@ -63,7 +64,7 @@ export async function updateItem(
 
 export async function deleteItem(id: string | number) {
   try {
-    await axios.delete(`${baseUrl}/item/${id}`, {
+    await axiosInstance.delete(`${baseUrl}/item/${id}`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     });
   } catch (err) {
@@ -73,7 +74,7 @@ export async function deleteItem(id: string | number) {
 
 export async function getItemById(id: string | number) {
   try {
-    const res = await axios.get(`${baseUrl}/item/${id}`, {
+    const res = await axiosInstance.get(`${baseUrl}/item/${id}`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     });
     const data = res.data.data;

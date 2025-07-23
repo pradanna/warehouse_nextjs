@@ -1,5 +1,6 @@
 import { baseUrl, getToken } from "@/app/config/config";
 import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
 export async function createOutlet(
   addName: string,
@@ -7,7 +8,7 @@ export async function createOutlet(
   addContact: string
 ) {
   try {
-    const response = await axios.post(
+    const response = await axiosInstance.post(
       baseUrl + "/outlet",
       {
         name: addName,
@@ -31,7 +32,7 @@ export async function createOutlet(
 
 export async function getOutlet(search: string, page: number, limit: number) {
   try {
-    const response = await axios.get(
+    const response = await axiosInstance.get(
       `${baseUrl}/outlet?param=${search}&page=${page}&per_page=${limit}`,
       {
         headers: {
@@ -49,11 +50,14 @@ export async function getOutlet(search: string, page: number, limit: number) {
 
 export async function deleteOutlet(outletId: string) {
   try {
-    const response = await axios.delete(`${baseUrl}/outlet/${outletId}`, {
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
+    const response = await axiosInstance.delete(
+      `${baseUrl}/outlet/${outletId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      }
+    );
 
     return response.data;
   } catch (err) {
@@ -63,7 +67,7 @@ export async function deleteOutlet(outletId: string) {
 
 export async function getOutletById(outletId: string) {
   try {
-    const response = await axios.get(`${baseUrl}/outlet/${outletId}`, {
+    const response = await axiosInstance.get(`${baseUrl}/outlet/${outletId}`, {
       headers: {
         Authorization: `Bearer ${getToken()}`,
       },
@@ -81,7 +85,7 @@ export async function updateOutlet(
   editContact: string
 ) {
   try {
-    const response = await axios.put(
+    const response = await axiosInstance.put(
       `${baseUrl}/outlet/${editId}`,
       {
         name: editName,

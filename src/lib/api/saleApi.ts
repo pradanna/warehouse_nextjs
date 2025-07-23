@@ -1,5 +1,6 @@
 import { baseUrl, getToken } from "@/app/config/config";
 import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
 export async function getSales(
   currentPage: number,
@@ -8,7 +9,7 @@ export async function getSales(
   selectedSupplier: any
 ) {
   try {
-    const res = await axios.get(`${baseUrl}/sale`, {
+    const res = await axiosInstance.get(`${baseUrl}/sale`, {
       params: {
         page: currentPage,
         per_page: limit,
@@ -28,7 +29,7 @@ export async function getSales(
 
 export async function createSales(payload: any) {
   try {
-    const response = await axios.post(`${baseUrl}/sale`, payload, {
+    const response = await axiosInstance.post(`${baseUrl}/sale`, payload, {
       headers: { Authorization: `Bearer ${getToken()}` },
     });
     return response.data;
@@ -38,9 +39,13 @@ export async function createSales(payload: any) {
 }
 export async function createSalePayment(payload: any) {
   try {
-    const response = await axios.post(`${baseUrl}/sale-payment`, payload, {
-      headers: { Authorization: `Bearer ${getToken()}` },
-    });
+    const response = await axiosInstance.post(
+      `${baseUrl}/sale-payment`,
+      payload,
+      {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      }
+    );
     return response.data;
   } catch (error: any) {
     return {
@@ -58,7 +63,7 @@ export async function deleteSales() {}
 
 export async function getSalesById(id: any) {
   try {
-    const response = await axios.get(`${baseUrl}/sale/${id}`, {
+    const response = await axiosInstance.get(`${baseUrl}/sale/${id}`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     });
     return response.data;

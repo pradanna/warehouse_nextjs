@@ -1,9 +1,10 @@
 import { baseUrl, getToken } from "@/app/config/config";
 import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
 export async function getSupplier(search: string, page: number, limit: number) {
   try {
-    const response = await axios.get(
+    const response = await axiosInstance.get(
       `${baseUrl}/supplier?param=${search}&page=${page}&per_page=${limit}`,
       {
         headers: {
@@ -24,7 +25,7 @@ export async function createSupplier(
   addContact: string
 ) {
   try {
-    const response = await axios.post(
+    const response = await axiosInstance.post(
       baseUrl + "/supplier",
       {
         name: addName,
@@ -51,7 +52,7 @@ export async function updateSupplier(
   editContact: string
 ) {
   try {
-    const response = await axios.put(
+    const response = await axiosInstance.put(
       `${baseUrl}/supplier/${editId}`,
       {
         name: editName,
@@ -73,7 +74,7 @@ export async function updateSupplier(
 
 export async function deleteSupplier(id: string) {
   try {
-    const response = await axios.delete(`${baseUrl}/supplier/${id}`, {
+    const response = await axiosInstance.delete(`${baseUrl}/supplier/${id}`, {
       headers: {
         Authorization: `Bearer ${getToken()}`,
       },
@@ -87,7 +88,7 @@ export async function deleteSupplier(id: string) {
 
 export async function getSupplierById(id: string) {
   try {
-    const response = await axios.get(`${baseUrl}/supplier/${id}`, {
+    const response = await axiosInstance.get(`${baseUrl}/supplier/${id}`, {
       headers: {
         Authorization: `Bearer ${getToken()}`,
       },

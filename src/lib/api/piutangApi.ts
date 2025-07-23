@@ -1,5 +1,6 @@
 import { baseUrl, getToken } from "@/app/config/config";
 import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
 export async function getcredit(
   currentPage: number,
@@ -8,7 +9,7 @@ export async function getcredit(
   status: any
 ) {
   try {
-    const res = await axios.get(`${baseUrl}/credit`, {
+    const res = await axiosInstance.get(`${baseUrl}/credit`, {
       params: {
         page: currentPage,
         per_page: limit,
@@ -28,7 +29,7 @@ export async function getcredit(
 
 export async function createcredit(payload: any) {
   try {
-    const response = await axios.post(`${baseUrl}/credit`, payload, {
+    const response = await axiosInstance.post(`${baseUrl}/credit`, payload, {
       headers: { Authorization: `Bearer ${getToken()}` },
     });
     return response.data;
@@ -43,7 +44,7 @@ export async function deletecredit() {}
 
 export async function getcreditById(id: any) {
   try {
-    const response = await axios.get(`${baseUrl}/credit/${id}`, {
+    const response = await axiosInstance.get(`${baseUrl}/credit/${id}`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     });
     return response.data;

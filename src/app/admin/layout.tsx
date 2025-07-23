@@ -91,6 +91,30 @@ export default function DashboardLayout({
     },
   ];
 
+  const financeItems: SidebarItem[] = [
+    {
+      name: "Kategori Pengeluaran",
+      href: "/admin/expense-category",
+      icon: <ChartPieIcon className="h-5 w-5" />,
+    },
+    {
+      name: "Cash Flow",
+      href: "/admin/cashflow",
+      icon: <FolderIcon className="h-5 w-5" />,
+    },
+
+    {
+      name: "Pemasukan Outlet",
+      href: "/admin/outlet-income",
+      icon: <PresentationChartBarIcon className="h-5 w-5" />,
+    },
+    {
+      name: "Pengeluaran Outlet",
+      href: "/admin/outlet-expense",
+      icon: <ShoppingCartIcon className="h-5 w-5" />,
+    },
+  ];
+
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const pathname = usePathname();
   const currentPage = getCurrentPageName(menuItems, pathname) ?? "Page";
@@ -109,6 +133,7 @@ export default function DashboardLayout({
 
           <Sidebar
             menuItems={menuItems}
+            financeItems={financeItems}
             isSidebarOpen={isSidebarOpen}
             logoExtended="/images/local/logo_panjang.png"
             logoSimple="/images/local/logo_pendek.png"
@@ -121,7 +146,7 @@ export default function DashboardLayout({
               isSidebarOpen={isSidebarOpen}
               currentPage={currentPage}
               profileName="admin"
-              profileImage="https://static-00.iconduck.com/assets.00/profile-circle-icon-2048x2048-cqe5466q.png"
+              profileImage="/images/local/avatar.png"
               onToggleSidebar={toggleSidebar}
               onLogout={handleLogout}
             />

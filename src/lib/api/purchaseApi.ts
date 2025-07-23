@@ -1,5 +1,6 @@
 import { baseUrl, getToken } from "@/app/config/config";
 import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
 export async function getPurchases(
   currentPage: number,
@@ -8,7 +9,7 @@ export async function getPurchases(
   selectedSupplier: any
 ) {
   try {
-    const res = await axios.get(`${baseUrl}/purchase`, {
+    const res = await axiosInstance.get(`${baseUrl}/purchase`, {
       params: {
         page: currentPage,
         per_page: limit,
@@ -28,7 +29,7 @@ export async function getPurchases(
 
 export async function createPurchases(payload: any) {
   try {
-    const response = await axios.post(`${baseUrl}/purchase`, payload, {
+    const response = await axiosInstance.post(`${baseUrl}/purchase`, payload, {
       headers: { Authorization: `Bearer ${getToken()}` },
     });
     return response.data;
@@ -38,9 +39,13 @@ export async function createPurchases(payload: any) {
 }
 export async function createPurchasePayment(payload: any) {
   try {
-    const response = await axios.post(`${baseUrl}/purchase-payment`, payload, {
-      headers: { Authorization: `Bearer ${getToken()}` },
-    });
+    const response = await axiosInstance.post(
+      `${baseUrl}/purchase-payment`,
+      payload,
+      {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      }
+    );
     return response.data;
   } catch (error: any) {
     return {
@@ -58,7 +63,7 @@ export async function deletePurchases() {}
 
 export async function getPurchasesById(id: any) {
   try {
-    const response = await axios.get(`${baseUrl}/purchase/${id}`, {
+    const response = await axiosInstance.get(`${baseUrl}/purchase/${id}`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     });
     return response.data;

@@ -1,5 +1,12 @@
-import { baseUrl, getToken } from "@/app/config/config";
+import {
+  baseUrl,
+  getRefreshToken,
+  getToken,
+  setToken,
+} from "@/app/config/config";
 import axios from "axios";
+import { refreshToken } from "./auth";
+import axiosInstance from "./axiosInstance";
 
 export async function getInventory(
   param: string,
@@ -15,8 +22,33 @@ export async function getInventory(
     );
 
     return response.data;
-  } catch (err) {
-    console.error("Gagal mengambil data inventory:", err);
+  } catch (err: any) {
+    if (err.response?.status === 401) {
+      try {
+        // Refresh token
+        const refreshRes = await refreshToken(getRefreshToken());
+        const newToken = refreshRes.data.access_token;
+
+        // Simpan token baru
+        setToken(newToken);
+
+        // Coba ulangi permintaan dengan token baru
+        const retry = await axios.get(
+          `${baseUrl}/inventory?param=${param}&page=${currentPage}&per_page=${limit}`,
+          {
+            headers: { Authorization: `Bearer ${newToken}` },
+          }
+        );
+
+        return retry.data;
+      } catch (refreshErr) {
+        console.error("Refresh token gagal:", refreshErr);
+        throw refreshErr;
+      }
+    } else {
+      console.error("Gagal mengambil data inventory:", err);
+      throw err;
+    }
   }
 }
 
@@ -29,32 +61,54 @@ export async function createInventory(
   addMaxStock: number,
   outletPrices: any
 ) {
-  try {
-    const payload = {
-      item_id: addItemId,
-      unit_id: addUnitId,
-      sku: addSku,
-      description: addDescription,
-      min_stock: addMinStock,
-      max_stock: addMaxStock,
-      prices: Object.entries(outletPrices)
-        .filter(
-          ([_, price]) =>
-            price !== null && price !== undefined && price !== undefined
-        )
-        .map(([outletId, price]) => ({
-          outlet_id: outletId,
-          price: Number(price),
-        })),
-    };
+  const payload = {
+    item_id: addItemId,
+    unit_id: addUnitId,
+    sku: addSku,
+    description: addDescription,
+    min_stock: addMinStock,
+    max_stock: addMaxStock,
+    prices: Object.entries(outletPrices)
+      .filter(
+        ([_, price]) =>
+          price !== null && price !== undefined && price !== undefined
+      )
+      .map(([outletId, price]) => ({
+        outlet_id: outletId,
+        price: Number(price),
+      })),
+  };
 
+  try {
     const response = await axios.post(`${baseUrl}/inventory`, payload, {
       headers: { Authorization: `Bearer ${getToken()}` },
     });
 
     return response.data;
-  } catch (err) {
-    console.error("Gagal menambahkan inventory:", err);
+  } catch (err: any) {
+    if (err.response?.status === 401) {
+      try {
+        // Refresh token
+        const refreshRes = await refreshToken(getRefreshToken());
+        const newToken = refreshRes.data.access_token;
+
+        // Simpan token baru
+        setToken(newToken);
+
+        // Ulangi request dengan token baru
+        const retry = await axios.post(`${baseUrl}/inventory`, payload, {
+          headers: { Authorization: `Bearer ${newToken}` },
+        });
+
+        return retry.data;
+      } catch (refreshErr) {
+        console.error("Refresh token gagal:", refreshErr);
+        throw refreshErr;
+      }
+    } else {
+      console.error("Gagal menambahkan inventory:", err);
+      throw err;
+    }
   }
 }
 
@@ -69,27 +123,55 @@ export async function updateInventory(
   editMaxStock: number,
   pricesArray: any
 ) {
+  const payload = {
+    item_id: editItemId,
+    unit_id: editUnitId,
+    sku: editSku,
+    description: editDescription,
+    current_stock: editCurrentStock,
+    min_stock: editMinStock,
+    max_stock: editMaxStock,
+    prices: pricesArray,
+  };
+
   try {
     const response = await axios.put(
       `${baseUrl}/inventory/${editId}`,
-      {
-        item_id: editItemId,
-        unit_id: editUnitId,
-        sku: editSku,
-        description: editDescription,
-        current_stock: editCurrentStock,
-        min_stock: editMinStock,
-        max_stock: editMaxStock,
-        prices: pricesArray, // harga per outlet
-      },
+      payload,
       {
         headers: { Authorization: `Bearer ${getToken()}` },
       }
     );
 
     return response;
-  } catch (err) {
-    console.error("Gagal mengubah inventory:", err);
+  } catch (err: any) {
+    if (err.response?.status === 401) {
+      try {
+        // Refresh token
+        const refreshRes = await refreshToken(getRefreshToken());
+        const newToken = refreshRes.data.access_token;
+
+        // Simpan token baru
+        setToken(newToken);
+
+        // Ulangi request dengan token baru
+        const retry = await axios.put(
+          `${baseUrl}/inventory/${editId}`,
+          payload,
+          {
+            headers: { Authorization: `Bearer ${newToken}` },
+          }
+        );
+
+        return retry;
+      } catch (refreshErr) {
+        console.error("Refresh token gagal:", refreshErr);
+        throw refreshErr;
+      }
+    } else {
+      console.error("Gagal mengubah inventory:", err);
+      throw err;
+    }
   }
 }
 
@@ -99,8 +181,29 @@ export async function deleteInventory(id: string | number) {
       headers: { Authorization: `Bearer ${getToken()}` },
     });
     return response.data;
-  } catch (err) {
-    console.log("Gagal menghapus inventory:", err);
+  } catch (err: any) {
+    if (err.response?.status === 401) {
+      try {
+        // Refresh token
+        const refreshRes = await refreshToken(getRefreshToken());
+        const newToken = refreshRes.data.access_token;
+
+        // Simpan token baru
+        setToken(newToken);
+
+        // Ulangi request dengan token baru
+        const retry = await axios.delete(`${baseUrl}/inventory/${id}`, {
+          headers: { Authorization: `Bearer ${newToken}` },
+        });
+        return retry.data;
+      } catch (refreshErr) {
+        console.error("Refresh token gagal:", refreshErr);
+        throw refreshErr;
+      }
+    } else {
+      console.log("Gagal menghapus inventory:", err);
+      throw err;
+    }
   }
 }
 
@@ -111,7 +214,29 @@ export async function getInventoryById(id: string | number) {
     });
 
     return res.data;
-  } catch (err) {
-    console.error("Gagal mengambil data inventory:", err);
+  } catch (err: any) {
+    if (err.response?.status === 401) {
+      try {
+        // Refresh token jika akses kadaluarsa
+        const refreshRes = await refreshToken(getRefreshToken());
+        const newToken = refreshRes.data.access_token;
+
+        // Simpan token baru
+        setToken(newToken);
+
+        // Coba ulangi request dengan token baru
+        const retryRes = await axios.get(`${baseUrl}/inventory/${id}`, {
+          headers: { Authorization: `Bearer ${newToken}` },
+        });
+
+        return retryRes.data;
+      } catch (refreshErr) {
+        console.error("Gagal refresh token saat getInventoryById:", refreshErr);
+        throw refreshErr;
+      }
+    } else {
+      console.error("Gagal mengambil data inventory:", err);
+      throw err;
+    }
   }
 }
