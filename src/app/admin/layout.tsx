@@ -97,11 +97,6 @@ export default function DashboardLayout({
       href: "/admin/master-category/expense-category",
       icon: <ChartPieIcon className="h-5 w-5" />,
     },
-    {
-      name: "Cash Flow",
-      href: "/admin/cashflow",
-      icon: <FolderIcon className="h-5 w-5" />,
-    },
 
     {
       name: "Pemasukan Outlet",
@@ -112,6 +107,12 @@ export default function DashboardLayout({
       name: "Pengeluaran Outlet",
       href: "/admin/outlet-expense",
       icon: <ShoppingCartIcon className="h-5 w-5" />,
+    },
+
+    {
+      name: "Cash Flow",
+      href: "/admin/cashflow",
+      icon: <FolderIcon className="h-5 w-5" />,
     },
   ];
 
