@@ -9,7 +9,7 @@ export default function ExpenseCategory() {
   return (
     <GenosPanel
       title="Kategori Pengeluaran"
-      subtitle="Halaman sedang dalam pengembangan"
+      subtitle="Data Kategori Pengeluaran"
       className="mt-3"
     >
       <ExpensesCategoryTable />

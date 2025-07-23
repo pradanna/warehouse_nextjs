@@ -93,8 +93,8 @@ export default function DashboardLayout({
 
   const financeItems: SidebarItem[] = [
     {
-      name: "Kategori Pengeluaran",
-      href: "/admin/expense-category",
+      name: "Master Kategori",
+      href: "/admin/master-category/expense-category",
       icon: <ChartPieIcon className="h-5 w-5" />,
     },
     {
