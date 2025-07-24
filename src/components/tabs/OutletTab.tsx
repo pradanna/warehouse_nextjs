@@ -63,7 +63,7 @@ export default function OutletTabs({ onSelect }: OutletTabsProps) {
           key={outlet.id}
           onClick={() => handleClick(outlet.id)}
           className={clsx(
-            "px-6 py-2 rounded-md font-semibold transition-all",
+            "px-6 py-2 rounded-md font-semibold transition-all text-xs cursor-pointer",
             outlet.id === activeId
               ? "bg-primary-color text-white"
               : "bg-white border border-gray-300 text-gray-600 hover:bg-primary/10"

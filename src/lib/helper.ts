@@ -36,3 +36,8 @@ export function addOneDay(date: Date | null): Date | null {
   newDate.setDate(newDate.getDate() + 1);
   return newDate;
 }
+
+export function formatDateToDateIndo(dateStr: string): Date {
+  const [year, month, day] = dateStr.split("-");
+  return new Date(Number(year), Number(month) - 1, Number(day));
+}

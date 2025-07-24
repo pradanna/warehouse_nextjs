@@ -12,6 +12,7 @@ import {
   getExpensesOutletbyId,
   updateExpensesOutlet,
 } from "@/lib/api/expensesOutletApi";
+import { formatRupiah } from "@/lib/helper";
 
 interface ExpensesOutletTableProps {
   outletId: string;
@@ -99,6 +100,7 @@ const ExpensesOutletTable = ({ outletId }: ExpensesOutletTableProps) => {
     { key: "date", label: "Tanggal", sortable: true },
     { key: "category.name", label: "kategori", sortable: true },
     { key: "amount", label: "Jumlah", sortable: true },
+    { key: "description", label: "Keterangan", sortable: true },
     { key: "author.username", label: "Input By", sortable: true },
   ];
 
@@ -108,7 +110,8 @@ const ExpensesOutletTable = ({ outletId }: ExpensesOutletTableProps) => {
       id: expensesOutlet.id,
       date: expensesOutlet.date,
       category: expensesOutlet.category,
-      amount: expensesOutlet.amount,
+      amount: formatRupiah(expensesOutlet.amount),
+      description: expensesOutlet.description,
       author: expensesOutlet.author,
     }));
   }, [expensesOutlets]);
@@ -206,12 +209,8 @@ const ExpensesOutletTable = ({ outletId }: ExpensesOutletTableProps) => {
       {isModalEditOpen && (
         <EditExpensesOutletModal
           show
-          editValue={editValue}
-          setEditValue={setEditValue}
-          inputRef={inputEditRef}
+          idExpense={idForEdit}
           onClose={handleEditClose}
-          onSubmit={handleSubmitEdit}
-          onKeyDown={handleKeyDownEdit}
         />
       )}
     </div>

@@ -101,7 +101,9 @@ const InventoryTable = () => {
       const res = await getInventory(param, currentPage, limit);
       console.log(res.data);
       setTABLE_ROWS(res.data);
-      setTotalItems(res.total);
+
+      console.log(res.meta.total_rows);
+      setTotalItems(res.meta.total_rows);
     } catch (err) {
       toast.error("Gagal mengambil data inventory");
     }

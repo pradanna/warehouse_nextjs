@@ -42,11 +42,12 @@ export default function AddExpensesOutletModal({
 
   const onSubmit = async () => {
     try {
+      console.log("addAmount: " + addAmount.toString());
       const unitData = {
         outlet_id: addOutletId,
         expense_category_id: addCategoryId,
         date: dayjs(expenseDate).format("YYYY-MM-DD"),
-        amount: Number(addAmount),
+        amount: addAmount,
         description: addDescription,
       };
 
@@ -101,8 +102,8 @@ export default function AddExpensesOutletModal({
           placeholder="Masukkan Jumlah Pengeluaran"
           type="number"
           value={addAmount}
-          onKeyDown={amountChange}
           ref={inputRef}
+          onChange={(e) => setAddAmount(Number(e.target.value))}
         />
 
         <GenosTextarea
