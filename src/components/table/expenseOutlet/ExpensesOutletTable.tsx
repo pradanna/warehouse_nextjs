@@ -13,7 +13,11 @@ import {
   updateExpensesOutlet,
 } from "@/lib/api/expensesOutletApi";
 
-const ExpensesOutletTable = () => {
+interface ExpensesOutletTableProps {
+  outletId: string;
+}
+
+const ExpensesOutletTable = ({ outletId }: ExpensesOutletTableProps) => {
   const [expensesOutlets, setExpensesOutlets] = useState<any[]>([]);
   const [search, setSearch] = useState("");
 
@@ -24,48 +28,17 @@ const ExpensesOutletTable = () => {
   const [isLoadingTable, setIsLoadingTable] = useState(true);
 
   // ADD VAR
-  const [addValue, setAddValue] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [idForEdit, setIdForEdit] = useState("");
 
   const handleOpen = () => {
     setIsModalOpen(true);
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 100);
   };
 
   const handleClose = () => {
     setIsModalOpen(false);
     setName("");
-  };
-
-  const handleSubmit = async () => {
-    try {
-      const response = await createExpensesOutlet({ name: addValue });
-      setAddValue("");
-      fetchExpensesOutlet(currentPage); // refresh data
-      inputRef.current?.focus();
-      console.log(response.message);
-      toast.success(response.message || "Data Berhasil ditambahkan", {
-        autoClose: 1000,
-      });
-    } catch (err: any) {
-      const message = err.response?.message || "Data Gagal ditambahkan";
-
-      console.log(err.response?.message);
-      toast.error(message, {
-        autoClose: 1000,
-      });
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleSubmit();
-    }
+    fetchExpensesOutlet(1);
   };
 
   // EDIT VAR
@@ -123,14 +96,20 @@ const ExpensesOutletTable = () => {
 
   // TABLE HEADER
   const TABLE_HEAD = [
-    { key: "name", label: "Nama ExpensesOutlet", sortable: true },
+    { key: "date", label: "Tanggal", sortable: true },
+    { key: "category.name", label: "kategori", sortable: true },
+    { key: "amount", label: "Jumlah", sortable: true },
+    { key: "author.username", label: "Input By", sortable: true },
   ];
 
   // TABLE ROWS
   const TABLE_ROWS = useMemo(() => {
     return expensesOutlets.map((expensesOutlet) => ({
       id: expensesOutlet.id,
-      name: expensesOutlet.name,
+      date: expensesOutlet.date,
+      category: expensesOutlet.category,
+      amount: expensesOutlet.amount,
+      author: expensesOutlet.author,
     }));
   }, [expensesOutlets]);
 
@@ -138,21 +117,21 @@ const ExpensesOutletTable = () => {
     setCurrentPage(1);
   }, [search]);
 
-  // FILTER
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      console.log("Trigger fetch: search =", search, "page =", currentPage);
-      fetchExpensesOutlet(currentPage);
-    }, 300);
-
-    return () => clearTimeout(delayDebounce);
-  }, [search, currentPage]);
+    if (outletId) {
+      fetchExpensesOutlet(1); // bisa dimulai dari page 1
+    }
+  }, [outletId]);
 
   const fetchExpensesOutlet = async (page: number) => {
     setIsLoadingTable(true);
 
     try {
-      const response = await getExpensesOutlet(search, page, limit);
+      const response = await getExpensesOutlet({
+        outlet_id: outletId,
+        page,
+        limit,
+      });
 
       setExpensesOutlets(response.data);
       setTotalExpensesOutlets(response.meta.total_rows);
@@ -222,17 +201,7 @@ const ExpensesOutletTable = () => {
         }
       />
 
-      {isModalOpen && (
-        <AddExpensesOutletModal
-          show
-          addValue={addValue}
-          setAddValue={setAddValue}
-          inputRef={inputRef}
-          onClose={handleClose}
-          onSubmit={handleSubmit}
-          onKeyDown={handleKeyDown}
-        />
-      )}
+      {isModalOpen && <AddExpensesOutletModal show onClose={handleClose} />}
 
       {isModalEditOpen && (
         <EditExpensesOutletModal

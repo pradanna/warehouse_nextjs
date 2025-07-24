@@ -1,35 +1,69 @@
 "use client";
 
 import GenosModal from "@/components/modal/GenosModal";
-import { RefObject, useState } from "react";
+import { RefObject, useRef, useState } from "react";
 import GenosTextfield from "../GenosTextfield";
 import GenosSearchSelect from "../GenosSearchSelect";
 import GenosDatepicker from "../GenosDatepicker";
 import GenosSearchSelectOutlet from "@/components/select-search/GenosSearchOutlet";
 import GenosSearchSelectExpenseCategory from "@/components/select-search/ExpenseCategorySearchOutlet";
+import GenosTextarea from "../GenosTextArea";
+import { createExpensesOutlet } from "@/lib/api/expensesOutletApi";
+import { toast } from "react-toastify";
+import dayjs from "dayjs";
 
 type AddExpensesOutletModalProps = {
   show: boolean;
-  addValue: string;
-  setAddValue: (value: string) => void;
-  inputRef?: RefObject<HTMLInputElement>;
   onClose: () => void;
-  onSubmit: () => void;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 };
 
 export default function AddExpensesOutletModal({
   show,
-  addValue,
-  setAddValue,
-  inputRef,
   onClose,
-  onSubmit,
-  onKeyDown,
 }: AddExpensesOutletModalProps) {
-  const [addOutletId, setAddOutletId] = useState<string | null>(null);
-  const [addCategoryId, setAddCategoryId] = useState<string | null>(null);
-  const [expenseDate, setExpenseDate] = useState<Date | null>(new Date());
+  const [addOutletId, setAddOutletId] = useState<string>("");
+  const [addCategoryId, setAddCategoryId] = useState<string>("");
+  const [addDescription, setAddDescription] = useState<string | null>("");
+  const [expenseDate, setExpenseDate] = useState<Date>(new Date());
+  const [addAmount, setAddAmount] = useState<number>(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  const amountChange = () => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Number(e.target.value);
+    setAddAmount(isNaN(value) ? 0 : value);
+  };
+
+  const descriptionChange =
+    () => (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const value = e.target.value;
+      setAddDescription(value);
+    };
+
+  const onSubmit = async () => {
+    try {
+      const unitData = {
+        outlet_id: addOutletId,
+        expense_category_id: addCategoryId,
+        date: dayjs(expenseDate).format("YYYY-MM-DD"),
+        amount: Number(addAmount),
+        description: addDescription,
+      };
+
+      const response = await createExpensesOutlet(unitData);
+      // Lakukan aksi setelah berhasil (misalnya reset form atau tutup modal)
+      console.log("Berhasil menambahkan data:", response);
+      toast.success(response.message || "Data Berhasil ditambahkan", {
+        autoClose: 1000,
+      });
+      onClose();
+    } catch (err) {
+      console.error("Gagal menambahkan data:", err);
+      toast.error(err.message || "Data Gagal ditambahkan", {
+        autoClose: 1000,
+      });
+    }
+  };
 
   return (
     <GenosModal
@@ -39,9 +73,6 @@ export default function AddExpensesOutletModal({
       onSubmit={onSubmit}
       size="md"
     >
-      {/* "outlet_id": "78dc1b3a-b2f5-48ec-9c33-91f719f34cf9",
-      "expense_category_id": "5aa34ce9-a181-4751-9b74-846753b1ddb3", "date":
-      "2025-07-16", "amount": 140000, "description": "pengeluaran" */}
       <div className="flex flex-col gap-5">
         <GenosSearchSelectOutlet
           value={addOutletId}
@@ -65,15 +96,22 @@ export default function AddExpensesOutletModal({
         />
 
         <GenosTextfield
-          id="tambah-expensesOutlet"
-          label="Nama Kategory Pengeluaran"
-          placeholder="Masukkan Nama Kategory Untuk Pengeluaran"
-          value={addValue}
-          onChange={(e: { target: { value: string } }) =>
-            setAddValue(e.target.value)
-          }
-          onKeyDown={onKeyDown}
+          id="add-amount-expense"
+          label="Jumlah Pengeluaran"
+          placeholder="Masukkan Jumlah Pengeluaran"
+          type="number"
+          value={addAmount}
+          onKeyDown={amountChange}
           ref={inputRef}
+        />
+
+        <GenosTextarea
+          label="Deskripsi"
+          placeholder="Masukkan Deskripsi"
+          value={addDescription}
+          onKeyDown={descriptionChange}
+          ref={ref}
+          onChange={(e) => setAddDescription(e.target.value)}
         />
       </div>
     </GenosModal>
