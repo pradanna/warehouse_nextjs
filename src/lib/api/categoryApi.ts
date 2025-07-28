@@ -3,9 +3,9 @@ import axios from "axios";
 import axiosInstance from "./axiosInstance";
 
 export async function getCategories(
+  search: string,
   page: number,
-  limit: number,
-  search: string
+  limit: number
 ) {
   try {
     const response = await axiosInstance.get(

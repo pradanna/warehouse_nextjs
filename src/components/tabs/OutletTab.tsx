@@ -11,12 +11,17 @@ interface Outlet {
 
 interface OutletTabsProps {
   onSelect: (outletId: string) => void;
+  onSelectName: (outletId: string) => void;
 }
 
-export default function OutletTabs({ onSelect }: OutletTabsProps) {
+export default function OutletTabs({
+  onSelect,
+  onSelectName,
+}: OutletTabsProps) {
   const [outlets, setOutlets] = useState<Outlet[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [activename, setActiveName] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchOutlets = async () => {
@@ -28,6 +33,8 @@ export default function OutletTabs({ onSelect }: OutletTabsProps) {
         if (outletList.length > 0) {
           setActiveId(outletList[0].id);
           onSelect(outletList[0].id);
+          onSelectName(outletList[0].name);
+          setActiveName(outletList[0].name);
         }
       } catch (err) {
         console.error("Failed to load outlets", err);
@@ -61,7 +68,11 @@ export default function OutletTabs({ onSelect }: OutletTabsProps) {
       {outlets.map((outlet) => (
         <button
           key={outlet.id}
-          onClick={() => handleClick(outlet.id)}
+          onClick={() => {
+            handleClick(outlet.id);
+            setActiveName(outlet.name);
+            onSelectName(outlet.name);
+          }}
           className={clsx(
             "px-6 py-2 rounded-md font-semibold transition-all text-xs cursor-pointer",
             outlet.id === activeId

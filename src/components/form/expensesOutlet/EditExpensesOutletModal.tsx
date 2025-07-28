@@ -17,6 +17,8 @@ import { formatDateToDateIndo } from "@/lib/helper";
 
 type EditExpensesOutletModalProps = {
   show: boolean;
+  idOutlet: string;
+  NameOutlet: string;
   idExpense: string;
   onClose: () => void;
 };
@@ -24,6 +26,8 @@ type EditExpensesOutletModalProps = {
 export default function EditExpensesOutletModal({
   show,
   idExpense,
+  idOutlet,
+  NameOutlet,
   onClose,
 }: EditExpensesOutletModalProps) {
   const [editOutletId, setEditOutletId] = useState<string>("");
@@ -39,8 +43,7 @@ export default function EditExpensesOutletModal({
       const response = await getExpensesOutletbyId(id);
       if (!response) return;
 
-      setEditOutletId(response.data.outlet_id);
-      setEditCategoryId(response.data.expense_category_id);
+      setEditCategoryId(response.data.category.id);
       setEditDescription(response.data.description);
       setEditAmount(Number(response.data.amount));
 
@@ -57,11 +60,6 @@ export default function EditExpensesOutletModal({
     }
   }, [idExpense, show]);
 
-  const amountChange = () => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number(e.target.value);
-    setEditAmount(isNaN(value) ? 0 : value);
-  };
-
   const descriptionChange =
     () => (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const value = e.target.value;
@@ -71,7 +69,7 @@ export default function EditExpensesOutletModal({
   const onSubmit = async () => {
     try {
       const unitData = {
-        outlet_id: editOutletId,
+        outlet_id: idOutlet,
         expense_category_id: editCategoryId,
         date: dayjs(expenseDate).format("YYYY-MM-DD"),
         amount: Number(editAmount),
@@ -95,20 +93,13 @@ export default function EditExpensesOutletModal({
 
   return (
     <GenosModal
-      title="Tambah kategori Pengeluaran"
+      title={`Tambah Pengeluaran di Outlet ` + NameOutlet}
       show={show}
       onClose={onClose}
       onSubmit={onSubmit}
       size="md"
     >
       <div className="flex flex-col gap-5">
-        <GenosSearchSelectOutlet
-          value={editOutletId}
-          onChange={setEditOutletId}
-          placeholder="Pilih Outlet"
-          label="OutletId"
-        />
-
         <GenosSearchSelectExpenseCategory
           value={editCategoryId}
           onChange={setEditCategoryId}
@@ -129,8 +120,8 @@ export default function EditExpensesOutletModal({
           placeholder="Masukkan Jumlah Pengeluaran"
           type="number"
           value={editAmount}
-          onKeyDown={amountChange}
           ref={inputRef}
+          onChange={(e) => setEditAmount(Number(e.target.value))}
         />
 
         <GenosTextarea

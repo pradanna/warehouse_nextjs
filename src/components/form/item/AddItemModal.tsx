@@ -1,42 +1,57 @@
 "use client";
 
 import GenosModal from "@/components/modal/GenosModal";
-import { RefObject } from "react";
+import { RefObject, useRef, useState } from "react";
 import GenosTextfield from "../GenosTextfield";
 import GenosTextarea from "../GenosTextArea";
 import GenosSearchSelect from "../GenosSearchSelect";
+import GenosSearchSelectMaterialCategory from "@/components/select-search/MaterialCategorySearch";
+import GenosSearchSelectCategory from "@/components/select-search/CategorySearch";
+import { toast } from "react-toastify";
+import { createItem } from "@/lib/api/itemApi";
 
 type AddCategorytModalProps = {
   show: boolean;
-  addCategoryId: string;
-  addName: string;
-  addDescription: string;
-  categories: any[];
-  setAddName: (value: string) => void;
-  setAddDescription: (value: string) => void;
-  setAddCategoryId: (value: string) => void;
-  inputRefName?: RefObject<HTMLInputElement>;
-  inputRefDescription?: RefObject<HTMLInputElement>;
   onClose: () => void;
-  onSubmit: () => void;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 };
 
 export default function AddItemModal({
   show,
-  addName,
-  addDescription,
-  setAddDescription,
-  setAddName,
-  setAddCategoryId,
-  inputRefName,
-  inputRefDescription,
-  categories,
-  addCategoryId,
   onClose,
-  onSubmit,
-  onKeyDown,
 }: AddCategorytModalProps) {
+  const [addmaterialCategory, setAddmaterialCategory] = useState<string>("");
+  const [addCategoryId, setAddCategoryId] = useState<string>("");
+  const [addName, setAddName] = useState<string>("");
+  const [addDescription, setAddDescription] = useState<string>("");
+  const inputRefName = useRef<HTMLInputElement>(null);
+  const inputRefDescription = useRef<HTMLInputElement>(null);
+
+  const onSubmit = async () => {
+    if (!addCategoryId) {
+      toast.error("Kategori harus dipilih", { autoClose: 1500 });
+      return;
+    }
+    if (!addmaterialCategory) {
+      toast.error("Bahan Baku harus dipilih", { autoClose: 1500 });
+      return;
+    }
+    try {
+      const res = await createItem(
+        addCategoryId,
+        addmaterialCategory,
+        addName,
+        addDescription
+      );
+      toast.success(res.data.message || "Item berhasil ditambahkan", {
+        autoClose: 1000,
+      });
+      onClose();
+    } catch (err: any) {
+      const message = err.response?.data?.message || "Gagal menambahkan item";
+      toast.error(message, { autoClose: 1000 });
+    }
+  };
+
   return (
     <GenosModal
       title="Tambah Item"
@@ -45,14 +60,20 @@ export default function AddItemModal({
       show
       size="md"
     >
-      <GenosSearchSelect
+      <GenosSearchSelectMaterialCategory
+        label="Kategori Bahan Baku"
+        value={addmaterialCategory}
+        onChange={(val) => setAddmaterialCategory(val as string)}
+        placeholder="Pilih Kategori Bahan Baku"
+      />
+
+      <GenosSearchSelectCategory
         label="Kategori"
-        options={categories.map((c) => ({ value: c.id, label: c.name }))}
         value={addCategoryId}
         onChange={(val) => setAddCategoryId(val as string)}
         placeholder="Pilih kategori"
-        className="mb-3"
       />
+
       <GenosTextfield
         id="tambah-item"
         label="Nama Item"

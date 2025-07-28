@@ -16,7 +16,7 @@ const tabs = [
     icon: FolderIcon,
   },
   {
-    name: "Kategori Material",
+    name: "Kategori Bahan Baku",
     href: "/admin/master-category/material-category",
     icon: ArchiveBoxIcon,
   },

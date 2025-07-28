@@ -8,8 +8,8 @@ import React from "react";
 export default function ExpenseCategory() {
   return (
     <GenosPanel
-      title="Kategori Material"
-      subtitle="Data Kategori Material"
+      title="Kategori Bahan Baku"
+      subtitle="Data Kategori Bahan Baku"
       className="mt-3"
     >
       <MaterialCategoryTable />

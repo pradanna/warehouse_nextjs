@@ -16,9 +16,13 @@ import { formatRupiah } from "@/lib/helper";
 
 interface ExpensesOutletTableProps {
   outletId: string;
+  outletName: string;
 }
 
-const ExpensesOutletTable = ({ outletId }: ExpensesOutletTableProps) => {
+const ExpensesOutletTable = ({
+  outletId,
+  outletName,
+}: ExpensesOutletTableProps) => {
   const [expensesOutlets, setExpensesOutlets] = useState<any[]>([]);
   const [search, setSearch] = useState("");
 
@@ -38,7 +42,6 @@ const ExpensesOutletTable = ({ outletId }: ExpensesOutletTableProps) => {
 
   const handleClose = () => {
     setIsModalOpen(false);
-    setName("");
     fetchExpensesOutlet(1);
   };
 
@@ -49,6 +52,7 @@ const ExpensesOutletTable = ({ outletId }: ExpensesOutletTableProps) => {
 
   const handleEditClose = () => {
     setIsModalEditOpen(false);
+    fetchExpensesOutlet(1);
   };
 
   const handleEdit = async (id: string) => {
@@ -69,29 +73,9 @@ const ExpensesOutletTable = ({ outletId }: ExpensesOutletTableProps) => {
     }
   };
 
-  const handleSubmitEdit = async () => {
-    try {
-      const response = await updateExpensesOutlet(idForEdit, editValue);
-      // handleClose();
-      setEditValue("");
-      fetchExpensesOutlet(currentPage); // refresh data
-      handleEditClose();
-      toast.success(response.message || "Data Berhasil ditambahkan", {
-        autoClose: 1000,
-      });
-    } catch (err: any) {
-      const message = err.response?.message || "Data Gagal ditambahkan";
-
-      toast.error(message, {
-        autoClose: 1000,
-      });
-    }
-  };
-
   const handleKeyDownEdit = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      handleSubmitEdit();
     }
   };
 
@@ -204,12 +188,21 @@ const ExpensesOutletTable = ({ outletId }: ExpensesOutletTableProps) => {
         }
       />
 
-      {isModalOpen && <AddExpensesOutletModal show onClose={handleClose} />}
+      {isModalOpen && (
+        <AddExpensesOutletModal
+          show
+          onClose={handleClose}
+          idOutlet={outletId}
+          NameOutlet={outletName}
+        />
+      )}
 
       {isModalEditOpen && (
         <EditExpensesOutletModal
           show
           idExpense={idForEdit}
+          idOutlet={outletId}
+          NameOutlet={outletName}
           onClose={handleEditClose}
         />
       )}

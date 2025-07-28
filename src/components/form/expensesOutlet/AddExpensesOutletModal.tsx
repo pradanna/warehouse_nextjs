@@ -13,6 +13,8 @@ import { toast } from "react-toastify";
 import dayjs from "dayjs";
 
 type AddExpensesOutletModalProps = {
+  idOutlet: string;
+  NameOutlet: string;
   show: boolean;
   onClose: () => void;
 };
@@ -20,19 +22,15 @@ type AddExpensesOutletModalProps = {
 export default function AddExpensesOutletModal({
   show,
   onClose,
+  idOutlet,
+  NameOutlet,
 }: AddExpensesOutletModalProps) {
-  const [addOutletId, setAddOutletId] = useState<string>("");
   const [addCategoryId, setAddCategoryId] = useState<string>("");
   const [addDescription, setAddDescription] = useState<string | null>("");
   const [expenseDate, setExpenseDate] = useState<Date>(new Date());
   const [addAmount, setAddAmount] = useState<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const ref = useRef<HTMLTextAreaElement>(null);
-
-  const amountChange = () => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number(e.target.value);
-    setAddAmount(isNaN(value) ? 0 : value);
-  };
 
   const descriptionChange =
     () => (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -44,7 +42,7 @@ export default function AddExpensesOutletModal({
     try {
       console.log("addAmount: " + addAmount.toString());
       const unitData = {
-        outlet_id: addOutletId,
+        outlet_id: idOutlet,
         expense_category_id: addCategoryId,
         date: dayjs(expenseDate).format("YYYY-MM-DD"),
         amount: addAmount,
@@ -68,20 +66,13 @@ export default function AddExpensesOutletModal({
 
   return (
     <GenosModal
-      title="Tambah kategori Pengeluaran"
+      title={`Tambah Pengeluaran di Outlet ` + NameOutlet}
       show={show}
       onClose={onClose}
       onSubmit={onSubmit}
       size="md"
     >
       <div className="flex flex-col gap-5">
-        <GenosSearchSelectOutlet
-          value={addOutletId}
-          onChange={setAddOutletId}
-          placeholder="Pilih Outlet"
-          label="OutletId"
-        />
-
         <GenosSearchSelectExpenseCategory
           value={addCategoryId}
           onChange={setAddCategoryId}

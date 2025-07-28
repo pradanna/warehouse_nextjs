@@ -14,13 +14,13 @@ import {
 import AddItemModal from "@/components/form/item/AddItemModal";
 import EdititemModal from "@/components/form/item/EditItemModal";
 
-interface Category {
-  id: string;
-  name: string;
-}
-
 const ItemTable = () => {
   type Category = {
+    id: string;
+    name: string;
+  };
+
+  type MaterialCategory = {
     id: string;
     name: string;
   };
@@ -29,6 +29,7 @@ const ItemTable = () => {
     id: string;
     name: string;
     category?: Category;
+    material_category?: MaterialCategory;
   };
 
   // Data Items
@@ -63,13 +64,17 @@ const ItemTable = () => {
   const [editDescription, setEditDescription] = useState("");
 
   const inputEditRefName = useRef<HTMLInputElement>(null);
-  const inputEditRefDescription = useRef<HTMLInputElement>(null);
 
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
 
   // TABLE HEAD
   const TABLE_HEAD = [
     { key: "category", label: "Kategori", sortable: false },
+    {
+      key: "material_category",
+      label: "Kategori Bahan Baku",
+      sortable: true,
+    },
     { key: "name", label: "Nama Item", sortable: true },
     { key: "description", label: "Deskripsi", sortable: false },
   ];
@@ -79,6 +84,7 @@ const ItemTable = () => {
     return items.map((item) => ({
       id: item.id,
       category: item.category?.name ?? "-",
+      material_category: item.material_category?.name ?? "-",
       name: item.name,
       description: item.description,
     }));
@@ -87,7 +93,7 @@ const ItemTable = () => {
   // Fetch kategori
   const fetchCategories = async () => {
     try {
-      const res = await getCategories(1, 1000, "");
+      const res = await getCategories("", 1, 1000);
       setCategories(res.data);
     } catch (err) {
       console.error("Gagal fetch kategori:", err);
@@ -159,23 +165,8 @@ const ItemTable = () => {
     setAddCategoryId("");
     setAddName("");
     setAddDescription("");
-  };
-  const handleSubmit = async () => {
-    if (!addCategoryId) {
-      toast.error("Kategori harus dipilih", { autoClose: 1500 });
-      return;
-    }
-    try {
-      const res = await createItem(addCategoryId, addName, addDescription);
-      toast.success(res.data.message || "Item berhasil ditambahkan", {
-        autoClose: 1000,
-      });
-      handleClose();
-      fetchItems(currentPage);
-    } catch (err: any) {
-      const message = err.response?.data?.message || "Gagal menambahkan item";
-      toast.error(message, { autoClose: 1000 });
-    }
+
+    fetchItems(currentPage);
   };
 
   // HANDLE EDIT
@@ -208,29 +199,7 @@ const ItemTable = () => {
     setEditCategoryId("");
     setEditName("");
     setEditDescription("");
-  };
-
-  const handleSubmitEdit = async () => {
-    if (!editCategoryId) {
-      toast.error("Kategori harus dipilih", { autoClose: 1500 });
-      return;
-    }
-    try {
-      const res = await updateItem(
-        editId,
-        editCategoryId,
-        editName,
-        editDescription
-      );
-      toast.success(res.data.message || "Item berhasil diubah", {
-        autoClose: 1000,
-      });
-      handleEditClose();
-      fetchItems(currentPage);
-    } catch (err: any) {
-      const message = err.response?.data?.message || "Gagal mengubah item";
-      toast.error(message, { autoClose: 1000 });
-    }
+    fetchItems(currentPage);
   };
 
   // HANDLE DELETE
@@ -289,50 +258,10 @@ const ItemTable = () => {
         }
       ></GenosTable>
 
-      {isModalOpen && (
-        <AddItemModal
-          show
-          addCategoryId={addCategoryId}
-          addName={addName}
-          addDescription={addDescription}
-          inputRefName={inputRefName}
-          inputRefDescription={inputRefDescription}
-          onClose={handleClose}
-          onSubmit={handleSubmit}
-          setAddCategoryId={setAddCategoryId}
-          setAddDescription={setAddDescription}
-          setAddName={setAddName}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleSubmit();
-            }
-          }}
-          categories={categories}
-        />
-      )}
+      {isModalOpen && <AddItemModal show onClose={handleClose} />}
 
       {isModalEditOpen && (
-        <EdititemModal
-          show
-          editCategoryId={editCategoryId}
-          editName={editName}
-          editDescription={editDescription}
-          inputRefName={inputRefName}
-          inputRefDescription={inputRefDescription}
-          onClose={handleEditClose}
-          onSubmit={handleSubmitEdit}
-          setEditCategoryId={setEditCategoryId}
-          setEditDescription={setEditDescription}
-          setEditName={setEditName}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleSubmitEdit();
-            }
-          }}
-          categories={categories}
-        />
+        <EdititemModal show itemId={editId} onClose={handleEditClose} />
       )}
     </div>
   );

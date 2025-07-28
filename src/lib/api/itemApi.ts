@@ -19,6 +19,7 @@ export async function getItems(search: string, page: number, limit: number) {
 
 export async function createItem(
   addCategoryId: string | number,
+  addmaterial: string,
   addName: string,
   addDescription: string
 ) {
@@ -27,6 +28,7 @@ export async function createItem(
       `${baseUrl}/item`,
       {
         category_id: addCategoryId,
+        material_category_id: addmaterial,
         name: addName,
         description: addDescription,
       },
@@ -42,6 +44,7 @@ export async function createItem(
 export async function updateItem(
   editId: string | number,
   editCategoryId: string | number,
+  editMaterialCategoryId: string | number,
   editName: string,
   editDescription: string
 ) {
@@ -50,6 +53,7 @@ export async function updateItem(
       `${baseUrl}/item/${editId}`,
       {
         category_id: editCategoryId,
+        material_category_id: editMaterialCategoryId,
         name: editName,
         description: editDescription,
       },
