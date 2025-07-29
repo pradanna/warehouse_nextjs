@@ -28,7 +28,7 @@ export default function GenosSearchSelectOutlet({
   const debouncedSearch = useDebounce(search, 500);
 
   const { data, isLoading } = useSWR(["outlet", debouncedSearch], async () => {
-    const res = await getOutlet(debouncedSearch, 1, 10);
+    const res = await getOutlet(debouncedSearch, 1, 1000);
     return res.data.map((o: any) => ({
       value: o.id,
       label: o.name,
