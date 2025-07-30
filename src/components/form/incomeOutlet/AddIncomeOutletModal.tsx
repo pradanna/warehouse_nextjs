@@ -24,38 +24,43 @@ export default function AddIncomeOutletModal({
   idOutlet,
   NameOutlet,
 }: AddIncomeOutletModalProps) {
-  const [addCategoryId, setAddCategoryId] = useState<string>("");
-  const [addDescription, setAddDescription] = useState<string | null>("");
+  const [addCashAmount, setAddCashAmount] = useState<number>(0);
+  const [addDigitalAmount, setAddDigitalAmount] = useState<number>(0);
+  const [addMutationAmount, setAddMutationAmount] = useState<number>(0);
+
+  const inputRefCash = useRef<HTMLInputElement>(null);
+  const inputRefDigital = useRef<HTMLInputElement>(null);
+  const inputRefMutation = useRef<HTMLInputElement>(null);
   const [incomeDate, setIncomeDate] = useState<Date>(new Date());
   const [addAmount, setAddAmount] = useState<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const ref = useRef<HTMLTextAreaElement>(null);
 
-  const descriptionChange =
-    () => (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const value = e.target.value;
-      setAddDescription(value);
-    };
-
   const onSubmit = async () => {
     try {
-      console.log("addAmount: " + addAmount.toString());
-      const unitData = {
+      if (!idOutlet || !incomeDate) {
+        toast.error("Outlet dan tanggal harus diisi");
+        return;
+      }
+
+      const payload = {
         outlet_id: idOutlet,
-        income_category_id: addCategoryId,
-        date: dayjs(incomeDate).format("YYYY-MM-DD"),
-        amount: addAmount,
-        description: addDescription,
+        date: incomeDate.toISOString().split("T")[0], // Format YYYY-MM-DD
+        income: {
+          cash: addCashAmount,
+          digital: addDigitalAmount,
+          by_mutation: addMutationAmount,
+        },
       };
 
-      const response = await createIncomesOutlet(unitData);
-      // Lakukan aksi setelah berhasil (misalnya reset form atau tutup modal)
+      const response = await createIncomesOutlet(payload); // ganti `createIncome` dengan fungsi API-mu
       console.log("Berhasil menambahkan data:", response);
+
       toast.success(response.message || "Data Berhasil ditambahkan", {
         autoClose: 1000,
       });
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Gagal menambahkan data:", err);
       toast.error(err.message || "Data Gagal ditambahkan", {
         autoClose: 1000,
@@ -65,7 +70,7 @@ export default function AddIncomeOutletModal({
 
   return (
     <GenosModal
-      title={`Tambah Pengeluaran di Outlet ` + NameOutlet}
+      title={`Tambah Pemasukan di Outlet ` + NameOutlet}
       show={show}
       onClose={onClose}
       onSubmit={onSubmit}
@@ -81,22 +86,33 @@ export default function AddIncomeOutletModal({
         />
 
         <GenosTextfield
-          id="add-amount-income"
-          label="Jumlah Pengeluaran"
-          placeholder="Masukkan Jumlah Pengeluaran"
+          id="cash"
+          label="Jumlah Pemasukan Tunai"
+          placeholder="Masukkan Jumlah Pemasukan Tunai"
           type="number"
-          value={addAmount}
-          ref={inputRef}
-          onChange={(e) => setAddAmount(Number(e.target.value))}
+          value={addCashAmount}
+          ref={inputRefCash}
+          onChange={(e) => setAddCashAmount(Number(e.target.value))}
         />
 
-        <GenosTextarea
-          label="Deskripsi"
-          placeholder="Masukkan Deskripsi"
-          value={addDescription}
-          onKeyDown={descriptionChange}
-          ref={ref}
-          onChange={(e) => setAddDescription(e.target.value)}
+        <GenosTextfield
+          id="digital"
+          label="Jumlah Pemasukan Digital"
+          placeholder="Masukkan Jumlah Pemasukan Digital"
+          type="number"
+          value={addDigitalAmount}
+          ref={inputRefDigital}
+          onChange={(e) => setAddDigitalAmount(Number(e.target.value))}
+        />
+
+        <GenosTextfield
+          id="by_mutation"
+          label="Jumlah Pemasukan via Mutasi"
+          placeholder="Masukkan Jumlah Pemasukan via Mutasi"
+          type="number"
+          value={addMutationAmount}
+          ref={inputRefMutation}
+          onChange={(e) => setAddMutationAmount(Number(e.target.value))}
         />
       </div>
     </GenosModal>

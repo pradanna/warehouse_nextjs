@@ -3,16 +3,14 @@ import axiosInstance from "./axiosInstance";
 
 export async function getIncomesOutlet({
   outlet_id,
-  income_category_id,
-  date_start,
-  date_end,
+  year,
+  month,
   page = 1,
   limit = 10,
 }: {
   outlet_id: string | null;
-  income_category_id?: string;
-  date_start?: string | null;
-  date_end?: string | null;
+  year?: string | null;
+  month?: string | null;
   page?: number;
   limit?: number;
 }) {
@@ -21,10 +19,9 @@ export async function getIncomesOutlet({
     const params = new URLSearchParams();
 
     if (outlet_id) params.append("outlet_id", outlet_id);
-    if (income_category_id)
-      params.append("income_category_id", income_category_id);
-    if (date_start) params.append("date_start", date_start);
-    if (date_end) params.append("date_end", date_end);
+
+    if (year) params.append("year", year);
+    if (month) params.append("month", month);
     params.append("page", String(page));
     params.append("per_page", String(limit));
 

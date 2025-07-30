@@ -11,6 +11,7 @@ export default function OutletIncome() {
   const [selectedOutletName, setSelectedOutletName] = useState<string | null>(
     null
   );
+
   console.log(getToken());
   return (
     <div>

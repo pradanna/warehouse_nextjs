@@ -4,15 +4,15 @@ import GenosTextfield from "@/components/form/GenosTextfield";
 import { toast } from "react-toastify";
 
 import {
-  createIncomesOutlet,
   deleteIncomesOutlet,
   getIncomesOutlet,
   getIncomesOutletbyId,
-  updateIncomesOutlet,
 } from "@/lib/api/incomeOutletApi";
 import { formatRupiah } from "@/lib/helper";
 import AddIncomeOutletModal from "@/components/form/incomeOutlet/AddIncomeOutletModal";
 import EditIncomeOutletModal from "@/components/form/incomeOutlet/EditIncomeOutletModal";
+import YearDropdown from "@/components/dropdown-button/YearDropDown";
+import MonthDropdown from "@/components/dropdown-button/MonthDropDown";
 
 interface IncomesOutletTableProps {
   outletId: string;
@@ -26,7 +26,6 @@ const IncomesOutletTable = ({
   const [incomeOutlets, setIncomesOutlets] = useState<any[]>([]);
   const [search, setSearch] = useState("");
 
-  const [name, setName] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalIncomesOutlets, setTotalIncomesOutlets] = useState(0);
   const limit = 10;
@@ -35,6 +34,13 @@ const IncomesOutletTable = ({
   // ADD VAR
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [idForEdit, setIdForEdit] = useState("");
+
+  // FILTER
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1;
+
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
   const handleOpen = () => {
     setIsModalOpen(true);
@@ -46,8 +52,6 @@ const IncomesOutletTable = ({
   };
 
   // EDIT VAR
-  const [editValue, setEditValue] = useState("");
-  const inputEditRef = useRef<HTMLInputElement>(null);
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
 
   const handleEditClose = () => {
@@ -55,36 +59,13 @@ const IncomesOutletTable = ({
     fetchIncomesOutlet(1);
   };
 
-  const handleEdit = async (id: string) => {
-    setIsModalEditOpen(true);
-
-    console.log("ID untuk edit:", id);
-    try {
-      const response = await getIncomesOutletbyId(id);
-      setEditValue(response.data.name);
-      setIdForEdit(id);
-
-      setTimeout(() => {
-        inputEditRef.current?.focus();
-        inputEditRef.current?.select();
-      }, 50);
-    } catch (err) {
-      console.error("Gagal mengambil data incomeOutlet untuk edit:", err);
-    }
-  };
-
-  const handleKeyDownEdit = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-    }
-  };
-
   // TABLE HEADER
   const TABLE_HEAD = [
     { key: "date", label: "Tanggal", sortable: true },
-    { key: "category.name", label: "kategori", sortable: true },
-    { key: "amount", label: "Jumlah", sortable: true },
-    { key: "description", label: "Keterangan", sortable: true },
+    { key: "cash", label: "Cash", sortable: true },
+    { key: "digital", label: "Digital", sortable: true },
+    { key: "total", label: "Total", sortable: true },
+    { key: "by_mutation", label: "Dari Mutasi", sortable: true },
     { key: "author.username", label: "Input By", sortable: true },
   ];
 
@@ -93,9 +74,10 @@ const IncomesOutletTable = ({
     return incomeOutlets.map((incomeOutlet) => ({
       id: incomeOutlet.id,
       date: incomeOutlet.date,
-      category: incomeOutlet.category,
-      amount: formatRupiah(incomeOutlet.amount),
-      description: incomeOutlet.description,
+      cash: formatRupiah(incomeOutlet.cash),
+      digital: formatRupiah(incomeOutlet.digital),
+      by_mutation: formatRupiah(incomeOutlet.by_mutation),
+      total: formatRupiah(incomeOutlet.total),
       author: incomeOutlet.author,
     }));
   }, [incomeOutlets]);
@@ -108,7 +90,7 @@ const IncomesOutletTable = ({
     if (outletId) {
       fetchIncomesOutlet(1); // bisa dimulai dari page 1
     }
-  }, [outletId]);
+  }, [outletId, selectedYear, selectedMonth]);
 
   const fetchIncomesOutlet = async (page: number) => {
     setIsLoadingTable(true);
@@ -116,12 +98,14 @@ const IncomesOutletTable = ({
     try {
       const response = await getIncomesOutlet({
         outlet_id: outletId,
+        year: selectedYear.toString(),
+        month: selectedMonth.toString(),
         page,
         limit,
       });
 
       setIncomesOutlets(response.data);
-      setTotalIncomesOutlets(response.meta.total_rows);
+      setTotalIncomesOutlets(response?.meta?.total_rows ?? 0);
     } catch (err: any) {
       toast.error(err.message, {
         autoClose: 1000,
@@ -166,24 +150,25 @@ const IncomesOutletTable = ({
         onPageChange={(page) => setCurrentPage(page)}
         onAddData={handleOpen}
         loading={isLoadingTable}
-        ACTION_BUTTON={{
-          edit: (row) => handleEdit(row.id),
-          delete: (row) => handleDelete(row.id),
-        }}
+        // ACTION_BUTTON={{
+        //   edit: (row) => handleEdit(row.id),
+        //   delete: (row) => handleDelete(row.id),
+        // }}
         FILTER={
           <div className="flex gap-4 mb-4">
-            <GenosTextfield
-              id="searh-incomeOutlet"
-              label="Cari Kategori Pengeluaran"
-              placeholder="Nama incomeOutlet"
-              className="w-full"
-              value={search}
-              is_icon_left={true}
-              onChange={(e) => {
-                console.log("onChange:", e.target.value);
-                setSearch(e.target.value);
-              }}
-            />
+            <div className="flex flex-wrap items-center gap-4 me-5">
+              <div>
+                <label className="block text-sm font-medium">Tahun</label>
+                <YearDropdown value={selectedYear} onChange={setSelectedYear} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium">Bulan</label>
+                <MonthDropdown
+                  value={selectedMonth}
+                  onChange={setSelectedMonth}
+                />
+              </div>
+            </div>
           </div>
         }
       />

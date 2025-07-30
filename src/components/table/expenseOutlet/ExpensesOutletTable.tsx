@@ -13,6 +13,7 @@ import {
   updateExpensesOutlet,
 } from "@/lib/api/expensesOutletApi";
 import { formatRupiah } from "@/lib/helper";
+import GenosDatepicker from "@/components/form/GenosDatepicker";
 
 interface ExpensesOutletTableProps {
   outletId: string;
@@ -35,6 +36,16 @@ const ExpensesOutletTable = ({
   // ADD VAR
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [idForEdit, setIdForEdit] = useState("");
+
+  // FILTER
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const todayEnd = new Date();
+  todayEnd.setHours(23, 59, 59, 999);
+
+  const [dateFrom, setDateFrom] = useState<Date | null>(todayStart);
+  const [dateTo, setDateTo] = useState<Date | null>(todayEnd);
 
   const handleOpen = () => {
     setIsModalOpen(true);
@@ -108,7 +119,7 @@ const ExpensesOutletTable = ({
     if (outletId) {
       fetchExpensesOutlet(1); // bisa dimulai dari page 1
     }
-  }, [outletId]);
+  }, [outletId, dateFrom, dateTo]);
 
   const fetchExpensesOutlet = async (page: number) => {
     setIsLoadingTable(true);
@@ -116,6 +127,8 @@ const ExpensesOutletTable = ({
     try {
       const response = await getExpensesOutlet({
         outlet_id: outletId,
+        date_start: dateFrom?.toISOString().split("T")[0],
+        date_end: dateTo?.toISOString().split("T")[0],
         page,
         limit,
       });
@@ -172,17 +185,18 @@ const ExpensesOutletTable = ({
         }}
         FILTER={
           <div className="flex gap-4 mb-4">
-            <GenosTextfield
-              id="searh-expensesOutlet"
-              label="Cari Kategori Pengeluaran"
-              placeholder="Nama expensesOutlet"
-              className="w-full"
-              value={search}
-              is_icon_left={true}
-              onChange={(e) => {
-                console.log("onChange:", e.target.value);
-                setSearch(e.target.value);
-              }}
+            <GenosDatepicker
+              id="tanggal-dari"
+              label="Dari Tanggal"
+              selected={dateFrom}
+              onChange={(date) => setDateFrom(date)}
+            />
+
+            <GenosDatepicker
+              id="tanggal-sampai"
+              label="Sampai Tanggal"
+              selected={dateTo}
+              onChange={(date) => setDateTo(date)}
             />
           </div>
         }
