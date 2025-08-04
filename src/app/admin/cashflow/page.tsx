@@ -22,7 +22,7 @@ interface CashflowItem {
   amount: number;
 }
 
-export default function Cashflow({ outlet_id, year, month }: Props) {
+export default function Cashflow(Props) {
   const [selectedOutletId, setSelectedOutletId] = useState<string | null>(null);
   const [selectedOutletName, setSelectedOutletName] = useState<string | null>(
     null
