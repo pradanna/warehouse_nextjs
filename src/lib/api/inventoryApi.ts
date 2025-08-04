@@ -117,12 +117,13 @@ export async function updateInventory(
   editItemId: string | number,
   editUnitId: string | number,
   editSku: string,
-  editDescription: string,
+  editDescription: string | "",
   editCurrentStock: number,
   editMinStock: number,
   editMaxStock: number,
   pricesArray: any
 ) {
+  console.log("PRICE ARRAY ", pricesArray);
   const payload = {
     item_id: editItemId,
     unit_id: editUnitId,

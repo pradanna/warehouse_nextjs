@@ -27,15 +27,6 @@ const InventoryTable = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [limit] = useState(10);
 
-  const [items, setItems] = useState([
-    { id: "item-1", name: "Item A" },
-    { id: "item-2", name: "Item B" },
-  ]);
-  const [units, setUnits] = useState([
-    { id: "unit-1", name: "PCS" },
-    { id: "unit-2", name: "BOX" },
-  ]);
-
   const [addItemId, setAddItemId] = useState<string | number>("");
   const [addUnitId, setAddUnitId] = useState<string | number>("");
   const [addSku, setAddSku] = useState("");
@@ -47,6 +38,10 @@ const InventoryTable = () => {
   const [outletPrices, setOutletPrices] = useState<{ [key: string]: number }>(
     {}
   );
+  const [initialOutletPrices, setInitialOutletPrices] = useState<
+    Record<string, number>
+  >({});
+
   const [outlets, setOutlets] = useState<any[]>([]);
 
   const [editId, setEditId] = useState("");
@@ -68,6 +63,8 @@ const InventoryTable = () => {
   const [sku, setSku] = useState("");
   const [description, setDescription] = useState("");
   const [param, setparam] = useState("");
+  const [items, setItems] = useState([]);
+  const [units, setUnits] = useState([]);
 
   const TABLE_HEAD = useMemo(
     () => [
@@ -199,7 +196,7 @@ const InventoryTable = () => {
       );
 
       console.log("outletPriceObj =", JSON.stringify(outletPricesObj, null, 2));
-
+      setInitialOutletPrices(outletPricesObj);
       setEditOutletPrices(outletPricesObj); // asumsikan kamu pakai state ini
       setIsModalEditOpen(true);
     } catch (err) {
@@ -209,7 +206,7 @@ const InventoryTable = () => {
 
   useEffect(() => {
     fetchInventory();
-  }, [itemId, unitId, sku, description]);
+  }, [itemId]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -244,19 +241,26 @@ const InventoryTable = () => {
 
   const handleSubmitEdit = async () => {
     try {
-      const pricesArray = Object.entries(outletPrices).map(
+      const mergedPrices = {
+        ...initialOutletPrices,
+        ...outletPrices, // ini akan menimpa data awal jika ada perubahan
+      };
+
+      const pricesArray = Object.entries(mergedPrices).map(
         ([outlet_id, price]) => ({
           outlet_id,
           price,
         })
       );
 
-      const response = await updateInventory(
+      console.log("PRICEARRAY OBJECT ", pricesArray);
+
+      await updateInventory(
         editId,
         editItemId,
         editUnitId,
         editSku,
-        editDescription,
+        editDescription ?? "",
         editCurrentStock,
         editMinStock,
         editMaxStock,
@@ -288,17 +292,23 @@ const InventoryTable = () => {
         isBelowStock={(row) => row.current_stock < row.min_stock}
         isAboveStock={(row) => row.current_stock > row.max_stock}
         FILTER={
-          <div className="flex gap-4 mb-4 items-end ">
+          <div className="flex gap-4 mb-4 items-end w-52">
             <GenosSearchSelect
               label="Item"
               placeholder="Pilih item"
-              className=" text-xs"
+              className="text-xs w-6xl"
               options={items.map((i) => ({ value: i.id, label: i.name }))}
               value={itemId}
-              onChange={setItemId}
+              onChange={(selectedId) => {
+                setItemId(selectedId);
+                const selectedItem = items.find((i) => i.id === selectedId);
+                if (selectedItem) {
+                  setparam(selectedItem.name); // pastikan kamu punya state setItemName
+                }
+              }}
             />
 
-            <GenosSearchSelect
+            {/* <GenosSearchSelect
               label="Unit"
               placeholder="Pilih unit"
               className="w-64 text-xs"
@@ -323,7 +333,7 @@ const InventoryTable = () => {
               className="w-64 text-xs"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-            />
+            /> */}
           </div>
         }
         ACTION_BUTTON={{
