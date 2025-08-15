@@ -6,26 +6,9 @@ import { addOneDay } from "@/lib/helper";
 
 import { createAdjustment, getAdjustmentIn } from "@/lib/api/adjustmentApi";
 import GenosTextfield from "@/components/form/GenosTextfield";
-import GenosSearchSelect from "@/components/form/GenosSearchSelect";
-import { getInventory } from "@/lib/api/inventoryApi";
+import GenosSearchSelectInventory from "@/components/select-search/InventorySearch";
 
-type Props = {
-  search: string;
-  setSearch: (value: string) => void;
-  dateFrom: Date | null;
-  setDateFrom: (value: Date | null) => void;
-  dateTo: Date | null;
-  setDateTo: (value: Date | null) => void;
-};
-
-const AdjustmentTableIn = ({
-  search,
-  setSearch,
-  dateFrom,
-  setDateFrom,
-  dateTo,
-  setDateTo,
-}: Props) => {
+const AdjustmentTableIn = ({ search, dateFrom, dateTo }) => {
   interface Adjustment {
     id: string;
     name: string;
@@ -44,13 +27,9 @@ const AdjustmentTableIn = ({
   const [qty, setQty] = useState<string | number>(0);
   const [deskripsi, setDeskripsi] = useState<string>("");
 
-  const [AdjustmentInDetail, setAdjustmentInDetail] = useState<any>();
   const [isModalAddOpen, setModalAddOpen] = useState(false);
 
-  const [inventories, setInventories] = useState<any>();
-  const [selectedItem, setSelectedItem] = useState<any>();
-  const [selectedInventory, setSelectedInventory] = useState<any>();
-  const [param, setparam] = useState<string>("");
+  const [selectedItemId, setSelectedItemId] = useState<string>("");
   const TABLE_HEAD = useMemo(
     () => [
       { key: "item.name", label: "Nama Barang", sortable: true, type: "text" },
@@ -86,6 +65,10 @@ const AdjustmentTableIn = ({
   const FetchAdjustment = async () => {
     setIsLoadingTable(true);
 
+    console.log("Search:", search);
+    console.log("Date From:", dateFrom);
+    console.log("Date To:", dateTo);
+
     try {
       const res = await getAdjustmentIn(
         currentPage,
@@ -96,7 +79,8 @@ const AdjustmentTableIn = ({
       );
       setAdjustmentData(res.data);
       setTABLE_ROWS(res.data);
-      setTotalItems(res.total);
+
+      setTotalItems(res.meta.total_rows);
     } catch (err) {
       console.log(err);
     }
@@ -108,26 +92,18 @@ const AdjustmentTableIn = ({
     FetchAdjustment();
   }, [search, dateFrom, dateTo, currentPage]);
 
-  useEffect(() => {
-    if (AdjustmentInDetail) {
-      console.log("AdjustmentIn detail updated:", AdjustmentInDetail);
-    }
-  }, [AdjustmentInDetail]);
-
   const handleOpenModalAdd = () => {
     setModalAddOpen(true);
   };
 
   const handleSaveAdjustmentIn = async () => {
     const payload = {
-      inventory_id: selectedInventory.id,
+      inventory_id: selectedItemId,
       type: "in",
       quantity: qty,
       description: deskripsi,
       date: new Date().toISOString().slice(0, 10),
     };
-
-    console.log("Payload:", payload);
 
     try {
       const res = await createAdjustment(payload);
@@ -140,6 +116,7 @@ const AdjustmentTableIn = ({
         });
         setModalAddOpen(false);
         FetchAdjustment();
+        refreshFields();
       } else {
         toast.error("Penyesuaian gagal disimpan", {
           autoClose: 1000,
@@ -153,21 +130,11 @@ const AdjustmentTableIn = ({
     }
   };
 
-  useEffect(() => {
-    const fetchInventories = async () => {
-      try {
-        const res = await getInventory(param, 1, 1000);
-        // Sesuaikan dengan struktur data dari API
-        setInventories(res.data);
-        console.log("Inventories:", res.data);
-      } catch (error) {
-        console.error("Gagal memuat inventory:", error);
-        toast.error("Gagal memuat data inventory");
-      }
-    };
-
-    fetchInventories();
-  }, []);
+  const refreshFields = () => {
+    setSelectedItemId("");
+    setQty(0);
+    setDeskripsi("");
+  };
 
   return (
     <>
@@ -203,7 +170,16 @@ const AdjustmentTableIn = ({
           onClose={() => setModalAddOpen(false)}
           onSubmit={handleSaveAdjustmentIn}
         >
-          <GenosSearchSelect
+          <GenosSearchSelectInventory
+            label="Item"
+            placeholder="Pilih item"
+            className={"mb-5"}
+            value={selectedItemId}
+            onChange={(itemId) => {
+              setSelectedItemId(itemId as string);
+            }}
+          />
+          {/* <GenosSearchSelect
             label="Item"
             placeholder="Pilih item"
             className="w-full mb-5"
@@ -231,7 +207,7 @@ const AdjustmentTableIn = ({
 
               // setUnit(inv?.unit.name || "-");
             }}
-          />
+          /> */}
 
           <GenosTextfield
             id="jumlah-barang"

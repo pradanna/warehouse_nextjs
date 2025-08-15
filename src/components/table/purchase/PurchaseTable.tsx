@@ -7,13 +7,12 @@ import { toast } from "react-toastify";
 import GenosSearchSelect from "../../form/GenosSearchSelect";
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import GenosButton from "../../button/GenosButton";
-import { getInventory } from "@/lib/api/inventoryApi";
+import { getInventory } from "@/lib/api/inventory/inventoryApi";
 import {
   createPurchases,
   getPurchases,
   getPurchasesById,
 } from "@/lib/api/purchaseApi";
-import { getSupplier } from "@/lib/api/supplierApi";
 import {
   clearSupplierFromLocal,
   getSupplierFromLocal,
@@ -28,6 +27,14 @@ import {
 import { generatePurchasePDF } from "@/components/PDF/printPurchasePDF";
 import { generatePurchaseExcel } from "@/components/excel/printPurchaseExcel";
 import PurchaseDetailModal from "@/components/form/purchase/purchaseDetail";
+import GenosSearchSelectSupplier from "@/components/select-search/SupplierSearch";
+import GenosSearchSelectInventory from "@/components/select-search/InventorySearch";
+import {
+  fetchInventoryById,
+  InventoryData,
+} from "@/lib/api/inventory/inventory-getbyid-api";
+import { formatRupiah } from "@/lib/helper";
+import { fetchSupplierById } from "@/lib/api/supplier/supplier-getbyid-api";
 
 const PurchaseTable = () => {
   const [data, setData] = useState([]);
@@ -43,13 +50,12 @@ const PurchaseTable = () => {
   const [isModalSupplierOpen, setIsModalSupplierOpen] = useState(false);
   const [selectedCart, setSelectedCart] = useState<null | any>(null);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [selectedInventory, setSelectedInventory] = useState<null | any>(null);
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
-  const [isSaving, setIsSaving] = useState(false);
   const [cartItems, setCartItems] = useState<any>([]);
 
-  const [inventories, setInventories] = useState([]);
+  const [selectedInventory, setSelectedInventory] =
+    useState<InventoryData | null>(null);
 
   // State tambahan untuk modal simpan purchase
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
@@ -58,7 +64,7 @@ const PurchaseTable = () => {
     useState(false);
   const [isModalViewOpen, setModalViewOpen] = useState(false);
   const [modalViewId, setModalViewId] = useState<any>();
-  const [supplierId, setSupplierId] = useState<string | null | number>(null);
+  const [supplierId, setSupplierId] = useState<string>(null);
   const [paymentType, setPaymentType] = useState("cash");
   const [paymentMetode, setPaymentMetode] = useState("cash");
   const [purchaseDescription, setPurchaseDescription] = useState("");
@@ -77,11 +83,15 @@ const PurchaseTable = () => {
   const [dpAmount, setDpAmount] = useState(0);
   const [payAmount, setPayAmount] = useState(0);
   const [supplierName, setSupplierName] = useState<string | null>("");
-  const [param, setparam] = useState<string>("");
   const [isFromTambah, setIsFromTambah] = useState(false);
 
   const [purchaseId, setPurchaseId] = useState<string | null>(null);
 
+  const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(
+    null
+  );
+
+  // FETCH PURCHASE
   const fetchPurchases = async () => {
     setIsLoading(true);
     try {
@@ -102,30 +112,10 @@ const PurchaseTable = () => {
   };
 
   useEffect(() => {
-    const fetchInventories = async () => {
-      try {
-        const res = await getInventory(param, 1, 1000);
-        // Sesuaikan dengan struktur data dari API
-        setInventories(res.data);
-        console.log("Inventories:", res.data);
-      } catch (error) {
-        console.error("Gagal memuat inventory:", error);
-        toast.error("Gagal memuat data inventory");
-      }
-    };
+    fetchPurchases();
+  }, [currentPage, limit, search, selectedSupplier]);
 
-    fetchInventories();
-  }, []);
-
-  const fetchSuppliers = async () => {
-    try {
-      const res = await getSupplier("", 1, 1000);
-      setSuppliers(res.data);
-    } catch (err) {
-      toast.error("Gagal mengambil data supplier");
-    }
-  };
-
+  // MODAL
   const handleOpen = () => {
     const supplier = getSupplierFromLocal();
     setIsFromTambah(true);
@@ -139,21 +129,56 @@ const PurchaseTable = () => {
   const handleClose = () => {
     setIsModalOpen(false);
     setSelectedItem(null);
-    setSelectedInventory(null);
     setQuantity(1);
     setPrice(0);
     setSelectedCart(null);
   };
 
-  useEffect(() => {
-    fetchPurchases();
-  }, [currentPage, limit, search, selectedSupplier]);
+  // GETDATABYID
+  const getInventoryDatabyId = async (id: string) => {
+    try {
+      const res = await fetchInventoryById(id);
+      return res.data;
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
+  };
 
-  useEffect(() => {
-    fetchSuppliers();
-  }, []);
+  const getSupplierDatabyId = async (id: string) => {
+    try {
+      const res = await fetchSupplierById(id);
+      return res.data;
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
+  };
 
-  const handleSaveCart = () => {
+  const handleSetSupplier = async () => {
+    console.log("handleSetSupplier");
+
+    if (supplierId) {
+      const supplier = await getSupplierDatabyId(supplierId);
+      if (supplier) {
+        saveSupplierToLocal(supplier.id, supplier.name);
+        const savedSupplier = getSupplierFromLocal();
+        if (savedSupplier) {
+          setSupplierName(savedSupplier.name);
+        }
+      } else {
+        toast.error("Supplier tidak ditemukan");
+      }
+      setIsModalSupplierOpen(false);
+    } else {
+      toast.error("Pilih supplier terlebih dahulu");
+    }
+    if (isFromTambah) {
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleSaveCart = async () => {
     const existingCart = getItemsFromLocal();
 
     if (!selectedItem) {
@@ -161,10 +186,12 @@ const PurchaseTable = () => {
       return;
     }
 
-    setIsSaving(true);
+    await getInventoryDatabyId(selectedItem).then((res) => {
+      setSelectedInventory(res);
+    });
 
     const newItem: PurchaseCartItem = {
-      inventory_id: selectedInventory?.id || "-",
+      inventory_id: selectedItem || "-",
       item_id: selectedItem,
       name: selectedInventory?.item.name || "-",
       unit_id: selectedInventory?.unit.id || "-",
@@ -190,14 +217,12 @@ const PurchaseTable = () => {
 
     setItemsToLocal(existingCart);
 
-    setSelectedInventory(null);
     setQuantity(1);
     setPrice(0);
 
     toast.success("Item berhasil ditambahkan ke cart");
     handleClose();
     setCartItems(getItemsFromLocal());
-    setIsSaving(false);
   };
 
   useEffect(() => {
@@ -307,27 +332,6 @@ const PurchaseTable = () => {
     }
   };
 
-  const handleSetSupplier = () => {
-    console.log("handleSetSupplier");
-
-    const selectedSupplier = suppliers.find(
-      (s: any) => s.id === supplierId
-    ) as any;
-    if (selectedSupplier) {
-      saveSupplierToLocal(selectedSupplier.id, selectedSupplier.name);
-
-      const savedSupplier = getSupplierFromLocal();
-      if (savedSupplier) {
-        setSupplierName(savedSupplier.name);
-      }
-    }
-    setIsModalSupplierOpen(false);
-
-    if (isFromTambah) {
-      setIsModalOpen(true);
-    }
-  };
-
   const handleDownloadPDF = () => {
     generatePurchasePDF(purchaseDetail);
   };
@@ -338,16 +342,11 @@ const PurchaseTable = () => {
 
   const FILTER = (
     <div className="flex gap-4 mb-4 items-end">
-      <GenosSearchSelect
-        label="Supplier"
+      <GenosSearchSelectSupplier
+        value={selectedSupplierId}
+        onChange={(val: any) => setSelectedSupplierId(val)}
         placeholder="Pilih supplier"
-        className="w-64 text-xs"
-        options={suppliers.map((s: any) => ({
-          value: s.id,
-          label: s.name,
-        }))}
-        value={selectedSupplier}
-        onChange={(val: any) => setSelectedSupplier(val)}
+        label="Supplier"
       />
       <GenosTextfield
         id="search"
@@ -379,10 +378,6 @@ const PurchaseTable = () => {
         )
     );
     setPayFromDetaildModalOpen(true);
-  };
-
-  const closeDetailPayment = () => {
-    setPayFromDetaildModalOpen(false);
   };
 
   // AMBIL DATA SUPPLIER
@@ -452,36 +447,15 @@ const PurchaseTable = () => {
             onSubmit={handleSaveCart}
           >
             <div className="grid grid-cols-1 gap-4 text-xs">
-              <GenosSearchSelect
+              <GenosSearchSelectInventory
                 label="Item"
                 placeholder="Pilih item"
                 className="w-full"
-                options={inventories.map((inv: any) => ({
-                  value: inv.item.id,
-                  label: `${inv.item.name} - ${inv.unit.name || "-"}`,
-                }))}
                 value={selectedItem}
                 onChange={(itemId: any) => {
-                  console.log("selectedItem " + selectedItem);
-                  console.log("itemId " + itemId);
-
-                  console.log("Semua ID inventories:");
-                  inventories.forEach((i: any) => console.log(i.item.id));
-
-                  console.log("ItemId yang dicari:", itemId);
-
-                  const inv = inventories.find(
-                    (i: any) => i.item.id === itemId
-                  ) as any;
-                  console.log("INV", inv);
-                  console.log("inv.item.name", inv.item.name);
                   setSelectedItem(itemId);
-                  setSelectedInventory(inv);
-
-                  // setUnit(inv?.unit.name || "-");
                 }}
               />
-
               <div className="grid grid-cols-2 gap-4">
                 <GenosTextfield
                   id="tambah-qty"
@@ -569,21 +543,21 @@ const PurchaseTable = () => {
                 </div>
                 <div className="flex justify-between">
                   <span>Diskon</span>
-                  <span>-{discountAmount.toLocaleString()}</span>
+                  <span>-{formatRupiah(discountAmount)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Pajak</span>
-                  <span>+{taxAmount.toLocaleString()}</span>
+                  <span>+{formatRupiah(taxAmount)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg mt-1">
                   <span>Total</span>
-                  <span>{totalAmount.toLocaleString()}</span>
+                  <span>{formatRupiah(totalAmount)}</span>
                 </div>
               </div>
 
               <button
                 onClick={gotoPaymentMetod}
-                className="bg-green-600 text-white py-2 rounded hover:bg-green-700"
+                className="bg-green-600 text-white py-2 rounded hover:bg-green-700 cursor-pointer w-full"
               >
                 Simpan
               </button>
@@ -600,16 +574,11 @@ const PurchaseTable = () => {
           onClose={() => setIsModalSupplierOpen(false)}
           onSubmit={handleSetSupplier}
         >
-          <GenosSearchSelect
-            label="Supplier"
+          <GenosSearchSelectSupplier
+            value={supplierId?.toString()}
+            onChange={(val: any) => setSupplierId(val)}
             placeholder="Pilih supplier"
-            className="w-full"
-            options={suppliers.map((s: any) => ({
-              value: s.id,
-              label: s.name,
-            }))}
-            value={supplierId}
-            onChange={setSupplierId}
+            label="Item"
           />
         </GenosModal>
       )}
@@ -729,16 +698,19 @@ const PurchaseTable = () => {
           <div className="flex justify-between font-semibold">
             <span>Total</span>
             <span>
-              {cartItems
-                .reduce((acc: number, item: any) => acc + item.total, 0)
-                .toLocaleString()}
+              {formatRupiah(
+                cartItems.reduce(
+                  (acc: number, item: any) => acc + item.total,
+                  0
+                )
+              )}
             </span>
           </div>
 
           <GenosButton
-            label="Proses Penjualan"
+            label="Proses Pembelian"
             onClick={handleOpenSavePurchase}
-            className="text-center text-white px-4 py-2 rounded hover:bg-primary-dark"
+            className="text-center text-white px-4 py-2 rounded hover:bg-primary-dark justify-center"
           ></GenosButton>
         </div>
       </div>

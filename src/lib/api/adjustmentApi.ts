@@ -74,7 +74,7 @@ export async function getAdjustmentIn(
       params: {
         page: currentPage,
         per_page: limit,
-        param,
+        param: param,
         date_start,
         date_end,
         type: "in",
@@ -83,6 +83,8 @@ export async function getAdjustmentIn(
         Authorization: `Bearer ${getToken()}`,
       },
     });
+
+    console.log("Response param:", res.data);
 
     return res.data;
   } catch (err: any) {

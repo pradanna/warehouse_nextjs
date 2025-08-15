@@ -16,7 +16,7 @@ import {
 import GenosSelect from "@/components/form/GenosSelect";
 import GenosTextfield from "@/components/form/GenosTextfield";
 import GenosSearchSelect from "@/components/form/GenosSearchSelect";
-import { getInventory } from "@/lib/api/inventoryApi";
+import { getInventory } from "@/lib/api/inventory/inventoryApi";
 
 const AdjustmentTable = () => {
   const [isLoadingTable, setIsLoadingTable] = useState(false);

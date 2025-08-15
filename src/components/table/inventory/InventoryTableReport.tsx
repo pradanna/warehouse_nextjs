@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import GenosTable from "@/components/table/GenosTable";
 import GenosTextfield from "@/components/form/GenosTextfield";
 import { toast } from "react-toastify";
-import { getInventory } from "@/lib/api/inventoryApi";
+import { getInventory } from "@/lib/api/inventory/inventoryApi";
 import { getItems } from "@/lib/api/itemApi";
 import { getUnit } from "@/lib/api/unitApi";
 import GenosDropdown from "@/components/button/GenosDropdown";

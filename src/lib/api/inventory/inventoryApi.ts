@@ -5,8 +5,8 @@ import {
   setToken,
 } from "@/app/config/config";
 import axios from "axios";
-import { refreshToken } from "./auth";
-import axiosInstance from "./axiosInstance";
+import { refreshToken } from "../auth";
+import axiosInstance from "../axiosInstance";
 
 export async function getInventory(
   param: string,

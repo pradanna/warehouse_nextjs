@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { addOneDay } from "@/lib/helper";
 
 import { getAdjustmentIn } from "@/lib/api/adjustmentApi";
-import { getInventory } from "@/lib/api/inventoryApi";
+import { getInventory } from "@/lib/api/inventory/inventoryApi";
 
 type Props = {
   search: string;
@@ -93,7 +93,7 @@ const AdjustmentTableInReport = ({
       );
       setAdjustmentData(res.data);
       setTABLE_ROWS(res.data);
-      setTotalItems(res.total);
+      setTotalItems(res.meta.total_rows);
     } catch (err) {
       console.log(err);
     }

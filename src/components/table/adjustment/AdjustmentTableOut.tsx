@@ -7,25 +7,16 @@ import { addOneDay } from "@/lib/helper";
 import { createAdjustment, getAdjustmentOut } from "@/lib/api/adjustmentApi";
 import GenosTextfield from "@/components/form/GenosTextfield";
 import GenosSearchSelect from "@/components/form/GenosSearchSelect";
-import { getInventory } from "@/lib/api/inventoryApi";
+import { getInventory } from "@/lib/api/inventory/inventoryApi";
+import GenosSearchSelectInventory from "@/components/select-search/InventorySearch";
 
 type Props = {
   search: string;
-  setSearch: (value: string) => void;
   dateFrom: Date | null;
-  setDateFrom: (value: Date | null) => void;
   dateTo: Date | null;
-  setDateTo: (value: Date | null) => void;
 };
 
-const AdjustmentTableOut = ({
-  search,
-  setSearch,
-  dateFrom,
-  setDateFrom,
-  dateTo,
-  setDateTo,
-}: Props) => {
+const AdjustmentTableOut = ({ search, dateFrom, dateTo }: Props) => {
   interface Adjustment {
     id: string;
     name: string;
@@ -38,23 +29,15 @@ const AdjustmentTableOut = ({
   const [adjustmentData, setAdjustmentData] = useState<Adjustment[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
-  const [type, setType] = useState("");
   const [TABLE_ROWS, setTABLE_ROWS] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [qty, setQty] = useState<string | number>(0);
   const [deskripsi, setDeskripsi] = useState<string>("");
-  const [totalSisaAdjustment, setTotalSisaAdjustment] = useState(0);
 
-  const [modalViewId, setModalViewId] = useState<any>();
-  const [isModalViewOpen, setModalViewOpen] = useState(false);
-  const [debtDetail, setAdjustmentDetail] = useState<any>();
   const [AdjustmentOutDetail, setAdjustmentOutDetail] = useState<any>();
   const [isModalAddOpen, setModalAddOpen] = useState(false);
 
-  const [inventories, setInventories] = useState<any>();
-  const [selectedItem, setSelectedItem] = useState<any>();
-  const [selectedInventory, setSelectedInventory] = useState<any>();
-  const [param, setparam] = useState<string>("");
+  const [selectedItemId, setSelectedItemId] = useState<string>("");
 
   const TABLE_HEAD = useMemo(
     () => [
@@ -101,7 +84,7 @@ const AdjustmentTableOut = ({
       );
       setAdjustmentData(res.data);
       setTABLE_ROWS(res.data);
-      setTotalItems(res.total);
+      setTotalItems(res.meta.total_rows);
     } catch (err) {
       console.log(err);
     }
@@ -123,12 +106,18 @@ const AdjustmentTableOut = ({
     setModalAddOpen(true);
   };
 
+  const refreshFields = () => {
+    setSelectedItemId("");
+    setQty(0);
+    setDeskripsi("");
+  };
+
   const handleSaveAdjustmentOut = async () => {
     const payload = {
-      inventory_id: selectedInventory.id,
+      inventory_id: selectedItemId,
       type: "out",
       quantity: qty,
-      deskripsi,
+      description: deskripsi,
       date: new Date().toISOString().slice(0, 10),
     };
 
@@ -145,6 +134,7 @@ const AdjustmentTableOut = ({
         });
         setModalAddOpen(false);
         FetchAdjustment();
+        refreshFields();
       } else {
         toast.error("Penyesuaian gagal disimpan", {
           autoClose: 1000,
@@ -157,22 +147,6 @@ const AdjustmentTableOut = ({
       });
     }
   };
-
-  useEffect(() => {
-    const fetchInventories = async () => {
-      try {
-        const res = await getInventory(param, 1, 1000);
-        // Sesuaikan dengan struktur data dari API
-        setInventories(res.data);
-        console.log("Inventories:", res.data);
-      } catch (error) {
-        console.error("Gagal memuat inventory:", error);
-        toast.error("Gagal memuat data inventory");
-      }
-    };
-
-    fetchInventories();
-  }, []);
 
   return (
     <>
@@ -208,33 +182,13 @@ const AdjustmentTableOut = ({
           onClose={() => setModalAddOpen(false)}
           onSubmit={handleSaveAdjustmentOut}
         >
-          <GenosSearchSelect
+          <GenosSearchSelectInventory
             label="Item"
             placeholder="Pilih item"
-            className="w-full mb-5"
-            options={inventories.map((inv: any) => ({
-              value: inv.item.id,
-              label: `${inv.item.name} - ${inv.unit.name || "-"}`,
-            }))}
-            value={selectedItem}
-            onChange={(itemId: any) => {
-              console.log("selectedItem " + selectedItem);
-              console.log("itemId " + itemId);
-
-              console.log("Semua ID inventories:");
-              inventories.forEach((i: any) => console.log(i.item.id));
-
-              console.log("ItemId yang dicari:", itemId);
-
-              const inv = inventories.find(
-                (i: any) => i.item.id === itemId
-              ) as any;
-              console.log("INV", inv);
-              console.log("inv.item.name", inv.item.name);
-              setSelectedItem(itemId);
-              setSelectedInventory(inv);
-
-              // setUnit(inv?.unit.name || "-");
+            className={"mb-5"}
+            value={selectedItemId}
+            onChange={(itemId) => {
+              setSelectedItemId(itemId as string);
             }}
           />
 

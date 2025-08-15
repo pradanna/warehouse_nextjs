@@ -15,8 +15,8 @@ export default function Stock_Adjustment_HistoryPage() {
 
   return (
     <div>
-      <GenosPanel>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <GenosPanel className="mt-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 ">
           <GenosTextfield
             id="search"
             label="Search"

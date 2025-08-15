@@ -5,13 +5,16 @@ import GenosTextfield from "@/components/form/GenosTextfield";
 import GenosPanel from "@/components/panel/GenosPanel";
 import AdjustmentTableIn from "@/components/table/adjustment/AdjustmentTableIn";
 import AdjustmentTableOut from "@/components/table/adjustment/AdjustmentTableOut";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function AdjustmentPage() {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState<string>("");
   const [dateFrom, setDateFrom] = useState<Date | null>(null);
   const [dateTo, setDateTo] = useState<Date | null>(null);
+
+  useEffect(() => {
+    console.log("search and dateFrom and dateTo:", search + dateFrom + dateTo);
+  }, [search, dateFrom, dateTo]);
 
   return (
     <div>
@@ -21,6 +24,7 @@ export default function AdjustmentPage() {
             id="search"
             label="Search"
             placeholder="Search"
+            value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
 
@@ -48,11 +52,8 @@ export default function AdjustmentPage() {
         >
           <AdjustmentTableIn
             search={search}
-            setSearch={setSearch}
             dateFrom={dateFrom}
-            setDateFrom={setDateFrom}
             dateTo={dateTo}
-            setDateTo={setDateTo}
           />
         </GenosPanel>
 
@@ -63,11 +64,8 @@ export default function AdjustmentPage() {
         >
           <AdjustmentTableOut
             search={search}
-            setSearch={setSearch}
             dateFrom={dateFrom}
-            setDateFrom={setDateFrom}
             dateTo={dateTo}
-            setDateTo={setDateTo}
           />
         </GenosPanel>
       </div>

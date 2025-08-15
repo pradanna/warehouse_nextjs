@@ -4,32 +4,36 @@ import { useDebounce } from "@/lib/utils/useDebounce";
 import React, { useState } from "react";
 import GenosSearchSelect from "../form/GenosSearchSelect";
 import useSWR from "swr";
-import { getMaterialCategory } from "@/lib/api/materialCategoryApi";
+import { getSupplier } from "@/lib/api/supplierApi";
 
-interface GenosSearchSelectMaterialCategoryProps {
+interface GenosSearchSelectSupplier {
   value: string | null;
   onChange: (value: string | null) => void;
   placeholder?: string;
   label?: string;
+  className?: string;
 }
 
-export default function GenosSearchSelectMaterialCategory({
+export default function GenosSearchSelectSupplier({
   value,
   onChange,
-  placeholder = "Cari Kategori Pengeluaran...",
-  label = "kategori Pengeluaran",
-}: GenosSearchSelectMaterialCategoryProps) {
+  placeholder = "Pilih Supplier...",
+  label = "item",
+  className = "",
+}: GenosSearchSelectSupplier) {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
 
   const { data, isLoading } = useSWR(
-    ["Kategori Pengeluaran", debouncedSearch],
+    ["Supplier", debouncedSearch],
     async () => {
-      const res = await getMaterialCategory(debouncedSearch, 1, 1000);
+      const res = await getSupplier(debouncedSearch, 1, 2000);
+      console.log("SEARCH SUP", res.data);
       return res.data.map((o: any) => ({
         value: o.id,
         label: o.name,
       }));
+      console.log(data);
     }
   );
 
@@ -41,7 +45,7 @@ export default function GenosSearchSelectMaterialCategory({
       placeholder={placeholder}
       options={data || []}
       isLoading={isLoading}
-      className="mb-3"
+      className={className}
     />
   );
 }

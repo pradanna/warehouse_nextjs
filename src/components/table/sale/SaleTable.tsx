@@ -10,7 +10,7 @@ import GenosSearchSelect from "@/components/form/GenosSearchSelect";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import GenosButton from "@/components/button/GenosButton";
 import { createSalePayment, getSales, getSalesById } from "@/lib/api/saleApi";
-import { getInventory } from "@/lib/api/inventoryApi";
+import { getInventory } from "@/lib/api/inventory/inventoryApi";
 import { getOutlet } from "@/lib/api/outletApi";
 import {
   getOutletFromLocal,
@@ -25,6 +25,13 @@ import {
 import { generateSalePDF } from "@/components/PDF/printSalePDF";
 import { generateSaleExcel } from "@/components/excel/printSaleExcel";
 import SaleDetailModal from "@/components/form/sale/saleDetail";
+import GenosSearchSelectOutlet from "@/components/select-search/GenosSearchOutlet";
+import { fetchOutletById } from "@/lib/api/outlet/supplier-getbyid-api";
+import {
+  fetchInventoryById,
+  InventoryData,
+} from "@/lib/api/inventory/inventory-getbyid-api";
+import GenosSearchSelectInventory from "@/components/select-search/InventorySearch";
 
 const SaleTable = () => {
   const [data, setData] = useState([]);
@@ -41,7 +48,8 @@ const SaleTable = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCart, setSelectedCart] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [selectedInventory, setSelectedInventory] = useState<any>(null);
+  const [selectedInventory, setSelectedInventory] =
+    useState<InventoryData | null>(null);
   const [unit, setUnit] = useState("-");
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
@@ -85,6 +93,7 @@ const SaleTable = () => {
   const [saleId, setSaleId] = useState<string | null>(null);
   const [payAmount, setPayAmount] = useState(0);
 
+  // FETCHSALES
   const fetchSales = async () => {
     setIsLoading(true);
     try {
@@ -100,28 +109,8 @@ const SaleTable = () => {
   };
 
   useEffect(() => {
-    const fetchInventories = async () => {
-      try {
-        const res = await getInventory(param, 1, 1000);
-        // Sesuaikan dengan struktur data dari API
-        setInventories(res.data);
-      } catch (error) {
-        console.error("Gagal memuat inventory:", error);
-        toast.error("Gagal memuat data inventory");
-      }
-    };
-
-    fetchInventories();
-  }, []);
-
-  const fetchOutlets = async () => {
-    try {
-      const res = await getOutlet("", 1, 1000);
-      setOutlets(res.data);
-    } catch (err) {
-      toast.error("Gagal mengambil data outlet");
-    }
-  };
+    fetchSales();
+  }, [currentPage, limit, search, selectedOutlet]);
 
   const handleOpen = () => {
     const Outlet = getOutletFromLocal();
@@ -143,13 +132,62 @@ const SaleTable = () => {
     setSelectedCart(null);
   };
 
-  useEffect(() => {
-    fetchSales();
-  }, [currentPage, limit, search, selectedOutlet]);
+  // GETDATABYID
+  const getInventoryDatabyId = async (id: string) => {
+    try {
+      const res = await fetchInventoryById(id);
+      return res.data;
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
+  };
 
-  useEffect(() => {
-    fetchOutlets();
-  }, []);
+  const getOutletrDatabyId = async (id: string) => {
+    try {
+      const res = await fetchOutletById(id);
+      return res.data;
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
+  };
+
+  const handleSetOutlet = async () => {
+    const outlet = await getOutletrDatabyId(outletId.toString());
+
+    if (!outlet) {
+      toast.error("Outlet tidak ditemukan");
+      return;
+    }
+
+    const savedOutlet = getOutletFromLocal();
+
+    // Jika outlet sebelumnya berbeda, munculkan konfirmasi
+    if (savedOutlet && savedOutlet.id !== outletId) {
+      const confirmChange = window.confirm(
+        "Mengganti outlet akan menghapus semua item di keranjang. Lanjutkan?"
+      );
+
+      if (!confirmChange) return;
+
+      clearItemsFromLocal();
+      setCartItems([]);
+    }
+
+    saveOutletToLocal(outlet.id, outlet.name);
+
+    const newSavedOutlet = getOutletFromLocal();
+    if (newSavedOutlet) {
+      setOutletName(newSavedOutlet.name);
+    }
+
+    setIsModalOutletOpen(false);
+
+    if (isFromTambah) {
+      setIsModalOpen(true);
+    }
+  };
 
   const handleSaveCart = () => {
     const existingCart = getItemsFromLocal();
@@ -271,41 +309,6 @@ const SaleTable = () => {
     console.log("setIsSaleModalOpen " + isSaleModalOpen);
   };
 
-  const handleSetOutlet = () => {
-    console.log("handleSetOutlet");
-
-    const selectedOutlet = outlets.find((s: any) => s.id === outletId) as any;
-
-    if (!selectedOutlet) return;
-
-    const savedOutlet = getOutletFromLocal();
-
-    // Jika outlet sebelumnya berbeda, munculkan konfirmasi
-    if (savedOutlet && savedOutlet.id !== selectedOutlet.id) {
-      const confirmChange = window.confirm(
-        "Mengganti outlet akan menghapus semua item di keranjang. Lanjutkan?"
-      );
-
-      if (!confirmChange) return;
-
-      clearItemsFromLocal();
-      setCartItems([]);
-    }
-
-    saveOutletToLocal(selectedOutlet.id, selectedOutlet.name);
-
-    const newSavedOutlet = getOutletFromLocal();
-    if (newSavedOutlet) {
-      setOutletName(newSavedOutlet.name);
-    }
-
-    setIsModalOutletOpen(false);
-
-    if (isFromTambah) {
-      setIsModalOpen(true);
-    }
-  };
-
   const handleSaveSale = async () => {
     const today = new Date().toISOString().slice(0, 10);
     const isInstallment = paymentType === "installment";
@@ -358,17 +361,11 @@ const SaleTable = () => {
 
   const FILTER = (
     <div className="flex gap-4 mb-4 items-end">
-      <GenosSearchSelect
-        label="Outlet"
-        placeholder="Pilih outlet"
-        className="w-64 text-xs"
-        options={outlets.map((s: any) => ({
-          value: s.id,
-          label: s.name,
-        }))}
+      <GenosSearchSelectOutlet
         value={selectedOutlet}
         onChange={(val: any) => setSelectedOutlet(val)}
       />
+
       <GenosTextfield
         id="search"
         label="Cari"
@@ -505,7 +502,23 @@ const SaleTable = () => {
             onSubmit={handleSaveCart}
           >
             <div className="grid grid-cols-1 gap-4 text-xs">
-              <GenosSearchSelect
+              <GenosSearchSelectInventory
+                value={selectedItem}
+                onChange={async (val: any) => {
+                  setSelectedItem(val);
+                  const res = await getInventoryDatabyId(val);
+                  console.log("res", res);
+
+                  const selectedPrice = res?.prices?.find(
+                    (p: any) => p.outlet?.id === outletId
+                  );
+
+                  setPrice(selectedPrice?.price || 0);
+
+                  setSelectedInventory(res);
+                }}
+              />
+              {/* <GenosSearchSelect
                 label="Item"
                 placeholder="Pilih item"
                 className="w-full"
@@ -532,7 +545,7 @@ const SaleTable = () => {
                   setPrice(selectedPrice?.price || 0);
                   // setUnit(inv?.unit.name || "-");
                 }}
-              />
+              /> */}
 
               <div className="grid grid-cols-2 gap-4">
                 <GenosTextfield
@@ -686,16 +699,9 @@ const SaleTable = () => {
             onClose={() => setIsModalOutletOpen(false)}
             onSubmit={handleSetOutlet}
           >
-            <GenosSearchSelect
-              label="Outlet"
-              placeholder="Pilih outlet"
-              className="w-full"
-              options={outlets.map((s: any) => ({
-                value: s.id,
-                label: s.name,
-              }))}
-              value={outletId}
-              onChange={setOutletId}
+            <GenosSearchSelectOutlet
+              value={outletId?.toString()}
+              onChange={(val: any) => setOutletId(val)}
             />
           </GenosModal>
         )}
@@ -785,7 +791,7 @@ const SaleTable = () => {
           <GenosButton
             label="Proses Penjualan"
             onClick={handleOpenSaveSale}
-            className="text-center text-white px-4 py-2 rounded hover:bg-primary-dark"
+            className="text-center text-white px-4 py-2 rounded hover:bg-primary-dark justify-center"
           ></GenosButton>
         </div>
       </div>

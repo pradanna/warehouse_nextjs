@@ -9,7 +9,7 @@ import {
   getInventory,
   getInventoryById,
   updateInventory,
-} from "@/lib/api/inventoryApi";
+} from "@/lib/api/inventory/inventoryApi";
 import { getItems } from "@/lib/api/itemApi";
 import { getUnit } from "@/lib/api/unitApi";
 import { getOutlet } from "@/lib/api/outletApi";

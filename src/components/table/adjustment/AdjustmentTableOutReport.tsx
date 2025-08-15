@@ -7,7 +7,7 @@ import { addOneDay } from "@/lib/helper";
 import { getAdjustmentOut } from "@/lib/api/adjustmentApi";
 import GenosTextfield from "@/components/form/GenosTextfield";
 import GenosSearchSelect from "@/components/form/GenosSearchSelect";
-import { getInventory } from "@/lib/api/inventoryApi";
+import { getInventory } from "@/lib/api/inventory/inventoryApi";
 
 type Props = {
   search: string;
@@ -101,7 +101,7 @@ const AdjustmentTableOutReport = ({
       );
       setAdjustmentData(res.data);
       setTABLE_ROWS(res.data);
-      setTotalItems(res.total);
+      setTotalItems(res.meta.total_rows);
     } catch (err) {
       console.log(err);
     }
