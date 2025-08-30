@@ -41,3 +41,21 @@ export function formatDateToDateIndo(dateStr: string): Date {
   const [year, month, day] = dateStr.split("-");
   return new Date(Number(year), Number(month) - 1, Number(day));
 }
+
+// ERROR HELPER
+export function parseError(err: any, unique: string): string {
+  if (err?.response?.data?.message) {
+    const message: string = err.response.data.message;
+
+    // Duplicate entry MySQL
+    if (message.includes("Duplicate entry")) {
+      return `${unique} sudah digunakan, data tidak boleh sama.`;
+    }
+
+    return message;
+  }
+
+  if (err?.message) return err.message;
+
+  return "Terjadi kesalahan, silakan coba lagi.";
+}

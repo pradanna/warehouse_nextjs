@@ -1,80 +1,114 @@
 "use client";
 
 import GenosModal from "@/components/modal/GenosModal";
-import { RefObject } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import GenosTextfield from "../GenosTextfield";
 import GenosTextarea from "../GenosTextArea";
 import GenosSearchSelect from "../GenosSearchSelect";
+import { editCategory, findCategoryById } from "@/lib/api/categoryApi";
+import { toast } from "react-toastify";
 
 type EditCategorytModalProps = {
   show: boolean;
   editCategoryId: string;
-  editName: string;
-  editDescription: string;
-  categories: any[];
-  setEditName: (value: string) => void;
-  setEditDescription: (value: string) => void;
-  setEditCategoryId: (value: string) => void;
-  inputRefName?: RefObject<HTMLInputElement>;
-  inputRefDescription?: RefObject<HTMLInputElement>;
   onClose: () => void;
-  onSubmit: () => void;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onSuccess: () => void;
 };
 
 export default function EditCategoryModal({
   show,
-  editName,
-  editDescription,
-  setEditDescription,
-  setEditName,
-  setEditCategoryId,
-  inputRefName,
-  inputRefDescription,
-  categories,
   editCategoryId,
   onClose,
-  onSubmit,
-  onKeyDown,
+  onSuccess,
 }: EditCategorytModalProps) {
+  const [loading, setLoading] = useState(false);
+  const [addName, setAddName] = useState("");
+  const [addDescription, setAddDescription] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRefDeskripsi = useRef<HTMLTextAreaElement>(null);
+
+  const handleGetEdit = async () => {
+    setLoading(true);
+    try {
+      const response = await findCategoryById(editCategoryId);
+
+      const { name, description } = response.data;
+      setAddName(name);
+      setAddDescription(description ?? "");
+
+      setTimeout(() => {
+        inputRef.current?.focus();
+        inputRef.current?.select();
+      }, 50);
+    } catch (err) {
+      console.error("Gagal mengambil data kategori:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitEdit = async () => {
+    setLoading(true);
+
+    try {
+      const response = await editCategory(
+        editCategoryId,
+        addName,
+        addDescription
+      );
+      toast.success(response.data.message || "Kategori berhasil diperbarui", {
+        autoClose: 1000,
+      });
+      onSuccess();
+      setAddName("");
+      setAddDescription("");
+      onClose();
+    } catch (err: any) {
+      const message = err.response?.data?.message || "Gagal mengubah kategori";
+      console.error("Gagal mengubah kategori:", message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyDownEdit = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSubmitEdit();
+    }
+  };
+
+  useEffect(() => {
+    if (show) {
+      handleGetEdit();
+    }
+  }, [show]);
+
   return (
     <GenosModal
-      title="Tambah Item"
+      title="Tambah Kategori"
       onClose={onClose}
-      onSubmit={onSubmit}
+      onSubmit={handleSubmitEdit}
       show
       size="md"
+      isLoading={loading}
     >
-      <GenosSearchSelect
-        label="Kategori"
-        options={categories.map((c) => ({ value: c.id, label: c.name }))}
-        value={editCategoryId}
-        onChange={(val) => setEditCategoryId(editCategoryId)}
-        placeholder="Pilih kategori"
+      <GenosTextfield
+        id="tambah-nama-kategori"
+        label="Nama Kategori"
+        placeholder="Masukkan Nama Kategori"
+        value={addName}
+        onChange={(e) => setAddName(e.target.value)}
+        ref={inputRef}
         className="mb-3"
       />
-      <GenosTextfield
-        id="tambah-item"
-        label="Nama Item"
-        placeholder="Masukkan Nama Item"
-        value={editName}
-        onChange={(e) => setEditName(e.target.value)}
-        ref={inputRefName}
-        className="mb-3"
-      />
-      <GenosTextfield
-        id="tambah-deskripsi"
+      <GenosTextarea
         label="Deskripsi"
         placeholder="Masukkan Deskripsi"
-        value={editDescription}
-        onChange={(e) => setEditDescription(e.target.value)}
-        ref={inputRefDescription}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            onSubmit();
-          }
-        }}
+        value={addDescription}
+        onKeyDown={handleKeyDownEdit}
+        ref={inputRefDeskripsi}
+        onChange={(e) => setAddDescription(e.target.value)}
       />
     </GenosModal>
   );

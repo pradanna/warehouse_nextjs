@@ -18,6 +18,7 @@ const AdjustmentTableIn = ({ search, dateFrom, dateTo }) => {
   }
 
   const [isLoadingTable, setIsLoadingTable] = useState(false);
+  const [isLoadingButton, setIsLoadingButton] = useState(false);
   const [adjustmentData, setAdjustmentData] = useState<Adjustment[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
@@ -97,6 +98,8 @@ const AdjustmentTableIn = ({ search, dateFrom, dateTo }) => {
   };
 
   const handleSaveAdjustmentIn = async () => {
+    setIsLoadingButton(true);
+
     const payload = {
       inventory_id: selectedItemId,
       type: "in",
@@ -127,6 +130,8 @@ const AdjustmentTableIn = ({ search, dateFrom, dateTo }) => {
       toast.error(err, {
         autoClose: 1000,
       });
+    } finally {
+      setIsLoadingButton(false);
     }
   };
 
@@ -169,6 +174,7 @@ const AdjustmentTableIn = ({ search, dateFrom, dateTo }) => {
           title={"Penyesuaian Stok Masuk"}
           onClose={() => setModalAddOpen(false)}
           onSubmit={handleSaveAdjustmentIn}
+          isLoading={isLoadingButton}
         >
           <GenosSearchSelectInventory
             label="Item"

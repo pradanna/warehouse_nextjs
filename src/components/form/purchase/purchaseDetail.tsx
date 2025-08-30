@@ -47,12 +47,20 @@ export default function PurchaseDetailModal({
   const remainingPayment = purchaseDetail.data.total - totalPaid;
 
   const [paymentMetode, setPaymentMetode] = useState("");
+  const [isLoadingButton, setIsLoadingButton] = useState(false);
 
   const closeDetailPayment = () => {
     setPayFromDetaildModalOpen(false);
   };
   const handleSavePayDebt = async () => {
+    setIsLoadingButton(true);
     const today = new Date().toISOString().slice(0, 10);
+
+    if (!paymentMetode) {
+      toast.error("Pilih metode pembayaran terlebih dahulu");
+      setIsLoadingButton(false);
+      return;
+    }
 
     const payload = {
       purchase_id: purchaseId,
@@ -83,6 +91,8 @@ export default function PurchaseDetailModal({
     } catch (error) {
       console.error(error);
       toast.error("Gagal menyimpan data pembelian");
+    } finally {
+      setIsLoadingButton(false);
     }
   };
 
@@ -299,6 +309,7 @@ export default function PurchaseDetailModal({
       {isPayFromDetaildModalOpen && (
         <PaymentModal
           show
+          isLoadingButton={isLoadingButton}
           onClose={closeDetailPayment}
           onSubmit={handleSavePayDebt}
           paymentMethod={paymentMetode}

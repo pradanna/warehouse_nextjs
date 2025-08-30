@@ -38,13 +38,13 @@ import { fetchSupplierById } from "@/lib/api/supplier/supplier-getbyid-api";
 
 const PurchaseTable = () => {
   const [data, setData] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingButton, setIsLoadingButton] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalSupplierOpen, setIsModalSupplierOpen] = useState(false);
@@ -186,16 +186,15 @@ const PurchaseTable = () => {
       return;
     }
 
-    await getInventoryDatabyId(selectedItem).then((res) => {
-      setSelectedInventory(res);
-    });
+    const res = await getInventoryDatabyId(selectedItem);
+    setSelectedInventory(res);
 
     const newItem: PurchaseCartItem = {
       inventory_id: selectedItem || "-",
       item_id: selectedItem,
-      name: selectedInventory?.item.name || "-",
-      unit_id: selectedInventory?.unit.id || "-",
-      unit_name: selectedInventory?.unit.name || "-",
+      name: res?.item.name || "-",
+      unit_id: res?.unit.id || "-",
+      unit_name: res?.unit.name || "-",
       quantity: quantity,
       price,
       total: quantity * price,
@@ -310,6 +309,8 @@ const PurchaseTable = () => {
 
     console.log("Payload sebelum dikirim:", payload);
 
+    setIsLoadingButton(true);
+
     try {
       const response = await createPurchases(payload);
       console.log("Response dari API:", response);
@@ -329,6 +330,8 @@ const PurchaseTable = () => {
     } catch (error) {
       console.error(error);
       toast.error("Gagal menyimpan data pembelian");
+    } finally {
+      setIsLoadingButton(false);
     }
   };
 
@@ -608,6 +611,7 @@ const PurchaseTable = () => {
           title={"Pembayaran"}
           onClose={() => setPaymentMetodModalOpen(false)}
           onSubmit={handleSavePurchase}
+          isLoading={loadingButton}
         >
           <GenosSelect
             label="Metode Pembayaran"

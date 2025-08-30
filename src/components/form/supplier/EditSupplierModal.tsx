@@ -1,46 +1,96 @@
 "use client";
 
 import GenosModal from "@/components/modal/GenosModal";
-import { RefObject } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import GenosTextfield from "../GenosTextfield";
+import { getSupplierById } from "@/lib/api/supplierApi";
+import axios from "axios";
+import { baseUrl, getToken } from "@/app/config/config";
+import { toast } from "react-toastify";
 
 type EditSuppliertModalProps = {
   show: boolean;
-  editName: string;
-  editAddress: string;
-  editContact: string;
-  ref?: RefObject<HTMLTextAreaElement>;
-  setEditName: (value: string) => void;
-  setEditAddress: (value: string) => void;
-  setEditContact: (value: string) => void;
-  inputEditRefName?: RefObject<HTMLInputElement>;
-  inputEditRefAddress?: RefObject<HTMLInputElement>;
-  inputEditRefContact?: RefObject<HTMLInputElement>;
+  id: string;
   onClose: () => void;
-  onSubmit: () => void;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onSuccess: () => void;
 };
 
 export default function EditSupplierModal({
   show,
-  editName,
-  setEditAddress,
-  setEditContact,
-  setEditName,
-  editAddress,
-  editContact,
-  inputEditRefName,
-  inputEditRefAddress,
-  inputEditRefContact,
+  id,
   onClose,
-  onSubmit,
-  onKeyDown,
+  onSuccess,
 }: EditSuppliertModalProps) {
+  const [loading, setLoading] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editAddress, setEditAddress] = useState("");
+  const [editContact, setEditContact] = useState("");
+  const inputEditRefName: RefObject<HTMLInputElement> = useRef(null);
+  const inputEditRefAddress: RefObject<HTMLInputElement> = useRef(null);
+  const inputEditRefContact: RefObject<HTMLInputElement> = useRef(null);
+
+  const fetchIdSupplier = async () => {
+    setLoading(true);
+    try {
+      const response = await getSupplierById(id);
+
+      const { name, address, contact } = response.data;
+      setEditName(name);
+      setEditAddress(address);
+      setEditContact(contact);
+
+      setTimeout(() => {
+        inputEditRefName.current?.focus();
+        inputEditRefName.current?.select();
+      }, 50);
+    } catch (err) {
+      console.error("Gagal mengambil data supplier:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitEdit = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.put(
+        `${baseUrl}/supplier/${id}`,
+        {
+          name: editName,
+          address: editAddress,
+          contact: editContact,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
+      onSuccess();
+      toast.success(response.data.message || "Supplier berhasil diperbarui", {
+        autoClose: 1000,
+      });
+      onClose();
+    } catch (err: any) {
+      const message = err.response?.data?.message || "Gagal mengubah supplier";
+      toast.error(message, { autoClose: 1000 });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (show) {
+      fetchIdSupplier();
+    }
+  }, [show]);
+
   return (
     <GenosModal
       title="Edit Supplier"
       onClose={onClose}
-      onSubmit={onSubmit}
+      onSubmit={handleSubmitEdit}
+      isLoading={loading}
       show
       size="md"
     >
@@ -72,7 +122,7 @@ export default function EditSupplierModal({
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();
-            onSubmit();
+            handleSubmitEdit();
           }
         }}
       />

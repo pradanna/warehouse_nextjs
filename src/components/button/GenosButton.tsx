@@ -10,13 +10,14 @@ type ButtonProps = {
   iconLeft?: React.ReactNode;
   iconRight?: React.ReactNode;
   onClick?: () => void;
-  type?: "button" | "submit" | "reset"; // Menambahkan type submit dan reset
+  type?: "button" | "submit" | "reset";
   disabled?: boolean;
   label: string;
   selfStart?: boolean;
-  outlined?: boolean; // Menambahkan props outlined untuk tombol bergaris
-  text?: boolean; // Menambahkan props untuk text button
-  ripple?: boolean; // Menambahkan props ripple untuk efek ripple
+  outlined?: boolean;
+  text?: boolean;
+  ripple?: boolean;
+  loading?: boolean; // <-- Tambahan
 };
 
 const sizeClasses = {
@@ -64,7 +65,7 @@ const textColorClasses = {
   danger: "text-danger-base hover:text-danger-dark",
   success: "text-success-base hover:text-success-dark",
   warning: "text-warning-base hover:text-warning-dark",
-  gray: "text-gray-400 r:text-gray-400",
+  gray: "text-gray-400 hover:text-gray-500",
 };
 
 export default function GenosButton({
@@ -79,15 +80,16 @@ export default function GenosButton({
   type = "button",
   disabled = false,
   selfStart = false,
-  outlined = false, // Menambahkan outline untuk tipe tombol
-  text = false, // Menambahkan text button
-  ripple = true, // Menambahkan props ripple dengan default true
+  outlined = false,
+  text = false,
+  ripple = true,
+  loading = false, // <-- Tambahan
 }: ButtonProps) {
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const [rippleEffect, setRippleEffect] = useState<JSX.Element | null>(null);
 
   const createRipple = (e: React.MouseEvent) => {
-    if (!ripple || disabled) return;
+    if (!ripple || disabled || loading) return;
 
     const button = buttonRef.current;
     if (!button) return;
@@ -110,42 +112,44 @@ export default function GenosButton({
     );
 
     setRippleEffect(rippleElement);
-
-    // Hapus ripple setelah animasi selesai
-    setTimeout(() => {
-      setRippleEffect(null);
-    }, 600);
+    setTimeout(() => setRippleEffect(null), 600);
   };
 
   return (
     <button
       type={type}
-      disabled={disabled}
+      disabled={disabled || loading}
       onClick={(e) => {
         if (onClick) onClick();
-        createRipple(e); // Menambahkan efek ripple
+        createRipple(e);
       }}
       ref={buttonRef}
       className={clsx(
-        "relative font-medium transition-all duration-200 focus:outline-none disabled:opacity-50 inline-flex items-center gap-2",
+        "relative font-medium transition-all duration-200 focus:outline-none disabled:opacity-50 inline-flex items-center justify-center gap-2",
         sizeClasses[size],
         roundedClasses[round],
-        disabled ? "cursor-default" : "cursor-pointer",
-        selfStart && "self-start", // Menggunakan self-start jika selfStart true
-        "h-auto", // Menambahkan h-auto untuk mengatur tinggi otomatis
+        disabled || loading ? "cursor-default" : "cursor-pointer",
+        selfStart && "self-start",
+        "h-auto",
         outlined
-          ? outlinedColorClasses[color] // Jika outlined true, pakai kelas outline
+          ? outlinedColorClasses[color]
           : text
-          ? textColorClasses[color] // Jika text true, pakai kelas text
-          : colorClasses[color], // Jika tidak, pakai kelas solid
+          ? textColorClasses[color]
+          : colorClasses[color],
         className
       )}
     >
-      {iconLeft && <span className="flex items-center">{iconLeft}</span>}
-      <span>{label}</span>
-      {iconRight && <span className="flex items-center">{iconRight}</span>}
+      {loading && (
+        <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+      )}
+      {!loading && iconLeft && (
+        <span className="flex items-center">{iconLeft}</span>
+      )}
+      <span>{loading ? "Loading..." : label}</span>
+      {!loading && iconRight && (
+        <span className="flex items-center">{iconRight}</span>
+      )}
 
-      {/* Render ripple effect jika ada */}
       {rippleEffect}
     </button>
   );

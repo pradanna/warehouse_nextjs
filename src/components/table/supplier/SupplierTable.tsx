@@ -22,12 +22,7 @@ const SupplierTable = () => {
   const [isLoadingTable, setIsLoadingTable] = useState(true);
 
   // ADD
-  const [addName, setAddName] = useState("");
-  const [addAddress, setAddAddress] = useState("");
-  const [addContact, setAddContact] = useState("");
   const inputRefName = useRef<HTMLInputElement>(null);
-  const inputRefAddress = useRef<HTMLInputElement>(null);
-  const inputRefContact = useRef<HTMLInputElement>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -40,37 +35,15 @@ const SupplierTable = () => {
 
   const handleClose = () => {
     setIsModalOpen(false);
-    setAddName("");
-    setAddAddress("");
-    setAddContact("");
   };
 
-  const handleSubmit = async () => {
-    try {
-      const response = await createSupplier(addName, addAddress, addContact);
-      setAddName("");
-      setAddAddress("");
-      setAddContact("");
-      fetchSupplier(currentPage);
-      toast.success(response.data.message || "Supplier berhasil ditambahkan", {
-        autoClose: 1000,
-      });
-      inputRefName.current?.focus();
-    } catch (err: any) {
-      const message =
-        err.response?.data?.message || "Gagal menambahkan supplier";
-      toast.error(message, { autoClose: 1000 });
-    }
+  const handleOnsuccess = () => {
+    fetchSupplier(currentPage);
   };
 
   // EDIT
   const [editId, setEditId] = useState("");
-  const [editName, setEditName] = useState("");
-  const [editAddress, setEditAddress] = useState("");
-  const [editContact, setEditContact] = useState("");
   const inputEditRefName = useRef<HTMLInputElement>(null);
-  const inputEditRefAddress = useRef<HTMLInputElement>(null);
-  const inputEditRefContact = useRef<HTMLInputElement>(null);
 
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
 
@@ -82,9 +55,6 @@ const SupplierTable = () => {
       const response = await getSupplierById(id);
 
       const { name, address, contact } = response.data;
-      setEditName(name);
-      setEditAddress(address);
-      setEditContact(contact);
 
       setTimeout(() => {
         inputEditRefName.current?.focus();
@@ -98,35 +68,6 @@ const SupplierTable = () => {
   const handleEditClose = () => {
     setIsModalEditOpen(false);
     setEditId("");
-    setEditName("");
-    setEditAddress("");
-    setEditContact("");
-  };
-
-  const handleSubmitEdit = async () => {
-    try {
-      const response = await axios.put(
-        `${baseUrl}/supplier/${editId}`,
-        {
-          name: editName,
-          address: editAddress,
-          contact: editContact,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-          },
-        }
-      );
-      fetchSupplier(currentPage);
-      toast.success(response.data.message || "Supplier berhasil diperbarui", {
-        autoClose: 1000,
-      });
-      handleEditClose();
-    } catch (err: any) {
-      const message = err.response?.data?.message || "Gagal mengubah supplier";
-      toast.error(message, { autoClose: 1000 });
-    }
   };
 
   // TABEL
@@ -228,34 +169,17 @@ const SupplierTable = () => {
       {isModalOpen && (
         <AddSupplierModal
           onClose={handleClose}
-          onSubmit={handleSubmit}
-          setAddAddress={setAddAddress}
-          setAddContact={setAddContact}
-          setAddName={setAddName}
+          onSuccess={handleOnsuccess}
           show
-          addName={addName}
-          addAddress={addAddress}
-          addContact={addContact}
-          inputRefName={inputRefName}
-          inputRefAddress={inputRefAddress}
-          inputRefContact={inputRefContact}
         />
       )}
 
       {isModalEditOpen && (
         <EditSupplierModal
           show
-          editName={editName}
-          editAddress={editAddress}
-          editContact={editContact}
-          inputEditRefName={inputEditRefName}
-          inputEditRefAddress={inputEditRefAddress}
-          inputEditRefContact={inputEditRefContact}
           onClose={handleEditClose}
-          onSubmit={handleSubmitEdit}
-          setEditAddress={setEditAddress}
-          setEditContact={setEditContact}
-          setEditName={setEditName}
+          onSuccess={handleOnsuccess}
+          id={editId}
         />
       )}
     </div>

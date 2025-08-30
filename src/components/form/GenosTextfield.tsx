@@ -20,6 +20,13 @@ type Props = {
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 };
 
+// 👉 helper format angka dengan titik
+const formatNumber = (val: string | number) => {
+  if (val === "" || val === undefined || val === null) return "";
+  const num = typeof val === "string" ? val.replace(/\D/g, "") : val.toString();
+  return Number(num).toLocaleString("id-ID");
+};
+
 const GenosTextfield = forwardRef<HTMLInputElement, Props>(
   (
     {
@@ -45,10 +52,23 @@ const GenosTextfield = forwardRef<HTMLInputElement, Props>(
     const isControlled = value !== undefined && onChange !== undefined;
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (isControlled) {
-        onChange?.(e);
+      if (type === "number") {
+        const raw = e.target.value.replace(/\D/g, ""); // hanya angka mentah
+        const fakeEvent = {
+          ...e,
+          target: {
+            ...e.target,
+            value: raw, // 👉 kirim angka mentah ke parent
+          },
+        };
+        onChange?.(fakeEvent as React.ChangeEvent<HTMLInputElement>);
+        if (!isControlled) setInternalValue(raw);
       } else {
-        setInternalValue(e.target.value);
+        if (isControlled) {
+          onChange?.(e);
+        } else {
+          setInternalValue(e.target.value);
+        }
       }
     };
 
@@ -88,8 +108,12 @@ const GenosTextfield = forwardRef<HTMLInputElement, Props>(
 
           <input
             id={id}
-            type={type}
-            value={inputValue}
+            type="text" // 👉 jangan pakai number supaya format tampil
+            value={
+              type === "number" && inputValue !== ""
+                ? formatNumber(inputValue)
+                : inputValue
+            }
             onChange={handleChange}
             name={name}
             placeholder={showFloatingLabel ? placeholder : ""}

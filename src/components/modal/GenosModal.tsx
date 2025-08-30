@@ -18,6 +18,7 @@ type GenosModalProps = {
   submitLabel?: string;
   cancelLabel?: string;
   withCloseButton?: boolean;
+  isLoading?: boolean;
 };
 
 const sizeClasses = {
@@ -39,6 +40,7 @@ export default function GenosModal({
   submitLabel = "Submit",
   cancelLabel = "Cancel",
   withCloseButton = true,
+  isLoading = false,
 }: GenosModalProps) {
   useEffect(() => {
     if (show && onOpen) onOpen();
@@ -84,7 +86,7 @@ export default function GenosModal({
         <div className="flex justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-700">
           {withCloseButton && (
             <GenosButton
-              label="Cancel"
+              label={cancelLabel}
               color="gray"
               onClick={onClose}
               outlined
@@ -94,12 +96,13 @@ export default function GenosModal({
           )}
           {onSubmit && (
             <GenosButton
-              label="Submit"
+              label={submitLabel}
               selfStart
               color="primary"
               onClick={onSubmit}
               round="md"
               size="md"
+              loading={isLoading}
               iconLeft={<InboxArrowDownIcon className="w-4 h-4" />}
             ></GenosButton>
           )}

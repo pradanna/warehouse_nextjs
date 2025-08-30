@@ -3,7 +3,6 @@ import GenosTable from "@/components/table/GenosTable";
 import GenosTextfield from "@/components/form/GenosTextfield";
 import { toast } from "react-toastify";
 import {
-  createOutlet,
   deleteOutlet,
   getOutlet,
   getOutletById,
@@ -21,12 +20,7 @@ const OutletTable = () => {
   const [isLoadingTable, setIsLoadingTable] = useState(true);
 
   // ADD
-  const [addName, setAddName] = useState("");
-  const [addAddress, setAddAddress] = useState("");
-  const [addContact, setAddContact] = useState("");
   const inputRefName = useRef<HTMLInputElement>(null);
-  const inputRefAddress = useRef<HTMLInputElement>(null);
-  const inputRefContact = useRef<HTMLInputElement>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -39,62 +33,23 @@ const OutletTable = () => {
 
   const handleClose = () => {
     setIsModalOpen(false);
-    setAddName("");
-    setAddAddress("");
-    setAddContact("");
   };
 
-  const handleSubmit = async () => {
-    try {
-      const response = await createOutlet(addName, addAddress, addContact);
-      setAddName("");
-      setAddAddress("");
-      setAddContact("");
-      fetchOutlet(currentPage);
-      toast.success(response.data.message || "Outlet berhasil ditambahkan", {
-        autoClose: 1000,
-      });
-      inputRefName.current?.focus();
-    } catch (err: any) {
-      const message = err.response?.data?.message || "Gagal menambahkan outlet";
-      toast.error(message, { autoClose: 1000 });
-    }
+  const handleSuccess = async () => {
+    fetchOutlet(currentPage);
   };
-
   // EDIT
   const [editId, setEditId] = useState("");
   const [editName, setEditName] = useState("");
   const [editAddress, setEditAddress] = useState("");
   const [editContact, setEditContact] = useState("");
   const inputEditRefName = useRef<HTMLInputElement>(null);
-  const inputEditRefAddress = useRef<HTMLInputElement>(null);
-  const inputEditRefContact = useRef<HTMLInputElement>(null);
 
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
 
   const handleEdit = async (id: string) => {
     setEditId(id);
     setIsModalEditOpen(true);
-
-    try {
-      const response = await getOutletById(id);
-
-      toast.success("Outlet berhasil diambil", {
-        autoClose: 1000,
-      });
-
-      const { name, address, contact } = response.data;
-      setEditName(name);
-      setEditAddress(address);
-      setEditContact(contact);
-
-      setTimeout(() => {
-        inputEditRefName.current?.focus();
-        inputEditRefName.current?.select();
-      }, 50);
-    } catch (err) {
-      console.error("Gagal mengambil data outlet:", err);
-    }
   };
 
   const handleEditClose = () => {
@@ -103,25 +58,6 @@ const OutletTable = () => {
     setEditName("");
     setEditAddress("");
     setEditContact("");
-  };
-
-  const handleSubmitEdit = async () => {
-    try {
-      const response = await updateOutlet(
-        editId,
-        editName,
-        editAddress,
-        editContact
-      );
-      fetchOutlet(currentPage);
-      toast.success(response.data.message || "Outlet berhasil diperbarui", {
-        autoClose: 1000,
-      });
-      handleEditClose();
-    } catch (err: any) {
-      const message = err.response?.data?.message || "Gagal mengubah outlet";
-      toast.error(message, { autoClose: 1000 });
-    }
   };
 
   // TABEL
@@ -142,18 +78,19 @@ const OutletTable = () => {
 
   // FETCH
   useEffect(() => {
-    const delay = setTimeout(() => {
+    const delayDebounce = setTimeout(() => {
+      console.log("Trigger fetch: search =", search, "page =", currentPage);
       fetchOutlet(currentPage);
     }, 300);
 
-    return () => clearTimeout(delay);
+    return () => clearTimeout(delayDebounce);
   }, [search, currentPage]);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [search]);
 
-  const fetchOutlet = async (page = 1) => {
+  const fetchOutlet = async (page) => {
     setIsLoadingTable(true);
     try {
       const response = await getOutlet(search, page, limit);
@@ -220,42 +157,15 @@ const OutletTable = () => {
       />
 
       {isModalOpen && (
-        <AddOutletModal
-          show
-          addName={addName}
-          addAddress={addAddress}
-          addContact={addContact}
-          inputRefName={inputRefName}
-          inputRefAddress={inputRefAddress}
-          inputRefContact={inputRefContact}
-          onClose={handleClose}
-          onSubmit={handleSubmit}
-          setAddAddress={setAddAddress}
-          setAddContact={setAddContact}
-          setAddName={setAddName}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleSubmit();
-            }
-          }}
-        />
+        <AddOutletModal show onClose={handleClose} onSuccess={handleSuccess} />
       )}
 
       {isModalEditOpen && (
         <EditOutletModal
           show
-          editName={editName}
-          editAddress={editAddress}
-          editContact={editContact}
-          inputEditRefName={inputEditRefName}
-          inputEditRefAddress={inputEditRefAddress}
-          inputEditRefContact={inputEditRefContact}
+          editId={editId}
           onClose={handleEditClose}
-          onSubmit={handleSubmitEdit}
-          setEditAddress={setEditAddress}
-          setEditContact={setEditContact}
-          setEditName={setEditName}
+          onSuccess={handleSuccess}
         />
       )}
     </div>

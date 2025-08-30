@@ -1,6 +1,8 @@
 import { baseUrl, getToken } from "@/app/config/config";
 import axios from "axios";
 import axiosInstance from "./axiosInstance";
+import { parseError } from "../helper";
+import { toast } from "react-toastify";
 
 export async function getUnit(search: string, page: number, limit: number) {
   try {
@@ -27,11 +29,11 @@ export async function createUnit(unitData: any) {
         Authorization: `Bearer ${getToken()}`,
       },
     });
-    // handleClose();
     return response.data;
   } catch (err: any) {
-    console.error("Error creating item:", err);
-    throw new Error(err.response?.data?.message || "Failed to create item");
+    const friendlyMessage = parseError(err, "Nama Unit");
+    toast.error(friendlyMessage);
+    throw new Error(friendlyMessage);
   }
 }
 
@@ -49,7 +51,9 @@ export async function updateUnit(unitId: string, unitData: any) {
 
     return response.data;
   } catch (err) {
-    console.error("Gagal mengambil data unit untuk edit:", err);
+    const friendlyMessage = parseError(err, "Nama Unit");
+    toast.error(friendlyMessage);
+    throw new Error(friendlyMessage);
   }
 }
 

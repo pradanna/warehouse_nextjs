@@ -314,14 +314,13 @@ export default function GenosTable({
                     }
                     className="text-center py-10 text-gray-500"
                   >
-                    <div className="flex  items-center justify-center">
-                      <ClipLoader
-                        color="#3B82F6"
-                        className="h-10 w-10 me-3"
-                        loading={true}
-                        size={30}
-                      />{" "}
-                      <span> Loading data...</span>
+                    <div className="flex flex-col items-center justify-center">
+                      <img
+                        src="/images/local/blue-loading.gif"
+                        alt="Loading..."
+                        className="w-12 h-12 mb-2"
+                      />
+                      <p className="text-center">Loading...</p>
                     </div>
                   </td>
                 </tr>

@@ -1,45 +1,70 @@
 "use client";
 
 import GenosModal from "@/components/modal/GenosModal";
-import { RefObject } from "react";
 import GenosTextfield from "../GenosTextfield";
+import { createUnit } from "@/lib/api/unitApi";
+import { toast } from "react-toastify";
+import { useRef, useState } from "react";
 
 type AddUnitModalProps = {
   show: boolean;
-  addValue: string;
-  setAddValue: (value: string) => void;
-  inputRef?: RefObject<HTMLInputElement>;
   onClose: () => void;
-  onSubmit: () => void;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onSuccess: () => void;
 };
 
 export default function AddUnitModal({
   show,
-  addValue,
-  setAddValue,
-  inputRef,
   onClose,
-  onSubmit,
-  onKeyDown,
+  onSuccess,
 }: AddUnitModalProps) {
+  const [unitName, setUnitName] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      const response = await createUnit({ name: unitName });
+
+      setUnitName("");
+      onSuccess();
+      inputRef.current?.focus();
+
+      toast.success(response?.message || "Data berhasil ditambahkan", {
+        autoClose: 1000,
+      });
+    } catch (err: any) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
   return (
     <GenosModal
       title="Tambah Unit"
       show={show}
       onClose={onClose}
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
       size="md"
+      isLoading={loading}
     >
       <GenosTextfield
         id="tambah-unit"
         label="Nama Unit"
         placeholder="Masukkan Nama Unit"
-        value={addValue}
+        value={unitName}
         onChange={(e: { target: { value: string } }) =>
-          setAddValue(e.target.value)
+          setUnitName(e.target.value)
         }
-        onKeyDown={onKeyDown}
+        onKeyDown={handleKeyDown}
         ref={inputRef}
       />
     </GenosModal>

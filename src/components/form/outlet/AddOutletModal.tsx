@@ -1,46 +1,56 @@
 "use client";
 
 import GenosModal from "@/components/modal/GenosModal";
-import { RefObject } from "react";
+import { RefObject, useRef, useState } from "react";
 import GenosTextfield from "../GenosTextfield";
+import { createOutlet } from "@/lib/api/outletApi";
+import { toast } from "react-toastify";
 
 type AddOutlettModalProps = {
   show: boolean;
-  addName: string;
-  addAddress: string;
-  addContact: string;
-  ref?: RefObject<HTMLTextAreaElement>;
-  setAddName: (value: string) => void;
-  setAddAddress: (value: string) => void;
-  setAddContact: (value: string) => void;
-  inputRefName?: RefObject<HTMLInputElement>;
-  inputRefAddress?: RefObject<HTMLInputElement>;
-  inputRefContact?: RefObject<HTMLInputElement>;
   onClose: () => void;
-  onSubmit: () => void;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onSuccess: () => void;
 };
 
 export default function AddOutletModal({
   show,
-  addName,
-  setAddAddress,
-  setAddContact,
-  setAddName,
-  addAddress,
-  addContact,
-  inputRefName,
-  inputRefAddress,
-  inputRefContact,
   onClose,
-  onSubmit,
-  onKeyDown,
+  onSuccess,
 }: AddOutlettModalProps) {
+  const [loading, setLoading] = useState(false);
+  const [addName, setAddName] = useState("");
+  const [addAddress, setAddAddress] = useState("");
+  const [addContact, setAddContact] = useState("");
+
+  const inputRefName: RefObject<HTMLInputElement> = useRef(null);
+  const inputRefAddress: RefObject<HTMLInputElement> = useRef(null);
+  const inputRefContact: RefObject<HTMLInputElement> = useRef(null);
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      const response = await createOutlet(addName, addAddress, addContact);
+      setAddName("");
+      setAddAddress("");
+      setAddContact("");
+      onSuccess();
+      toast.success(response.data.message || "Outlet berhasil ditambahkan", {
+        autoClose: 1000,
+      });
+      inputRefName.current?.focus();
+    } catch (err: any) {
+      const message = err.response?.data?.message || "Gagal menambahkan outlet";
+      toast.error(message, { autoClose: 1000 });
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <GenosModal
       title="Tambah Outlet"
       onClose={onClose}
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
+      isLoading={loading}
       show
       size="md"
     >
@@ -72,7 +82,7 @@ export default function AddOutletModal({
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();
-            onSubmit();
+            handleSubmit();
           }
         }}
       />

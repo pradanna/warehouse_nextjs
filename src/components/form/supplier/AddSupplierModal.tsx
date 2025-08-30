@@ -1,46 +1,57 @@
 "use client";
 
 import GenosModal from "@/components/modal/GenosModal";
-import { RefObject } from "react";
+import { RefObject, useRef, useState } from "react";
 import GenosTextfield from "../GenosTextfield";
+import { createSupplier } from "@/lib/api/supplierApi";
+import { toast } from "react-toastify";
 
 type AddSuppliertModalProps = {
   show: boolean;
-  addName: string;
-  addAddress: string;
-  addContact: string;
-  ref?: RefObject<HTMLTextAreaElement>;
-  setAddName: (value: string) => void;
-  setAddAddress: (value: string) => void;
-  setAddContact: (value: string) => void;
-  inputRefName?: RefObject<HTMLInputElement>;
-  inputRefAddress?: RefObject<HTMLInputElement>;
-  inputRefContact?: RefObject<HTMLInputElement>;
   onClose: () => void;
-  onSubmit: () => void;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onSuccess: () => void;
 };
 
 export default function AddSupplierModal({
   show,
-  addName,
-  setAddAddress,
-  setAddContact,
-  setAddName,
-  addAddress,
-  addContact,
-  inputRefName,
-  inputRefAddress,
-  inputRefContact,
   onClose,
-  onSubmit,
-  onKeyDown,
+  onSuccess,
 }: AddSuppliertModalProps) {
+  const [loading, isLoading] = useState(false);
+  const [addName, setAddName] = useState("");
+  const [addAddress, setAddAddress] = useState("");
+  const [addContact, setAddContact] = useState("");
+  const inputRefName: RefObject<HTMLInputElement> = useRef(null);
+  const inputRefAddress: RefObject<HTMLInputElement> = useRef(null);
+  const inputRefContact: RefObject<HTMLInputElement> = useRef(null);
+
+  const handleSubmit = async () => {
+    isLoading(true);
+    try {
+      const response = await createSupplier(addName, addAddress, addContact);
+      setAddName("");
+      setAddAddress("");
+      setAddContact("");
+      onSuccess();
+      toast.success(response.data.message || "Supplier berhasil ditambahkan", {
+        autoClose: 1000,
+      });
+      inputRefName.current?.focus();
+    } catch (err: any) {
+      const message =
+        err.response?.data?.message || "Gagal menambahkan supplier";
+      toast.error(message, { autoClose: 1000 });
+    } finally {
+      isLoading(false);
+    }
+  };
+
   return (
     <GenosModal
       title="Tambah Supplier"
       onClose={onClose}
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
+      isLoading={loading}
       show
       size="md"
     >
@@ -72,7 +83,7 @@ export default function AddSupplierModal({
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();
-            onSubmit();
+            handleSubmit();
           }
         }}
       />

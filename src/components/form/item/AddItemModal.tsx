@@ -1,14 +1,12 @@
 "use client";
 
 import GenosModal from "@/components/modal/GenosModal";
-import { RefObject, useRef, useState } from "react";
 import GenosTextfield from "../GenosTextfield";
-import GenosTextarea from "../GenosTextArea";
-import GenosSearchSelect from "../GenosSearchSelect";
 import GenosSearchSelectMaterialCategory from "@/components/select-search/MaterialCategorySearch";
 import GenosSearchSelectCategory from "@/components/select-search/CategorySearch";
 import { toast } from "react-toastify";
 import { createItem } from "@/lib/api/itemApi";
+import { useRef, useState } from "react";
 
 type AddCategorytModalProps = {
   show: boolean;
@@ -25,8 +23,10 @@ export default function AddItemModal({
   const [addDescription, setAddDescription] = useState<string>("");
   const inputRefName = useRef<HTMLInputElement>(null);
   const inputRefDescription = useRef<HTMLInputElement>(null);
-
+  const [loading, setLoading] = useState(false);
   const onSubmit = async () => {
+    setLoading(true);
+
     if (!addCategoryId) {
       toast.error("Kategori harus dipilih", { autoClose: 1500 });
       return;
@@ -49,6 +49,8 @@ export default function AddItemModal({
     } catch (err: any) {
       const message = err.response?.data?.message || "Gagal menambahkan item";
       toast.error(message, { autoClose: 1000 });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,6 +60,7 @@ export default function AddItemModal({
       onClose={onClose}
       onSubmit={onSubmit}
       show
+      isLoading={loading}
       size="md"
     >
       <GenosSearchSelectMaterialCategory

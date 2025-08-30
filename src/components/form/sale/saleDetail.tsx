@@ -42,8 +42,11 @@ const SaleDetailModal = ({
   };
 
   const [paymentMetode, setPaymentMetode] = useState("");
+  const [isLoadingButton, setIsLoadingButton] = useState(false);
 
   const handleSavePayDebt = async () => {
+    setIsLoadingButton(true);
+
     const today = new Date().toISOString().slice(0, 10);
 
     const payload = {
@@ -73,6 +76,8 @@ const SaleDetailModal = ({
     } catch (error) {
       console.error(error);
       toast.error("Gagal menyimpan data pembelian");
+    } finally {
+      setIsLoadingButton(false);
     }
   };
 
@@ -290,6 +295,7 @@ const SaleDetailModal = ({
       {isPayFromDetaildModalOpen && (
         <PaymentModal
           show
+          isLoadingButton={isLoadingButton}
           onClose={closeDetailPayment}
           onSubmit={handleSavePayDebt}
           paymentMethod={paymentMetode}

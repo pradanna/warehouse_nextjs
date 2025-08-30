@@ -26,6 +26,7 @@ export default function EdititemModal({
   const [editDescription, setEditDescription] = useState<string>("");
   const inputRefName = useRef<HTMLInputElement>(null);
   const inputRefDescription = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (itemId) {
@@ -34,6 +35,7 @@ export default function EdititemModal({
   }, [itemId]);
 
   const fetchDataForEdit = async (id: string) => {
+    setLoading(true);
     try {
       const response = await getItemById(id);
       if (!response) return;
@@ -51,10 +53,13 @@ export default function EdititemModal({
         inputRefDescription.current.value = data.description || "";
     } catch (error) {
       console.error("Gagal memuat data item untuk edit:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const onSubmit = async () => {
+    setLoading(true);
     if (!editCategoryId) {
       toast.error("Kategori harus dipilih", { autoClose: 1500 });
       return;
@@ -78,6 +83,8 @@ export default function EdititemModal({
     } catch (err: any) {
       const message = err.response?.data?.message || "Gagal menambahkan item";
       toast.error(message, { autoClose: 1000 });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -87,6 +94,7 @@ export default function EdititemModal({
       onClose={onClose}
       onSubmit={onSubmit}
       show
+      isLoading={loading}
       size="md"
     >
       <GenosSearchSelectMaterialCategory

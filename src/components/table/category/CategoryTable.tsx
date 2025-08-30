@@ -13,6 +13,7 @@ import {
   findCategoryById,
 } from "@/lib/api/categoryApi";
 import AddCategoryModal from "@/components/form/category/AddCategoryModal";
+import EditCategoryModal from "@/components/form/category/EditCategoryModal";
 
 const CategoryTable = () => {
   const [categories, setCategories] = useState<any[]>([]);
@@ -22,109 +23,32 @@ const CategoryTable = () => {
   const limit = 10;
   const [isLoadingTable, setIsLoadingTable] = useState(true);
 
-  // ADD
-  const [addName, setAddName] = useState("");
-  const [addDescription, setAddDescription] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-  const inputRefDeskripsi = useRef<HTMLTextAreaElement>(null);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleOpen = () => {
     setIsModalOpen(true);
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 100);
   };
 
   const handleClose = () => {
     setIsModalOpen(false);
-    setAddName("");
-    setAddDescription("");
   };
 
-  const handleSubmit = async () => {
-    try {
-      const response = await createCategory(addName, addDescription);
-
-      setAddName("");
-      setAddDescription("");
-      fetchCategory(currentPage);
-      toast.success(response.data.message || "Kategori berhasil ditambahkan", {
-        autoClose: 1000,
-      });
-      inputRef.current?.focus();
-    } catch (err: any) {
-      const message =
-        err.response?.data?.message || "Gagal menambahkan kategori";
-      toast.error(message, { autoClose: 1000 });
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleSubmit();
-    }
+  const handleOnSuccess = () => {
+    fetchCategory(currentPage);
   };
 
   // EDIT
   const [editId, setEditId] = useState("");
-  const [editName, setEditName] = useState("");
-  const [editDescription, setEditDescription] = useState("");
-  const inputEditRef = useRef<HTMLInputElement>(null);
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
-  const inputRefDeskripsiEdit = useRef<HTMLTextAreaElement>(null);
 
   const handleGetEdit = async (id: string) => {
     setEditId(id);
     setIsModalEditOpen(true);
-
-    try {
-      const response = await findCategoryById(id);
-
-      const { name, description } = response.data;
-      console.log("Nama kategori:", name);
-      console.log("Deskripsi kategori:", description);
-
-      setEditName(name);
-      setEditDescription(description);
-
-      setTimeout(() => {
-        inputEditRef.current?.focus();
-        inputEditRef.current?.select();
-      }, 50);
-    } catch (err) {
-      console.error("Gagal mengambil data kategori:", err);
-    }
   };
 
   const handleEditClose = () => {
     setIsModalEditOpen(false);
     setEditId("");
-    setEditName("");
-    setEditDescription("");
-  };
-
-  const handleSubmitEdit = async () => {
-    try {
-      const response = await editCategory(editId, editName, editDescription);
-      fetchCategory(currentPage);
-      toast.success(response.data.message || "Kategori berhasil diperbarui", {
-        autoClose: 1000,
-      });
-      handleEditClose();
-    } catch (err: any) {
-      const message = err.response?.data?.message || "Gagal mengubah kategori";
-      toast.error(message, { autoClose: 1000 });
-    }
-  };
-
-  const handleKeyDownEdit = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleSubmitEdit();
-    }
   };
 
   // TABEL
@@ -181,7 +105,7 @@ const CategoryTable = () => {
     if (!confirmDelete) return;
 
     try {
-      const response = await deleteCategory(id);
+      await deleteCategory(id);
 
       toast.success("Kategori berhasil dihapus", {
         autoClose: 1000,
@@ -230,44 +154,18 @@ const CategoryTable = () => {
       {isModalOpen && (
         <AddCategoryModal
           show
-          addName={addName}
-          addDescription={addDescription}
-          setAddName={setAddName}
-          setAddDescription={setAddDescription}
           onClose={handleClose}
-          onSubmit={handleSubmit}
-          onKeyDown={handleKeyDown}
-          inputRef={inputRef}
-          ref={inputRefDeskripsi}
+          onSuccess={handleOnSuccess}
         />
       )}
 
       {isModalEditOpen && (
-        <GenosModal
-          title="Edit Kategori"
-          onClose={handleEditClose}
-          onSubmit={handleSubmitEdit}
+        <EditCategoryModal
           show
-          size="md"
-        >
-          <GenosTextfield
-            id="edit-nama-kategori"
-            label="Nama Kategori"
-            placeholder="Masukkan Nama Kategori"
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            ref={inputEditRef}
-            className="mb-3"
-          />
-          <GenosTextarea
-            label="Deskripsi"
-            placeholder="Masukkan Deskripsi"
-            value={editDescription}
-            onKeyDown={handleKeyDownEdit}
-            ref={inputRefDeskripsiEdit}
-            onChange={(e) => setEditDescription(e.target.value)}
-          />
-        </GenosModal>
+          onClose={handleEditClose}
+          onSuccess={handleOnSuccess}
+          editCategoryId={editId}
+        />
       )}
     </div>
   );

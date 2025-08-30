@@ -1,6 +1,8 @@
 import { baseUrl, getToken } from "@/app/config/config";
 import axios from "axios";
 import axiosInstance from "./axiosInstance";
+import { parseError } from "../helper";
+import { toast } from "react-toastify";
 
 export async function getCategories(
   search: string,
@@ -39,8 +41,9 @@ export async function createCategory(addName: string, addDescription: string) {
     );
     return response.data;
   } catch (err: any) {
-    const message = err.response?.data?.message || "Gagal menambahkan kategori";
-    console.log(message);
+    const friendlyMessage = parseError(err, "Nama kategori");
+    toast.error(friendlyMessage);
+    throw new Error(friendlyMessage);
   }
 }
 export async function findCategoryById(id: string) {
@@ -77,8 +80,9 @@ export async function editCategory(
     );
     return response.data;
   } catch (err: any) {
-    const message = err.response?.data?.message || "Gagal mengubah kategori";
-    console.error("Gagal merubah category:", err);
+    const friendlyMessage = parseError(err, "Nama kategori");
+    toast.error(friendlyMessage);
+    throw new Error(friendlyMessage);
   }
 }
 export async function deleteCategory(id: string) {

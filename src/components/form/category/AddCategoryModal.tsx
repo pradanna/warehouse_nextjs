@@ -1,42 +1,65 @@
 "use client";
 
 import GenosModal from "@/components/modal/GenosModal";
-import { RefObject } from "react";
+import { RefObject, useRef, useState } from "react";
 import GenosTextfield from "../GenosTextfield";
 import GenosTextarea from "../GenosTextArea";
+import { createCategory } from "@/lib/api/categoryApi";
+import { toast } from "react-toastify";
 
 type AddItemtModalProps = {
   show: boolean;
-  addName: string;
-  addDescription: string;
-  ref?: RefObject<HTMLTextAreaElement>;
-  setAddName: (value: string) => void;
-  setAddDescription: (value: string) => void;
-  inputRef?: RefObject<HTMLInputElement>;
   onClose: () => void;
-  onSubmit: () => void;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onSuccess: () => void;
 };
 
 export default function AddCategoryModal({
   show,
-  addName,
-  addDescription,
-  ref,
-  setAddDescription,
-  setAddName,
-  inputRef,
   onClose,
-  onSubmit,
-  onKeyDown,
+  onSuccess,
 }: AddItemtModalProps) {
+  const [loading, setLoading] = useState(false);
+  const [addName, setAddName] = useState("");
+  const [addDescription, setAddDescription] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRefDeskripsi = useRef<HTMLTextAreaElement>(null);
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      const response = await createCategory(addName, addDescription);
+
+      setAddName("");
+      setAddDescription("");
+      onSuccess();
+      toast.success(response.data.message || "Kategori berhasil ditambahkan", {
+        autoClose: 1000,
+      });
+      inputRef.current?.focus();
+    } catch (err: any) {
+      const message =
+        err.response?.data?.message || "Gagal menambahkan kategori";
+      console.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
   return (
     <GenosModal
       title="Tambah Kategori"
       onClose={onClose}
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
       show
       size="md"
+      isLoading={loading}
     >
       <GenosTextfield
         id="tambah-nama-kategori"
@@ -51,8 +74,8 @@ export default function AddCategoryModal({
         label="Deskripsi"
         placeholder="Masukkan Deskripsi"
         value={addDescription}
-        onKeyDown={onKeyDown}
-        ref={ref}
+        onKeyDown={handleKeyDown}
+        ref={inputRefDeskripsi}
         onChange={(e) => setAddDescription(e.target.value)}
       />
     </GenosModal>

@@ -12,6 +12,7 @@ type PaymentModalProps = {
   setPaymentMethod: (value: string) => void;
   payAmount: number;
   setPayAmount: (value: number) => void;
+  isLoadingButton: boolean;
 };
 
 const PaymentModal: React.FC<PaymentModalProps> = ({
@@ -22,6 +23,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   setPaymentMethod,
   payAmount,
   setPayAmount,
+  isLoadingButton,
 }) => {
   return (
     <GenosModal
@@ -29,6 +31,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       title="Pembayaran"
       onClose={onClose}
       onSubmit={onSubmit}
+      isLoading={isLoadingButton}
     >
       <GenosSelect
         label="Metode Pembayaran"

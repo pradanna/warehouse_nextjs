@@ -7,6 +7,53 @@ import {
 import axios from "axios";
 import { refreshToken } from "../auth";
 import axiosInstance from "../axiosInstance";
+import { parseError } from "@/lib/helper";
+import { toast } from "react-toastify";
+
+export interface InventoryResponse {
+  status: number;
+  message: string;
+  data: Inventory[];
+  meta: Meta;
+}
+
+export interface Inventory {
+  id: string;
+  name: string;
+  unit: string;
+  sku: string;
+  description: string | null;
+  current_stock: number;
+  min_stock: number;
+  max_stock: number;
+  prices: Price[];
+  modified_by: ModifiedBy;
+  created_at: string; // ISO date string
+  updated_at: string; // ISO date string
+}
+
+export interface Price {
+  id: string;
+  outlet: Outlet;
+  price: number;
+}
+
+export interface Outlet {
+  id: string;
+  name: string;
+}
+
+export interface ModifiedBy {
+  id: string;
+  username: string;
+}
+
+export interface Meta {
+  page: number;
+  per_page: number;
+  total_rows: number;
+  total_pages: number;
+}
 
 export async function getInventory(
   param: string,
@@ -14,7 +61,7 @@ export async function getInventory(
   limit: number
 ) {
   try {
-    const response = await axios.get(
+    const response = await axios.get<InventoryResponse>(
       `${baseUrl}/inventory?param=${param}&page=${currentPage}&per_page=${limit}`,
       {
         headers: { Authorization: `Bearer ${getToken()}` },
@@ -106,8 +153,9 @@ export async function createInventory(
         throw refreshErr;
       }
     } else {
-      console.error("Gagal menambahkan inventory:", err);
-      throw err;
+      const friendlyMessage = parseError(err, "SKU ");
+      toast.error(friendlyMessage);
+      throw new Error(friendlyMessage);
     }
   }
 }
@@ -170,8 +218,9 @@ export async function updateInventory(
         throw refreshErr;
       }
     } else {
-      console.error("Gagal mengubah inventory:", err);
-      throw err;
+      const friendlyMessage = parseError(err, "SKU ");
+      toast.error(friendlyMessage);
+      throw new Error(friendlyMessage);
     }
   }
 }

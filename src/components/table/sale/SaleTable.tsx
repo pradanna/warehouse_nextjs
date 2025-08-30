@@ -42,6 +42,7 @@ const SaleTable = () => {
   const [limit, setLimit] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingButton, setLoadingButton] = useState(false);
 
   const [SaleItems, setSaleItems] = useState([]);
 
@@ -342,6 +343,7 @@ const SaleTable = () => {
     };
 
     console.log("Payload sebelum dikirim:", payload);
+    setLoadingButton(true);
 
     try {
       await axios.post(`${baseUrl}/sale`, payload, {
@@ -356,6 +358,8 @@ const SaleTable = () => {
     } catch (error) {
       console.error(error);
       toast.error("Gagal menyimpan data penjualan");
+    } finally {
+      setLoadingButton(false);
     }
   };
 
@@ -661,6 +665,7 @@ const SaleTable = () => {
             title={"Pembayaran"}
             onClose={() => setPaymentMetodModalOpen(false)}
             onSubmit={handleSaveSale}
+            isLoading={loadingButton}
           >
             <GenosSelect
               label="Metode Pembayaran"

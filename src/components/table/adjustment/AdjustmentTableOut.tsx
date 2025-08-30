@@ -26,6 +26,7 @@ const AdjustmentTableOut = ({ search, dateFrom, dateTo }: Props) => {
   }
 
   const [isLoadingTable, setIsLoadingTable] = useState(false);
+  const [isLoadingButton, setIsLoadingButton] = useState(false);
   const [adjustmentData, setAdjustmentData] = useState<Adjustment[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
@@ -113,6 +114,8 @@ const AdjustmentTableOut = ({ search, dateFrom, dateTo }: Props) => {
   };
 
   const handleSaveAdjustmentOut = async () => {
+    setIsLoadingButton(true);
+
     const payload = {
       inventory_id: selectedItemId,
       type: "out",
@@ -145,6 +148,8 @@ const AdjustmentTableOut = ({ search, dateFrom, dateTo }: Props) => {
       toast.error(err, {
         autoClose: 1000,
       });
+    } finally {
+      setIsLoadingButton(false);
     }
   };
 
@@ -181,6 +186,7 @@ const AdjustmentTableOut = ({ search, dateFrom, dateTo }: Props) => {
           title={"Penyesuaian Stok Keluar"}
           onClose={() => setModalAddOpen(false)}
           onSubmit={handleSaveAdjustmentOut}
+          isLoading={isLoadingButton}
         >
           <GenosSearchSelectInventory
             label="Item"

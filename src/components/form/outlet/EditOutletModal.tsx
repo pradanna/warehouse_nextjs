@@ -1,46 +1,78 @@
 "use client";
 
 import GenosModal from "@/components/modal/GenosModal";
-import { RefObject } from "react";
+import { useEffect, useRef, useState } from "react";
 import GenosTextfield from "../GenosTextfield";
+import { toast } from "react-toastify";
+import { getOutletById, updateOutlet } from "@/lib/api/outletApi";
 
 type EditOutlettModalProps = {
   show: boolean;
-  editName: string;
-  editAddress: string;
-  editContact: string;
-  ref?: RefObject<HTMLTextAreaElement>;
-  setEditName: (value: string) => void;
-  setEditAddress: (value: string) => void;
-  setEditContact: (value: string) => void;
-  inputEditRefName?: RefObject<HTMLInputElement>;
-  inputEditRefAddress?: RefObject<HTMLInputElement>;
-  inputEditRefContact?: RefObject<HTMLInputElement>;
+  editId: string;
   onClose: () => void;
-  onSubmit: () => void;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onSuccess: () => void;
 };
 
 export default function EditOutletModal({
   show,
-  editName,
-  setEditAddress,
-  setEditContact,
-  setEditName,
-  editAddress,
-  editContact,
-  inputEditRefName,
-  inputEditRefAddress,
-  inputEditRefContact,
+  editId,
   onClose,
-  onSubmit,
-  onKeyDown,
+  onSuccess,
 }: EditOutlettModalProps) {
+  const [editName, setEditName] = useState("");
+  const [editAddress, setEditAddress] = useState("");
+  const [editContact, setEditContact] = useState("");
+  const inputEditRefName = useRef<HTMLInputElement>(null);
+  const inputEditRefAddress = useRef<HTMLInputElement>(null);
+  const inputEditRefContact = useRef<HTMLInputElement>(null);
+
+  const handleSubmitEdit = async () => {
+    try {
+      const response = await updateOutlet(
+        editId,
+        editName,
+        editAddress,
+        editContact
+      );
+      onSuccess();
+      toast.success(response.data.message || "Outlet berhasil diperbarui", {
+        autoClose: 1000,
+      });
+      onClose();
+    } catch (err: any) {
+      const message = err.response?.data?.message || "Gagal mengubah outlet";
+      toast.error(message, { autoClose: 1000 });
+    }
+  };
+
+  const handleEdit = async () => {
+    try {
+      const response = await getOutletById(editId);
+      const { name, address, contact } = response.data;
+      setEditName(name);
+      setEditAddress(address);
+      setEditContact(contact);
+
+      setTimeout(() => {
+        inputEditRefName.current?.focus();
+        inputEditRefName.current?.select();
+      }, 50);
+    } catch (err) {
+      console.error("Gagal mengambil data outlet:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (show) {
+      handleEdit();
+    }
+  }, [show]);
+
   return (
     <GenosModal
       title="Edit Outlet"
       onClose={onClose}
-      onSubmit={onSubmit}
+      onSubmit={handleSubmitEdit}
       show
       size="md"
     >
@@ -72,7 +104,7 @@ export default function EditOutletModal({
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();
-            onSubmit();
+            handleSubmitEdit();
           }
         }}
       />
