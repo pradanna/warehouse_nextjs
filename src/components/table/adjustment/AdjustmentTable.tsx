@@ -17,6 +17,7 @@ import GenosSelect from "@/components/form/GenosSelect";
 import GenosTextfield from "@/components/form/GenosTextfield";
 import GenosSearchSelect from "@/components/form/GenosSearchSelect";
 import { getInventory } from "@/lib/api/inventory/inventoryApi";
+import dayjs from "dayjs";
 
 const AdjustmentTable = () => {
   const [isLoadingTable, setIsLoadingTable] = useState(false);
@@ -142,7 +143,7 @@ const AdjustmentTable = () => {
       type,
       quantity: qty,
       deskripsi,
-      date: new Date().toISOString().slice(0, 10),
+      date: dayjs().format("YYYY-MM-DD"),
     };
 
     console.log("Payload:", payload);

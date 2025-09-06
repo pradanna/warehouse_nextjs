@@ -1,15 +1,12 @@
 "use client";
 
 import GenosModal from "@/components/modal/GenosModal";
-import { RefObject, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import GenosTextfield from "../GenosTextfield";
-import GenosSearchSelect from "../GenosSearchSelect";
 import GenosDatepicker from "../GenosDatepicker";
-import GenosSearchSelectOutlet from "@/components/select-search/GenosSearchOutlet";
-import GenosTextarea from "../GenosTextArea";
 import { toast } from "react-toastify";
-import dayjs from "dayjs";
 import { createIncomesOutlet } from "@/lib/api/incomeOutletApi";
+import dayjs from "dayjs";
 
 type AddIncomeOutletModalProps = {
   idOutlet: string;
@@ -24,19 +21,19 @@ export default function AddIncomeOutletModal({
   idOutlet,
   NameOutlet,
 }: AddIncomeOutletModalProps) {
+  const [isLoadingButton, setIsLoadingButton] = useState(false);
   const [addCashAmount, setAddCashAmount] = useState<number>(0);
   const [addDigitalAmount, setAddDigitalAmount] = useState<number>(0);
-  const [addMutationAmount, setAddMutationAmount] = useState<number>(0);
 
   const inputRefCash = useRef<HTMLInputElement>(null);
   const inputRefDigital = useRef<HTMLInputElement>(null);
-  const inputRefMutation = useRef<HTMLInputElement>(null);
   const [incomeDate, setIncomeDate] = useState<Date>(new Date());
-  const [addAmount, setAddAmount] = useState<number>(0);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const ref = useRef<HTMLTextAreaElement>(null);
+
+  const [totalAmount, setTotalAmount] = useState<number>(0);
 
   const onSubmit = async () => {
+    setIsLoadingButton(true);
+
     try {
       if (!idOutlet || !incomeDate) {
         toast.error("Outlet dan tanggal harus diisi");
@@ -45,11 +42,10 @@ export default function AddIncomeOutletModal({
 
       const payload = {
         outlet_id: idOutlet,
-        date: incomeDate.toISOString().split("T")[0], // Format YYYY-MM-DD
+        date: dayjs(incomeDate).format("YYYY-MM-DD"), // Format YYYY-MM-DD
         income: {
           cash: addCashAmount,
           digital: addDigitalAmount,
-          by_mutation: addMutationAmount,
         },
       };
 
@@ -65,8 +61,14 @@ export default function AddIncomeOutletModal({
       toast.error(err.message || "Data Gagal ditambahkan", {
         autoClose: 1000,
       });
+    } finally {
+      setIsLoadingButton(false);
     }
   };
+
+  useEffect(() => {
+    setTotalAmount((addDigitalAmount ?? 0) + (addCashAmount ?? 0));
+  }, [addCashAmount, addDigitalAmount]);
 
   return (
     <GenosModal
@@ -75,6 +77,7 @@ export default function AddIncomeOutletModal({
       onClose={onClose}
       onSubmit={onSubmit}
       size="md"
+      isLoading={isLoadingButton}
     >
       <div className="flex flex-col gap-5">
         <div className="fixed z-[9998]" id="root-portal"></div>
@@ -107,12 +110,12 @@ export default function AddIncomeOutletModal({
 
         <GenosTextfield
           id="by_mutation"
-          label="Jumlah Pemasukan via Mutasi"
+          label="Jumlah"
+          disabled
           placeholder="Masukkan Jumlah Pemasukan via Mutasi"
           type="number"
-          value={addMutationAmount}
-          ref={inputRefMutation}
-          onChange={(e) => setAddMutationAmount(Number(e.target.value))}
+          value={totalAmount}
+          onChange={() => {}}
         />
       </div>
     </GenosModal>

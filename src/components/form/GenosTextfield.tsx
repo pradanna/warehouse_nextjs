@@ -17,6 +17,9 @@ type Props = {
   name?: string;
   type?: string;
   disabled?: boolean;
+  readOnly?: boolean;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onClick?: (e: React.MouseEvent<HTMLInputElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 };
 
@@ -44,6 +47,9 @@ const GenosTextfield = forwardRef<HTMLInputElement, Props>(
       name,
       type = "text",
       disabled = false,
+      readOnly = false,
+      onBlur,
+      onClick,
     },
     ref
   ) => {
@@ -118,12 +124,19 @@ const GenosTextfield = forwardRef<HTMLInputElement, Props>(
             name={name}
             placeholder={showFloatingLabel ? placeholder : ""}
             onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
+            onBlur={(e) => {
+              setIsFocused(false);
+              if (onBlur) {
+                onBlur(e);
+              }
+            }}
+            onClick={onClick}
             onKeyDown={onKeyDown}
             disabled={disabled}
+            readOnly={readOnly}
             ref={ref}
             className={clsx(
-              "py-2 px-3 bg-transparent focus:outline-none text-sm w-full"
+              "py-2 px-3 bg-transparent focus:outline-none text-sm w-full cursor-pointer"
             )}
           />
 

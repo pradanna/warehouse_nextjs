@@ -37,12 +37,17 @@ const roundedClasses = {
 };
 
 const colorClasses = {
-  primary: "bg-primary-color text-white hover:bg-primary-dark",
-  secondary: "bg-secondary-color text-gray-800 hover:bg-secondary-dark",
-  danger: "bg-danger-base text-white hover:bg-danger-dark",
-  success: "bg-success-base text-white hover:bg-success-dark",
-  warning: "bg-warning-base text-white hover:bg-warning-dark",
-  gray: "bg-gray-400 text-black hover:bg-gray-500",
+  primary:
+    "bg-primary-color border border-primary-color text-white hover:bg-primary-dark",
+  secondary:
+    "bg-secondary-color text-white hover:bg-secondary-dark border border-secondary-color ",
+  danger:
+    "bg-danger-base  text-white hover:bg-danger-dark border border-danger-base",
+  success:
+    "bg-success-base text-white hover:bg-success-dark border border-success-base",
+  warning:
+    "bg-warning-base text-white hover:bg-warning-dark border border-warning-base",
+  gray: "bg-gray-400 text-black hover:bg-gray-500 border border-gray-400",
 };
 
 const outlinedColorClasses = {

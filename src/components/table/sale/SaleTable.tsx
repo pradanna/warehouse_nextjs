@@ -32,6 +32,7 @@ import {
   InventoryData,
 } from "@/lib/api/inventory/inventory-getbyid-api";
 import GenosSearchSelectInventory from "@/components/select-search/InventorySearch";
+import dayjs from "dayjs";
 
 const SaleTable = () => {
   const [data, setData] = useState([]);
@@ -101,7 +102,7 @@ const SaleTable = () => {
       const res = await getSales(currentPage, limit, search, selectedOutlet);
 
       setData(res.data);
-      setTotalItems(res.data.total);
+      setTotalItems(res.meta.total_rows);
     } catch (err) {
       toast.error("Gagal mengambil data sale");
     } finally {
@@ -311,7 +312,7 @@ const SaleTable = () => {
   };
 
   const handleSaveSale = async () => {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = dayjs().format("YYYY-MM-DD");
     const isInstallment = paymentType === "installment";
 
     // Misal kamu bisa atur nilai DP secara manual atau pakai default 30% dari total
@@ -329,7 +330,7 @@ const SaleTable = () => {
         saleDescription || `Penjualan ${new Date().toLocaleDateString()}`,
       payment_type: paymentType,
       payment: {
-        date: new Date().toISOString().slice(0, 10),
+        date: dayjs().format("YYYY-MM-DD"),
         description: isInstallment ? "Down Payment" : "Full Payment",
         payment_type: paymentMetode,
         amount: downPayment,
@@ -425,7 +426,7 @@ const SaleTable = () => {
   };
 
   const handleSavePayCredit = async () => {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = dayjs().format("YYYY-MM-DD");
 
     const payload = {
       sale_id: saleId,

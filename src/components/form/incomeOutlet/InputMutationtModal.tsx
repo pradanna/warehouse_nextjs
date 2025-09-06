@@ -6,34 +6,34 @@ import GenosTextfield from "../GenosTextfield";
 import dayjs from "dayjs";
 
 import { toast } from "react-toastify";
+import GenosSearchSelectOutlet from "@/components/select-search/GenosSearchOutlet";
 import GenosDatepicker from "../GenosDatepicker";
-import { formatDateToDateIndo } from "@/lib/helper";
+import GenosTextarea from "../GenosTextArea";
+import { formatDateToDateIndo, formatRupiah } from "@/lib/helper";
 import {
   createIncomesOutlet,
   getIncomesOutletbyId,
+  updateIncomeMutation,
   updateIncomesOutlet,
 } from "@/lib/api/incomeOutletApi";
 
-type EditIncomeOutletModalProps = {
+type InputMutationtModalModalProps = {
   show: boolean;
-  idOutlet: string;
   NameOutlet: string;
   idIncome: string;
   onClose: () => void;
 };
 
-export default function EditIncomeOutletModal({
+export default function InputMutationtModalModal({
   show,
   idIncome,
-  idOutlet,
   NameOutlet,
   onClose,
-}: EditIncomeOutletModalProps) {
+}: InputMutationtModalModalProps) {
   const [isLoadingButton, setIsLoadingButton] = useState(false);
-  const [totalAmount, setTotalAmount] = useState<number>(0);
   const [incomeDate, setIncomeDate] = useState<Date>(new Date());
-  const [editAmountCash, setEditAmountCash] = useState<number>(0);
-  const [editAmountDigital, setEditAmountDigital] = useState<number>(0);
+  const [mutationAmount, setMutationAmount] = useState<number>(0);
+  const [total, setTotal] = useState<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const fetchDataForEdit = async (id: string) => {
@@ -46,11 +46,13 @@ export default function EditIncomeOutletModal({
         return;
       }
 
-      setEditAmountCash(Number(response.data.cash));
-      setEditAmountDigital(Number(response.data.digital));
-
-      console.log("Data pengeluaran untuk edit:", response.data.date);
-      setIncomeDate(formatDateToDateIndo(response.data.date));
+      setTotal(response.data.total);
+      setMutationAmount(response.data.by_mutation);
+      setIncomeDate(
+        formatDateToDateIndo(
+          dayjs(response.data.date).subtract(1, "day").format("YYYY-MM-DD")
+        )
+      );
     } catch (error) {
       console.error("Gagal memuat data pengeluaran untuk edit:", error);
     } finally {
@@ -59,31 +61,20 @@ export default function EditIncomeOutletModal({
   };
 
   useEffect(() => {
-    console.log("idIncome:", idIncome);
-    console.log("show:", show);
-
     if (idIncome && show) {
       fetchDataForEdit(idIncome);
     }
   }, [idIncome, show]);
 
-  useEffect(() => {
-    setTotalAmount((editAmountDigital ?? 0) + (editAmountCash ?? 0));
-  }, [editAmountDigital, editAmountCash]);
-
   const onSubmit = async () => {
     setIsLoadingButton(true);
     try {
       const payload = {
-        outlet_id: idOutlet,
         date: dayjs(incomeDate).format("YYYY-MM-DD"),
-        income: {
-          cash: editAmountCash,
-          digital: editAmountDigital,
-        },
+        amount: mutationAmount,
       };
 
-      const response = await updateIncomesOutlet(idIncome, payload);
+      const response = await updateIncomeMutation(idIncome, payload);
       // Lakukan aksi setelah berhasil (misalnya reset form atau tutup modal)
       console.log("Berhasil menambahkan data:", response);
       toast.success(response.message || "Data Berhasil ditambahkan", {
@@ -102,7 +93,7 @@ export default function EditIncomeOutletModal({
 
   return (
     <GenosModal
-      title={`Ubah Data Pemasukan di Outlet ` + NameOutlet}
+      title={`Masukan Mutasi di Outlet ` + NameOutlet}
       show={show}
       onClose={onClose}
       onSubmit={onSubmit}
@@ -110,6 +101,7 @@ export default function EditIncomeOutletModal({
       isLoading={isLoadingButton}
     >
       <div className="flex flex-col gap-5">
+        {/* <p>Total{formatRupiah(total)}</p> */}
         <div className="fixed z-[9998]" id="root-portal"></div>
         <GenosDatepicker
           id="income-date"
@@ -120,31 +112,12 @@ export default function EditIncomeOutletModal({
 
         <GenosTextfield
           id="edit-amount-income"
-          label="Jumlah Pemasukan Cash"
+          label="Jumlah Mutation"
           placeholder="Masukkan Jumlah Pemasukan Cash"
           type="number"
-          value={editAmountCash}
+          value={mutationAmount}
           ref={inputRef}
-          onChange={(e) => setEditAmountCash(Number(e.target.value))}
-        />
-
-        <GenosTextfield
-          id="edit-amount-income"
-          label="Jumlah Pemasukan Digital"
-          placeholder="Masukkan Jumlah Pemasukan Digital"
-          type="number"
-          value={editAmountDigital}
-          ref={inputRef}
-          onChange={(e) => setEditAmountDigital(Number(e.target.value))}
-        />
-        <GenosTextfield
-          id="by_mutation"
-          label="Jumlah"
-          disabled
-          placeholder="Masukkan Jumlah Pemasukan via Mutasi"
-          type="number"
-          value={totalAmount}
-          onChange={() => {}}
+          onChange={(e) => setMutationAmount(Number(e.target.value))}
         />
       </div>
     </GenosModal>

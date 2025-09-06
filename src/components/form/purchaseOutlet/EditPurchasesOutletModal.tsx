@@ -1,38 +1,45 @@
 "use client";
 
 import GenosModal from "@/components/modal/GenosModal";
-import { RefObject, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import GenosTextfield from "../GenosTextfield";
 import dayjs from "dayjs";
-import {
-  createExpensesOutlet,
-  getExpensesOutletbyId,
-  OutletExpenseInput,
-} from "@/lib/api/expensesOutletApi";
+
 import { toast } from "react-toastify";
-import GenosSearchSelectOutlet from "@/components/select-search/GenosSearchOutlet";
+
 import GenosSearchSelectExpenseCategory from "@/components/select-search/ExpenseCategorySearchOutlet";
 import GenosDatepicker from "../GenosDatepicker";
 import GenosTextarea from "../GenosTextArea";
-import { formatDateToDateIndo } from "@/lib/helper";
+import { formatDateToDateIndo, formatRupiah } from "@/lib/helper";
+import {
+  createPurchasesOutlet,
+  getPurchasesOutletbyId,
+  updatePurchasesOutlet,
+} from "@/lib/api/purchaseOutlet/PurchasesOutletApi";
 
-type EditExpensesOutletModalProps = {
+import { OutletPurchaseInput } from "@/lib/api/purchaseOutlet/PurchaseOutletInterface";
+import { Sale } from "@/lib/api/sales/interfaceSales";
+import { OutletPurchaseById } from "@/lib/api/purchaseOutlet/PurchaseOutletInterfaceById";
+import { getSalesById } from "@/lib/api/sales/SalesApi";
+import SalesPicker from "@/components/search-table/search-sale";
+
+type EditPurchasesOutletModalProps = {
   show: boolean;
   idOutlet: string;
   NameOutlet: string;
-  idExpense: string;
+  idPurchasse: string;
   onClose: () => void;
 };
 
-export default function EditExpensesOutletModal({
+export default function EditPurchasesOutletModal({
   show,
-  idExpense,
+  idPurchasse,
   idOutlet,
   NameOutlet,
   onClose,
-}: EditExpensesOutletModalProps) {
+}: EditPurchasesOutletModalProps) {
+  const [selectedSales, setSelectedSales] = useState<Sale>();
   const [isLoadingButton, setIsLoadingButton] = useState(false);
-  const [editCategoryId, setEditCategoryId] = useState<string>("");
   const [editDescription, setEditDescription] = useState<string | null>("");
   const [expenseDate, setExpenseDate] = useState<Date>(new Date());
   const [editAmountCash, setEditAmountCash] = useState<number>(0);
@@ -40,14 +47,25 @@ export default function EditExpensesOutletModal({
   const inputRef = useRef<HTMLInputElement>(null);
   const ref = useRef<HTMLTextAreaElement>(null);
 
+  const [idSale, setIdSale] = useState<string>("");
+  const [noReference, setNoReference] = useState<string>("");
+  const [dateSale, setdateSale] = useState<string>("");
+  const [total, setTotal] = useState<number>(0);
+
   const fetchDataForEdit = async (id: string) => {
     setIsLoadingButton(true);
     try {
-      const response = await getExpensesOutletbyId(id);
+      const response = await getPurchasesOutletbyId(id);
+      const responseSale = await getSalesById(response.data.sale.id);
+      setIdSale(response.data.sale.id);
+      setNoReference(response.data.sale.reference_number);
+      setdateSale(responseSale.data.date);
+      setTotal(response.data.sale.total);
+
+      console.log("Data pengeluaran untuk edit:", response.data);
       if (!response) return;
 
-      setEditCategoryId(response.data.category.id);
-      setEditDescription(response.data.description);
+      setEditDescription(response.data.cash_flow.name);
       setEditAmountCash(Number(response.data.cash));
       setEditAmountDigital(Number(response.data.digital));
 
@@ -61,10 +79,10 @@ export default function EditExpensesOutletModal({
   };
 
   useEffect(() => {
-    if (idExpense && show) {
-      fetchDataForEdit(idExpense);
+    if (idPurchasse && show) {
+      fetchDataForEdit(idPurchasse);
     }
-  }, [idExpense, show]);
+  }, [idPurchasse, show]);
 
   const descriptionChange =
     () => (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -75,18 +93,20 @@ export default function EditExpensesOutletModal({
   const onSubmit = async () => {
     setIsLoadingButton(true);
     try {
-      const unitData: OutletExpenseInput = {
-        outlet_id: idOutlet,
-        expense_category_id: editCategoryId,
+      const unitData: OutletPurchaseInput = {
+        sale_id: selectedSales?.id ?? idSale,
         date: dayjs(expenseDate).format("YYYY-MM-DD"),
         amount: {
-          cash: editAmountCash ?? 0,
-          digital: editAmountDigital ?? 0,
+          cash: editAmountCash,
+          digital: editAmountDigital,
         },
-        description: editDescription ? editDescription : "",
+        cash_flow: {
+          date: dayjs(expenseDate).format("YYYY-MM-DD"),
+          name: editDescription,
+        },
       };
 
-      const response = await createExpensesOutlet(unitData);
+      const response = await updatePurchasesOutlet(idPurchasse, unitData);
       // Lakukan aksi setelah berhasil (misalnya reset form atau tutup modal)
       console.log("Berhasil menambahkan data:", response);
       toast.success(response.message || "Data Berhasil ditambahkan", {
@@ -110,14 +130,21 @@ export default function EditExpensesOutletModal({
       onClose={onClose}
       onSubmit={onSubmit}
       isLoading={isLoadingButton}
-      size="md"
+      size="lg"
     >
       <div className="flex flex-col gap-5">
-        <GenosSearchSelectExpenseCategory
-          value={editCategoryId}
-          onChange={setEditCategoryId}
-          placeholder="Pilih Kategori Pengeluaran"
-          label="Kategori Pengeluaran"
+        <SalesPicker
+          outlet_id={idOutlet}
+          value={selectedSales}
+          placeholder={
+            noReference +
+            " (" +
+            dateSale +
+            ")" +
+            ", Total: " +
+            formatRupiah(total)
+          }
+          onSelect={(sales) => setSelectedSales(sales)}
         />
         <div className="fixed z-[9998]" id="root-portal"></div>
         <GenosDatepicker

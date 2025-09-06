@@ -9,6 +9,7 @@ import GenosTextfield from "@/components/form/GenosTextfield";
 import GenosSearchSelect from "@/components/form/GenosSearchSelect";
 import { getInventory } from "@/lib/api/inventory/inventoryApi";
 import GenosSearchSelectInventory from "@/components/select-search/InventorySearch";
+import dayjs from "dayjs";
 
 type Props = {
   search: string;
@@ -121,7 +122,7 @@ const AdjustmentTableOut = ({ search, dateFrom, dateTo }: Props) => {
       type: "out",
       quantity: qty,
       description: deskripsi,
-      date: new Date().toISOString().slice(0, 10),
+      date: dayjs().format("YYYY-MM-DD"),
     };
 
     console.log("Payload:", payload);

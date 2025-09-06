@@ -7,12 +7,14 @@ import {
   deleteIncomesOutlet,
   getIncomesOutlet,
   getIncomesOutletbyId,
+  updateIncomeMutation,
 } from "@/lib/api/incomeOutletApi";
 import { formatRupiah } from "@/lib/helper";
 import AddIncomeOutletModal from "@/components/form/incomeOutlet/AddIncomeOutletModal";
 import EditIncomeOutletModal from "@/components/form/incomeOutlet/EditIncomeOutletModal";
 import YearDropdown from "@/components/dropdown-button/YearDropDown";
 import MonthDropdown from "@/components/dropdown-button/MonthDropDown";
+import InputMutationtModalModal from "@/components/form/incomeOutlet/InputMutationtModal";
 
 interface IncomesOutletTableProps {
   outletId: string;
@@ -32,6 +34,7 @@ const IncomesOutletTable = ({
   const [isLoadingTable, setIsLoadingTable] = useState(true);
 
   // ADD VAR
+  const [isModalInputMutasiOpen, setIsModalInputMutasiOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [idForEdit, setIdForEdit] = useState("");
 
@@ -59,14 +62,29 @@ const IncomesOutletTable = ({
     fetchIncomesOutlet(1);
   };
 
+  const handleInputMutationClose = () => {
+    setIsModalInputMutasiOpen(false);
+    fetchIncomesOutlet(1);
+  };
+
   // TABLE HEADER
   const TABLE_HEAD = [
-    { key: "date", label: "Tanggal", sortable: true },
-    { key: "cash", label: "Cash", sortable: true },
-    { key: "digital", label: "Digital", sortable: true },
-    { key: "total", label: "Total", sortable: true },
-    { key: "by_mutation", label: "Dari Mutasi", sortable: true },
+    { key: "date", label: "Tanggal", sortable: true, fontWeight: "bold" },
+    { key: "cash", label: "Cash", sortable: true, type: "currency" },
+    { key: "digital", label: "Digital", sortable: true, type: "currency" },
+    { key: "total", label: "Total", sortable: true, type: "currency" },
     { key: "author.username", label: "Input By", sortable: true },
+    {
+      key: "by_mutation",
+      label: "Mutasi",
+      sortable: true,
+      isTextField: true,
+      type: "currency",
+      onClick: (row) => {
+        setIsModalInputMutasiOpen(true);
+        setIdForEdit(row.id);
+      },
+    },
   ];
 
   // TABLE ROWS
@@ -74,10 +92,10 @@ const IncomesOutletTable = ({
     return incomeOutlets.map((incomeOutlet) => ({
       id: incomeOutlet.id,
       date: incomeOutlet.date,
-      cash: formatRupiah(incomeOutlet.cash),
-      digital: formatRupiah(incomeOutlet.digital),
-      by_mutation: formatRupiah(incomeOutlet.by_mutation),
-      total: formatRupiah(incomeOutlet.total),
+      cash: incomeOutlet.cash,
+      digital: incomeOutlet.digital,
+      total: incomeOutlet.total,
+      by_mutation: incomeOutlet.by_mutation,
       author: incomeOutlet.author,
     }));
   }, [incomeOutlets]);
@@ -116,6 +134,13 @@ const IncomesOutletTable = ({
     }
   };
 
+  const handleEdit = async (id: string) => {
+    setIdForEdit(id);
+    setIsModalEditOpen(true);
+
+    console.log("ID untuk edit:", id);
+  };
+
   const handleDelete = async (id: string) => {
     const confirmDelete = window.confirm(
       "Apakah Anda yakin ingin menghapus incomeOutlet ini?"
@@ -138,6 +163,7 @@ const IncomesOutletTable = ({
     }
   };
 
+  const handleTableField = (row, newValue: number) => {};
   return (
     <div>
       <GenosTable
@@ -150,10 +176,28 @@ const IncomesOutletTable = ({
         onPageChange={(page) => setCurrentPage(page)}
         onAddData={handleOpen}
         loading={isLoadingTable}
-        // ACTION_BUTTON={{
-        //   edit: (row) => handleEdit(row.id),
-        //   delete: (row) => handleDelete(row.id),
-        // }}
+        handleTableField={(row, key, value) => {
+          console.log("Row:", row); // seluruh data row
+          console.log("Key:", key); // misalnya "cash"
+          console.log("Value:", value); // value baru yang diinput user
+
+          // Contoh: update state lokal
+          setIncomesOutlets((prev) =>
+            prev.map((r) =>
+              r.id === row.id ? { ...r, [key]: Number(value) } : r
+            )
+          );
+
+          // Atau langsung panggil API update ke server
+          updateIncomeMutation(row.id, {
+            amount: Number(value),
+            date: row.date,
+          });
+        }}
+        ACTION_BUTTON={{
+          edit: (row) => handleEdit(row.id),
+          delete: (row) => handleDelete(row.id),
+        }}
         FILTER={
           <div className="flex gap-4 mb-4">
             <div className="flex flex-wrap items-center gap-4 me-5">
@@ -189,6 +233,15 @@ const IncomesOutletTable = ({
           idOutlet={outletId}
           NameOutlet={outletName}
           onClose={handleEditClose}
+        />
+      )}
+
+      {isModalInputMutasiOpen && (
+        <InputMutationtModalModal
+          show
+          idIncome={idForEdit}
+          NameOutlet={outletName}
+          onClose={handleInputMutationClose}
         />
       )}
     </div>

@@ -75,7 +75,14 @@ export default function GenosSearchSelect({
     <div className={clsx("w-full max-w-[500px]", className)} ref={wrapperRef}>
       <label className="block text-xs text-gray-700 mb-1">{label}</label>
       {isLoading ? (
-        <ArrowPathIcon className="w-4 h-4 animate-spin" />
+        <div className="flex flex-row items-center gap-3">
+          <img
+            src="/images/local/blue-loading.gif"
+            alt="Loading..."
+            className="w-12 h-12 mb-2"
+          />
+          <span className="text-center">Tunggu sebentar ya</span>
+        </div>
       ) : (
         <div
           className={clsx(

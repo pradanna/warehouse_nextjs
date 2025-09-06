@@ -7,6 +7,7 @@ import { addOneDay } from "@/lib/helper";
 import { createAdjustment, getAdjustmentIn } from "@/lib/api/adjustmentApi";
 import GenosTextfield from "@/components/form/GenosTextfield";
 import GenosSearchSelectInventory from "@/components/select-search/InventorySearch";
+import dayjs from "dayjs";
 
 const AdjustmentTableIn = ({ search, dateFrom, dateTo }) => {
   interface Adjustment {
@@ -105,7 +106,7 @@ const AdjustmentTableIn = ({ search, dateFrom, dateTo }) => {
       type: "in",
       quantity: qty,
       description: deskripsi,
-      date: new Date().toISOString().slice(0, 10),
+      date: dayjs().format("YYYY-MM-DD"),
     };
 
     try {

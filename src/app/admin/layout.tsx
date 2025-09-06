@@ -13,6 +13,8 @@ import {
   ShoppingCartIcon,
   AdjustmentsHorizontalIcon,
   ChartBarSquareIcon,
+  ShoppingBagIcon,
+  CakeIcon,
 } from "@heroicons/react/24/outline";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import NavbarAdmin from "@/components/navbar/NavbarAdmin";
@@ -108,7 +110,16 @@ export default function DashboardLayout({
       href: "/admin/outlet-expense",
       icon: <ShoppingCartIcon className="h-5 w-5" />,
     },
-
+    {
+      name: "Purchase Outlet ",
+      href: "/admin/outlet-purchase",
+      icon: <ShoppingBagIcon className="h-5 w-5" />,
+    },
+    {
+      name: "Pastry Outlet ",
+      href: "/admin/outlet-pastry",
+      icon: <CakeIcon className="h-5 w-5" />,
+    },
     {
       name: "Cash Flow",
       href: "/admin/cashflow",

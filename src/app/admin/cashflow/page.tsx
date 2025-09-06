@@ -1,5 +1,6 @@
 "use client";
 
+import GenosButton from "@/components/button/GenosButton";
 import CashFlowPerTanggal from "@/components/card/CashflowPertanggal";
 import MonthDropdown from "@/components/dropdown-button/MonthDropDown";
 import YearDropdown from "@/components/dropdown-button/YearDropDown";
@@ -7,6 +8,12 @@ import GenosPanel from "@/components/panel/GenosPanel";
 import OutletTabs from "@/components/tabs/OutletTab";
 import { getCashflow } from "@/lib/api/cashFlowApi";
 import { formatRupiah } from "@/lib/helper";
+import {
+  AtSymbolIcon,
+  CurrencyBangladeshiIcon,
+  CurrencyDollarIcon,
+  PrinterIcon,
+} from "@heroicons/react/24/outline";
 import React, { useEffect, useState } from "react";
 
 interface Props {
@@ -39,6 +46,8 @@ export default function Cashflow(Props) {
 
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+
+  const [isCash, setIscash] = useState(true);
 
   useEffect(() => {
     const fetchCashflow = async () => {
@@ -88,7 +97,22 @@ export default function Cashflow(Props) {
         subtitle="Data Cashflow Outlet per periode"
         className="mt-3"
         actionChildren={
-          <div className="flex flex-wrap items-center gap-4 me-5">
+          <div className="flex flex-wrap items-end gap-4 me-5">
+            <GenosButton
+              round="sm"
+              label="Cash"
+              outlined={!isCash}
+              onClick={() => setIscash(true)}
+              iconLeft={<CurrencyDollarIcon className="w-4 h-4 " />}
+            />
+            <GenosButton
+              label="Digital"
+              round="sm"
+              outlined={isCash}
+              onClick={() => setIscash(false)}
+              iconLeft={<AtSymbolIcon className="w-4 h-4" />}
+            />
+            <p className="text-gray-300">|</p>
             <div>
               <label className="block text-sm font-medium">Tahun</label>
               <YearDropdown value={selectedYear} onChange={setSelectedYear} />
@@ -100,6 +124,13 @@ export default function Cashflow(Props) {
                 onChange={setSelectedMonth}
               />
             </div>
+            <p className="text-gray-300">|</p>
+            <GenosButton
+              label="Cetak Excel"
+              color="secondary"
+              iconLeft={<PrinterIcon className="w-4 h-4" />}
+              round="sm"
+            />
           </div>
         }
       >

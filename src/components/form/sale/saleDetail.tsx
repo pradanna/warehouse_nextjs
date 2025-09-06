@@ -9,6 +9,7 @@ import GenosButton from "@/components/button/GenosButton";
 import PaymentModal from "../debt/debtPayment";
 import { toast } from "react-toastify";
 import { createSalePayment } from "@/lib/api/saleApi";
+import dayjs from "dayjs";
 
 const SaleDetailModal = ({
   show,
@@ -47,7 +48,7 @@ const SaleDetailModal = ({
   const handleSavePayDebt = async () => {
     setIsLoadingButton(true);
 
-    const today = new Date().toISOString().slice(0, 10);
+    const today = dayjs().format("YYYY-MM-DD");
 
     const payload = {
       sale_id: saleId,

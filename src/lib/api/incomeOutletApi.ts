@@ -65,7 +65,7 @@ export async function updateIncomesOutlet(unitId: string, unitData: any) {
   try {
     const response = await axiosInstance.put(
       baseUrl + "/outlet-income/" + unitId,
-      { name: unitData },
+      unitData,
       {
         headers: {
           Authorization: `Bearer ${getToken()}`,
@@ -99,6 +99,24 @@ export async function getIncomesOutletbyId(unitId: string) {
   try {
     const response = await axiosInstance.get(
       `${baseUrl}/outlet-income/${unitId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (err) {
+    console.error("Gagal mengambil data incomeOutlet untuk edit:", err);
+  }
+}
+
+export async function updateIncomeMutation(unitId: string, unitData: any) {
+  try {
+    const response = await axiosInstance.put(
+      baseUrl + "/outlet-income/" + unitId + "/mutation",
+      unitData,
       {
         headers: {
           Authorization: `Bearer ${getToken()}`,

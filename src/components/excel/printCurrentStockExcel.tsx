@@ -1,4 +1,5 @@
 // components/excelGenerator.ts
+import dayjs from "dayjs";
 import * as XLSX from "xlsx";
 
 export const generateCurrentStockExcel = (data: any[]) => {
@@ -32,7 +33,7 @@ export const generateCurrentStockExcel = (data: any[]) => {
 
   // Tambahkan tanggal ke nama file
   const today = new Date();
-  const dateStr = today.toISOString().split("T")[0]; // format: YYYY-MM-DD
+  const dateStr = dayjs(today).format("YYYY-MM-DD");
   const filename = `Laporan-Stok-${dateStr}.xlsx`;
 
   XLSX.writeFile(workbook, filename);

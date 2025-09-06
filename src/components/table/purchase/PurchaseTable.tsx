@@ -35,6 +35,7 @@ import {
 } from "@/lib/api/inventory/inventory-getbyid-api";
 import { formatRupiah } from "@/lib/helper";
 import { fetchSupplierById } from "@/lib/api/supplier/supplier-getbyid-api";
+import dayjs from "dayjs";
 
 const PurchaseTable = () => {
   const [data, setData] = useState([]);
@@ -103,7 +104,7 @@ const PurchaseTable = () => {
       );
 
       setData(res.data);
-      setTotalItems(res.total);
+      setTotalItems(res.meta.total_rows);
     } catch (err) {
       toast.error("Gagal mengambil data purchase");
     } finally {
@@ -275,7 +276,7 @@ const PurchaseTable = () => {
   };
 
   const handleSavePurchase = async () => {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = dayjs().format("YYYY-MM-DD");
     const isInstallment = paymentType === "installment";
 
     // Misal kamu bisa atur nilai DP secara manual atau pakai default 30% dari total

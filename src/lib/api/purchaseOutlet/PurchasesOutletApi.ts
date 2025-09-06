@@ -1,29 +1,20 @@
 import { baseUrl, getToken } from "@/app/config/config";
-import axiosInstance from "./axiosInstance";
+import axiosInstance from "../axiosInstance";
+import { OutletPurchasesResponse } from "./PurchaseOutletInterface";
+import { OutletPurchaseByIdResponse } from "./PurchaseOutletInterfaceById";
 
-export interface OutletExpenseInput {
-  outlet_id: string;
-  expense_category_id: string;
-  date: string; // format: YYYY-MM-DD
-  amount: {
-    cash: number;
-    digital: number;
-  };
-  description: string;
-}
-
-export async function getExpensesOutlet({
+export async function getPurchasesOutlet({
   outlet_id,
   expense_category_id,
-  date_start,
-  date_end,
+  year,
+  month,
   page = 1,
   limit = 10,
 }: {
   outlet_id: string | null;
   expense_category_id?: string;
-  date_start?: string | null;
-  date_end?: string | null;
+  year?: string | null;
+  month?: string | null;
   page?: number;
   limit?: number;
 }) {
@@ -34,13 +25,13 @@ export async function getExpensesOutlet({
     if (outlet_id) params.append("outlet_id", outlet_id);
     if (expense_category_id)
       params.append("expense_category_id", expense_category_id);
-    if (date_start) params.append("date_start", date_start);
-    if (date_end) params.append("date_end", date_end);
+    if (year) params.append("year", year);
+    if (month) params.append("month", month);
     params.append("page", String(page));
     params.append("per_page", String(limit));
 
-    const response = await axiosInstance.get(
-      `${baseUrl}/outlet-expense?${params.toString()}`,
+    const response = await axiosInstance.get<OutletPurchasesResponse>(
+      `${baseUrl}/outlet-purchase?${params.toString()}`,
       {
         headers: {
           Authorization: `Bearer ${getToken()}`,
@@ -48,18 +39,18 @@ export async function getExpensesOutlet({
       }
     );
 
-    console.log("Get ExpensesOutlet Success:", response.data.data);
+    console.log("Get PurchasesOutlet Success:", response.data.data);
     return response.data;
   } catch (err) {
-    console.error("Gagal mengambil data expensesOutlet:", err);
+    console.error("Gagal mengambil data purchases Outlet:", err);
     throw err;
   }
 }
 
-export async function createExpensesOutlet(unitData: any) {
+export async function createPurchasesOutlet(unitData: any) {
   try {
     const response = await axiosInstance.post(
-      baseUrl + "/outlet-expense",
+      baseUrl + "/outlet-purchase",
       unitData,
       {
         headers: {
@@ -75,11 +66,11 @@ export async function createExpensesOutlet(unitData: any) {
   }
 }
 
-export async function updateExpensesOutlet(unitId: string, unitData: any) {
+export async function updatePurchasesOutlet(unitId: string, unitData: any) {
   try {
     const response = await axiosInstance.put(
-      baseUrl + "/outlet-expense/" + unitId,
-      { name: unitData },
+      baseUrl + "/outlet-purchase/" + unitId,
+      unitData,
       {
         headers: {
           Authorization: `Bearer ${getToken()}`,
@@ -89,14 +80,14 @@ export async function updateExpensesOutlet(unitId: string, unitData: any) {
 
     return response.data;
   } catch (err) {
-    console.error("Gagal mengambil data expensesOutlet untuk edit:", err);
+    console.error("Gagal mengambil data purchasesOutlet untuk edit:", err);
   }
 }
 
-export async function deleteExpensesOutlet(unitId: string) {
+export async function deletePurchasesOutlet(unitId: string) {
   try {
     const response = await axiosInstance.delete(
-      `${baseUrl}/outlet-expense/${unitId}`,
+      `${baseUrl}/outlet-purchase/${unitId}`,
       {
         headers: {
           Authorization: `Bearer ${getToken()}`,
@@ -105,14 +96,14 @@ export async function deleteExpensesOutlet(unitId: string) {
     );
     return response.data;
   } catch (err) {
-    console.error("Gagal mengambil data expensesOutlet untuk edit:", err);
+    console.error("Gagal mengambil data purchasesOutlet untuk edit:", err);
   }
 }
 
-export async function getExpensesOutletbyId(unitId: string) {
+export async function getPurchasesOutletbyId(unitId: string) {
   try {
-    const response = await axiosInstance.get(
-      `${baseUrl}/outlet-expense/${unitId}`,
+    const response = await axiosInstance.get<OutletPurchaseByIdResponse>(
+      `${baseUrl}/outlet-purchase/${unitId}`,
       {
         headers: {
           Authorization: `Bearer ${getToken()}`,
@@ -122,6 +113,6 @@ export async function getExpensesOutletbyId(unitId: string) {
 
     return response.data;
   } catch (err) {
-    console.error("Gagal mengambil data expensesOutlet untuk edit:", err);
+    console.error("Gagal mengambil data purchasesOutlet untuk edit:", err);
   }
 }

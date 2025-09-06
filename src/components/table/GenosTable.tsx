@@ -16,17 +16,20 @@ import GenosPagination from "../pagination/GenosPagination";
 import GenosCheckbox from "../form/GenosCheckbox";
 import GenosButton from "../button/GenosButton";
 import { formatRupiah } from "@/lib/helper";
-import { ClipLoader } from "react-spinners";
+import GenosTextfield from "../form/GenosTextfield";
 
 type TableHead = {
   key: string;
   label: string;
   sortable?: boolean;
+  isTextField?: boolean;
   type?: "text" | "currency" | "number" | string;
   fontWeight?: "normal" | "medium" | "semibold" | "bold" | string;
+  onClick?: (row: any) => void;
 };
 
 type ActionType = {
+  pilih?: (row: any) => void;
   view?: (row: any) => void;
   edit?: (row: any) => void;
   delete?: (row: any) => void;
@@ -41,6 +44,7 @@ type GenosTableProps = {
   onAddData?: () => void;
   handleExportSelected?: () => void;
   handleDeleteSelected?: () => void;
+  handleTableField?: (row, head_key, value) => void;
   PAGINATION?: boolean;
   FILTER?: React.ReactNode;
   RIGHT_DIV?: React.ReactNode;
@@ -95,6 +99,7 @@ export default function GenosTable({
   RIGHT_DIV,
   handleDeleteSelected,
   handleExportSelected,
+  handleTableField,
 }: GenosTableProps) {
   const [expandedRowIndex, setExpandedRowIndex] = useState<number | null>(null);
   const toggleExpandRow = (index: number) => {
@@ -366,6 +371,7 @@ export default function GenosTable({
                             />
                           </td>
                         )}
+
                         {TABLE_HEAD.map((head) => (
                           <td
                             key={head.key}
@@ -373,14 +379,39 @@ export default function GenosTable({
                               head.fontWeight ? `font-${head.fontWeight}` : ""
                             }`}
                           >
-                            {head.type === "currency"
-                              ? formatRupiah(getNestedValue(row, head.key))
-                              : getNestedValue(row, head.key)}
+                            {head.isTextField ? (
+                              <GenosTextfield
+                                id={`${row.id}-${head.key}`}
+                                label=""
+                                readOnly
+                                type={
+                                  head.type === "currency" ? "number" : "text"
+                                }
+                                value={getNestedValue(row, head.key) ?? "0"}
+                                onChange={(e) => {}}
+                                onClick={() => {
+                                  head.onClick?.(row);
+                                }}
+                              />
+                            ) : head.type === "currency" ? (
+                              formatRupiah(getNestedValue(row, head.key))
+                            ) : (
+                              getNestedValue(row, head.key)
+                            )}
                           </td>
                         ))}
+
                         {ACTION_BUTTON && (
                           <td className="p-3">
                             <div className="flex items-center justify-center gap-4">
+                              {ACTION_BUTTON.pilih && (
+                                <button
+                                  onClick={() => ACTION_BUTTON.pilih?.(row)}
+                                  className="bg-red-500 text-white hover:bg-red-700 cursor-pointer transition-all duration-300 px-3 py-1 rounded-lg"
+                                >
+                                  Pilih
+                                </button>
+                              )}
                               {ACTION_BUTTON.view && (
                                 <button
                                   onClick={() => ACTION_BUTTON.view?.(row)}

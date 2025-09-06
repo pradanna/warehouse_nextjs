@@ -1,34 +1,34 @@
 "use client";
 
 import GenosModal from "@/components/modal/GenosModal";
-import { RefObject, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import GenosTextfield from "../GenosTextfield";
-import GenosSearchSelect from "../GenosSearchSelect";
 import GenosDatepicker from "../GenosDatepicker";
-import GenosSearchSelectOutlet from "@/components/select-search/GenosSearchOutlet";
 import GenosSearchSelectExpenseCategory from "@/components/select-search/ExpenseCategorySearchOutlet";
 import GenosTextarea from "../GenosTextArea";
-import {
-  createExpensesOutlet,
-  OutletExpenseInput,
-} from "@/lib/api/expensesOutletApi";
+
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
+import { OutletExpenseInput } from "@/lib/api/expensesOutletApi";
+import { createPurchasesOutlet } from "@/lib/api/purchaseOutlet/PurchasesOutletApi";
+import SalesPicker from "@/components/search-table/search-sale";
+import { Sale } from "@/lib/api/sales/interfaceSales";
+import { OutletPurchaseInput } from "@/lib/api/purchaseOutlet/PurchaseOutletInterface";
 
-type AddExpensesOutletModalProps = {
+type AddPurchasesOutletModalProps = {
   idOutlet: string;
   NameOutlet: string;
   show: boolean;
   onClose: () => void;
 };
 
-export default function AddExpensesOutletModal({
+export default function AddPurchasesOutletModal({
   show,
   onClose,
   idOutlet,
   NameOutlet,
-}: AddExpensesOutletModalProps) {
-  const [addCategoryId, setAddCategoryId] = useState<string>("");
+}: AddPurchasesOutletModalProps) {
+  const [selectedSales, setSelectedSales] = useState<Sale>();
   const [addDescription, setAddDescription] = useState<string | null>("");
   const [expenseDate, setExpenseDate] = useState<Date>(new Date());
   const [addAmountCash, setAddAmountCash] = useState<number>(0);
@@ -47,18 +47,20 @@ export default function AddExpensesOutletModal({
     setIsLoadingButton(true);
 
     try {
-      const unitData: OutletExpenseInput = {
-        outlet_id: idOutlet,
-        expense_category_id: addCategoryId,
+      const unitData: OutletPurchaseInput = {
+        sale_id: selectedSales?.id,
         date: dayjs(expenseDate).format("YYYY-MM-DD"),
         amount: {
           cash: addAmountCash,
           digital: addAmountDigital,
         },
-        description: addDescription,
+        cash_flow: {
+          date: dayjs(expenseDate).format("YYYY-MM-DD"),
+          name: addDescription,
+        },
       };
 
-      const response = await createExpensesOutlet(unitData);
+      const response = await createPurchasesOutlet(unitData);
       // Lakukan aksi setelah berhasil (misalnya reset form atau tutup modal)
       console.log("Berhasil menambahkan data:", response);
       toast.success(response.message || "Data Berhasil ditambahkan", {
@@ -82,15 +84,15 @@ export default function AddExpensesOutletModal({
       onClose={onClose}
       onSubmit={onSubmit}
       isLoading={isLoadingButton}
-      size="md"
+      size="lg"
     >
       <div className="flex flex-col gap-5">
-        <GenosSearchSelectExpenseCategory
-          value={addCategoryId}
-          onChange={setAddCategoryId}
-          placeholder="Pilih Kategori Pengeluaran"
-          label="Kategori Pengeluaran"
+        <SalesPicker
+          outlet_id={idOutlet}
+          value={selectedSales}
+          onSelect={(sales) => setSelectedSales(sales)}
         />
+
         <div className="fixed z-[9998]" id="root-portal"></div>
         <GenosDatepicker
           id="expense-date"

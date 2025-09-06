@@ -3,32 +3,32 @@ import GenosTable from "@/components/table/GenosTable";
 import GenosTextfield from "@/components/form/GenosTextfield";
 import { toast } from "react-toastify";
 
-import AddExpensesOutletModal from "../../form/expensesOutlet/AddExpensesOutletModal";
-import EditExpensesOutletModal from "../../form/expensesOutlet/EditExpensesOutletModal";
-import {
-  createExpensesOutlet,
-  deleteExpensesOutlet,
-  getExpensesOutlet,
-  getExpensesOutletbyId,
-  updateExpensesOutlet,
-} from "@/lib/api/expensesOutletApi";
 import { formatRupiah } from "@/lib/helper";
 import GenosDatepicker from "@/components/form/GenosDatepicker";
-import dayjs from "dayjs";
+import {
+  deletePurchasesOutlet,
+  getPurchasesOutlet,
+  getPurchasesOutletbyId,
+} from "@/lib/api/purchaseOutlet/PurchasesOutletApi";
+import YearDropdown from "@/components/dropdown-button/YearDropDown";
+import MonthDropdown from "@/components/dropdown-button/MonthDropDown";
+import AddPurchasesOutletModal from "@/components/form/purchaseOutlet/AddPurchasesOutletModal";
+import EditPurchasesOutletModal from "@/components/form/purchaseOutlet/EditPurchasesOutletModal";
+import { Sale } from "@/lib/api/sales/interfaceSales";
 
-interface ExpensesOutletTableProps {
+interface PurchasesOutletTableProps {
   outletId: string;
   outletName: string;
 }
 
-const ExpensesOutletTable = ({
+const PurchasesOutletTable = ({
   outletId,
   outletName,
-}: ExpensesOutletTableProps) => {
-  const [expensesOutlets, setExpensesOutlets] = useState<any[]>([]);
+}: PurchasesOutletTableProps) => {
+  const [purchasesOutlets, setPurchasesOutlets] = useState<any[]>([]);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalExpensesOutlets, setTotalExpensesOutlets] = useState(0);
+  const [totalPurchasesOutlets, setTotalPurchasesOutlets] = useState(0);
   const limit = 10;
   const [isLoadingTable, setIsLoadingTable] = useState(true);
 
@@ -43,8 +43,12 @@ const ExpensesOutletTable = ({
   const todayEnd = new Date();
   todayEnd.setHours(23, 59, 59, 999);
 
-  const [dateFrom, setDateFrom] = useState<Date | null>(todayStart);
-  const [dateTo, setDateTo] = useState<Date | null>(todayEnd);
+  // FILTER
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1;
+
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
   const handleOpen = () => {
     setIsModalOpen(true);
@@ -52,16 +56,15 @@ const ExpensesOutletTable = ({
 
   const handleClose = () => {
     setIsModalOpen(false);
-    fetchExpensesOutlet(1);
+    fetchPurchasesOutlet(1);
   };
 
   // EDIT VAR
-  const inputEditRef = useRef<HTMLInputElement>(null);
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
 
   const handleEditClose = () => {
     setIsModalEditOpen(false);
-    fetchExpensesOutlet(1);
+    fetchPurchasesOutlet(1);
   };
 
   const handleEdit = async (id: string) => {
@@ -69,48 +72,37 @@ const ExpensesOutletTable = ({
 
     console.log("ID untuk edit:", id);
     try {
-      await getExpensesOutletbyId(id);
+      await getPurchasesOutletbyId(id);
       setIdForEdit(id);
-
-      setTimeout(() => {
-        inputEditRef.current?.focus();
-        inputEditRef.current?.select();
-      }, 50);
     } catch (err) {
       console.error("Gagal mengambil data expensesOutlet untuk edit:", err);
-    }
-  };
-
-  const handleKeyDownEdit = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
     }
   };
 
   // TABLE HEADER
   const TABLE_HEAD = [
     { key: "date", label: "Tanggal", sortable: true },
-    { key: "category.name", label: "kategori", sortable: true },
+    { key: "sale.reference_number", label: "Referensi", sortable: true },
     { key: "cash", label: "Cash", sortable: true },
     { key: "digital", label: "Digital", sortable: true },
     { key: "amount", label: "Jumlah", sortable: true },
-    { key: "description", label: "Keterangan", sortable: true },
-    { key: "author.username", label: "Input By", sortable: true },
+    { key: "cash_flow.name", label: "Keterangan", sortable: true },
+    { key: "total", label: "Total (referensi)", sortable: true },
   ];
 
   // TABLE ROWS
   const TABLE_ROWS = useMemo(() => {
-    return expensesOutlets.map((expensesOutlet) => ({
-      id: expensesOutlet.id,
-      date: expensesOutlet.date,
-      category: expensesOutlet.category,
-      amount: formatRupiah(expensesOutlet.amount),
-      cash: formatRupiah(expensesOutlet.cash),
-      digital: formatRupiah(expensesOutlet.digital),
-      description: expensesOutlet.description,
-      author: expensesOutlet.author,
+    return purchasesOutlets.map((purchasesOutlet) => ({
+      id: purchasesOutlet.id,
+      date: purchasesOutlet.date,
+      sale: purchasesOutlet.sale,
+      amount: formatRupiah(purchasesOutlet.amount),
+      cash: formatRupiah(purchasesOutlet.cash),
+      digital: formatRupiah(purchasesOutlet.digital),
+      cash_flow: purchasesOutlet.cash_flow,
+      total: formatRupiah(purchasesOutlet.sale.total),
     }));
-  }, [expensesOutlets]);
+  }, [purchasesOutlets]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -118,24 +110,25 @@ const ExpensesOutletTable = ({
 
   useEffect(() => {
     if (outletId) {
-      fetchExpensesOutlet(1); // bisa dimulai dari page 1
+      fetchPurchasesOutlet(1); // bisa dimulai dari page 1
     }
-  }, [outletId, dateFrom, dateTo]);
+  }, [outletId, selectedYear, selectedMonth]);
 
-  const fetchExpensesOutlet = async (page: number) => {
+  const fetchPurchasesOutlet = async (page: number) => {
     setIsLoadingTable(true);
 
     try {
-      const response = await getExpensesOutlet({
+      const response = await getPurchasesOutlet({
         outlet_id: outletId,
-        date_start: dayjs(dateFrom).format("YYYY-MM-DD"),
-        date_end: dayjs(dateTo).format("YYYY-MM-DD"),
+        year: selectedYear.toString(),
+        month: selectedMonth.toString(),
         page,
         limit,
       });
 
-      setExpensesOutlets(response.data);
-      setTotalExpensesOutlets(response.meta.total_rows);
+      setPurchasesOutlets(response.data);
+      console.log(response.data);
+      setTotalPurchasesOutlets(response.meta.total);
     } catch (err: any) {
       toast.error(err.message, {
         autoClose: 1000,
@@ -153,13 +146,13 @@ const ExpensesOutletTable = ({
     if (!confirmDelete) return;
 
     try {
-      await deleteExpensesOutlet(id);
+      await deletePurchasesOutlet(id);
 
-      toast.success("ExpensesOutlet berhasil dihapus", {
+      toast.success("PurchasesOutlet berhasil dihapus", {
         autoClose: 1000,
       });
 
-      fetchExpensesOutlet(currentPage); // refresh list
+      fetchPurchasesOutlet(currentPage); // refresh list
     } catch (err) {
       console.error("Gagal menghapus expensesOutlet:", err);
       toast.error("Gagal menghapus expensesOutlet", {
@@ -175,7 +168,7 @@ const ExpensesOutletTable = ({
         TABLE_ROWS={TABLE_ROWS}
         PAGINATION
         rowsPerPage={limit}
-        totalRows={totalExpensesOutlets}
+        totalRows={totalPurchasesOutlets}
         currentPage={currentPage}
         onPageChange={(page) => setCurrentPage(page)}
         onAddData={handleOpen}
@@ -186,25 +179,25 @@ const ExpensesOutletTable = ({
         }}
         FILTER={
           <div className="flex gap-4 mb-4">
-            <GenosDatepicker
-              id="tanggal-dari"
-              label="Dari Tanggal"
-              selected={dateFrom}
-              onChange={(date) => setDateFrom(date)}
-            />
-
-            <GenosDatepicker
-              id="tanggal-sampai"
-              label="Sampai Tanggal"
-              selected={dateTo}
-              onChange={(date) => setDateTo(date)}
-            />
+            <div className="flex flex-wrap items-center gap-4 me-5">
+              <div>
+                <label className="block text-sm font-medium">Tahun</label>
+                <YearDropdown value={selectedYear} onChange={setSelectedYear} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium">Bulan</label>
+                <MonthDropdown
+                  value={selectedMonth}
+                  onChange={setSelectedMonth}
+                />
+              </div>
+            </div>
           </div>
         }
       />
 
       {isModalOpen && (
-        <AddExpensesOutletModal
+        <AddPurchasesOutletModal
           show
           onClose={handleClose}
           idOutlet={outletId}
@@ -213,9 +206,9 @@ const ExpensesOutletTable = ({
       )}
 
       {isModalEditOpen && (
-        <EditExpensesOutletModal
+        <EditPurchasesOutletModal
           show
-          idExpense={idForEdit}
+          idPurchasse={idForEdit}
           idOutlet={outletId}
           NameOutlet={outletName}
           onClose={handleEditClose}
@@ -225,4 +218,4 @@ const ExpensesOutletTable = ({
   );
 };
 
-export default ExpensesOutletTable;
+export default PurchasesOutletTable;

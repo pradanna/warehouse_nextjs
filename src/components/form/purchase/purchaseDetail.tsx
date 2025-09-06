@@ -9,6 +9,7 @@ import GenosButton from "@/components/button/GenosButton";
 import PaymentModal from "../debt/debtPayment";
 import { createPurchasePayment } from "@/lib/api/purchaseApi";
 import { toast } from "react-toastify";
+import dayjs from "dayjs";
 
 interface PurchaseDetailModalProps {
   show: boolean;
@@ -54,7 +55,7 @@ export default function PurchaseDetailModal({
   };
   const handleSavePayDebt = async () => {
     setIsLoadingButton(true);
-    const today = new Date().toISOString().slice(0, 10);
+    const today = dayjs().format("YYYY-MM-DD");
 
     if (!paymentMetode) {
       toast.error("Pilih metode pembayaran terlebih dahulu");
