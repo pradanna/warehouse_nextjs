@@ -27,32 +27,6 @@ const MovementTableReport = () => {
     { id: "unit-2", name: "BOX" },
   ]);
 
-  const [addItemId, setAddItemId] = useState<string | number>("");
-  const [addUnitId, setAddUnitId] = useState<string | number>("");
-  const [addSku, setAddSku] = useState("");
-  const [addDescription, setAddDescription] = useState("");
-  const [addPrice, setAddPrice] = useState(0);
-  const [addCurrentStock, setAddCurrentStock] = useState(0);
-  const [addMinStock, setAddMinStock] = useState(0);
-  const [addMaxStock, setAddMaxStock] = useState(0);
-  const [outletPrices, setOutletPrices] = useState<{ [key: string]: number }>(
-    {}
-  );
-  const [outlets, setOutlets] = useState<any[]>([]);
-
-  const [editId, setEditId] = useState("");
-  const [editItemId, setEditItemId] = useState<string | number>("");
-  const [editUnitId, setEditUnitId] = useState<string | number>("");
-  const [editSku, setEditSku] = useState("");
-  const [editDescription, setEditDescription] = useState("");
-  const [editPrice, setEditPrice] = useState(0);
-  const [editCurrentStock, setEditCurrentStock] = useState(0);
-  const [editMinStock, setEditMinStock] = useState(0);
-  const [editMaxStock, setEditMaxStock] = useState(0);
-  const [editOutletPrices, setEditOutletPrices] = useState<{
-    [key: string]: number;
-  }>({});
-
   const TABLE_HEAD = useMemo(
     () => [
       { key: "type", label: "type", sortable: true },
@@ -70,10 +44,10 @@ const MovementTableReport = () => {
   const fetchInventory = async () => {
     setIsLoadingTable(true);
     try {
-      const res = await getMovements(currentPage, 100);
+      const res = await getMovements(currentPage, 10);
       console.log(res.data);
       setTABLE_ROWS(res.data);
-      setTotalItems(res.total);
+      setTotalItems(res.meta.total_rows);
     } catch (err) {
       toast.error("Gagal mengambil data inventory");
     }
@@ -90,7 +64,7 @@ const MovementTableReport = () => {
 
   useEffect(() => {
     fetchInventory();
-  }, []);
+  }, [currentPage]);
 
   return (
     <>

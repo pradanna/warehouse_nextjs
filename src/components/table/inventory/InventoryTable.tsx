@@ -39,8 +39,17 @@ const InventoryTable = () => {
       { key: "sku", label: "SKU", sortable: true },
       { key: "item.name", label: "Name", sortable: true },
       { key: "unit.name", label: "Unit", sortable: false },
-      { key: "description", label: "Deskripsi", sortable: false },
-      { key: "current_stock", label: "Stok", sortable: false },
+      {
+        key: "description",
+        label: "Deskripsi",
+        sortable: false,
+      },
+      {
+        key: "current_stock",
+        label: "Stok",
+        sortable: true,
+        type: "number",
+      },
     ],
     []
   );

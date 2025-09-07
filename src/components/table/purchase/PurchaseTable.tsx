@@ -33,14 +33,15 @@ import {
   fetchInventoryById,
   InventoryData,
 } from "@/lib/api/inventory/inventory-getbyid-api";
-import { formatRupiah } from "@/lib/helper";
+import { dateRange, formatRupiah } from "@/lib/helper";
 import { fetchSupplierById } from "@/lib/api/supplier/supplier-getbyid-api";
 import dayjs from "dayjs";
+import GenosDatepicker from "@/components/form/GenosDatepicker";
+import { useDebounce } from "@/lib/utils/useDebounce";
 
 const PurchaseTable = () => {
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
-  const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
@@ -88,9 +89,19 @@ const PurchaseTable = () => {
 
   const [purchaseId, setPurchaseId] = useState<string | null>(null);
 
+  // FILTER
   const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(
     null
   );
+  const [statusFilter, setStatusFilter] = useState("");
+  const [dateFromFilter, setDateFromFilter] = useState<Date | null>(
+    dateRange.todayStart
+  );
+  const [dateToFilter, setDateToFilter] = useState<Date | null>(
+    dateRange.todayEnd
+  );
+  const [paymentMetodeFilter, setPaymentMetodeFilter] = useState("");
+  const debouncedSearch = useDebounce(search, 1000);
 
   // FETCH PURCHASE
   const fetchPurchases = async () => {
@@ -100,7 +111,11 @@ const PurchaseTable = () => {
         currentPage,
         limit,
         search,
-        selectedSupplier
+        selectedSupplierId,
+        paymentMetodeFilter,
+        statusFilter,
+        dateFromFilter,
+        dateToFilter
       );
 
       setData(res.data);
@@ -114,7 +129,16 @@ const PurchaseTable = () => {
 
   useEffect(() => {
     fetchPurchases();
-  }, [currentPage, limit, search, selectedSupplier]);
+  }, [
+    currentPage,
+    limit,
+    debouncedSearch,
+    selectedSupplierId,
+    dateFromFilter,
+    dateToFilter,
+    statusFilter,
+    paymentMetodeFilter,
+  ]);
 
   // MODAL
   const handleOpen = () => {
@@ -234,10 +258,21 @@ const PurchaseTable = () => {
       { key: "reference_number", label: "Ref#", sortable: true },
       { key: "date", label: "Tanggal", sortable: true },
       { key: "supplier_name", label: "Supplier", sortable: true },
-      { key: "sub_total", label: "Subtotal", sortable: false },
-      { key: "discount", label: "Diskon", sortable: false },
-      { key: "tax", label: "Pajak", sortable: false },
-      { key: "total", label: "Total", sortable: false },
+      {
+        key: "sub_total",
+        label: "Subtotal",
+        sortable: false,
+        type: "currency",
+      },
+      { key: "discount", label: "Diskon", sortable: false, type: "currency" },
+      { key: "tax", label: "Pajak", sortable: false, type: "currency" },
+      {
+        key: "total",
+        label: "Total",
+        sortable: false,
+        type: "currency",
+        fontWeight: "bold",
+      },
       { key: "description", label: "Deskripsi", sortable: false },
       { key: "payment_type", label: "Tipe Bayar", sortable: false },
     ],
@@ -345,21 +380,69 @@ const PurchaseTable = () => {
   };
 
   const FILTER = (
-    <div className="flex gap-4 mb-4 items-end">
+    <div className="flex gap-4 mb-4 items-end flex-wrap">
+      <GenosTextfield
+        id="search"
+        label="Cari ref#"
+        placeholder="PRC/175....."
+        className="w-40 text-xs"
+        is_icon_left
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
       <GenosSearchSelectSupplier
         value={selectedSupplierId}
         onChange={(val: any) => setSelectedSupplierId(val)}
         placeholder="Pilih supplier"
+        className="w-40"
         label="Supplier"
       />
-      <GenosTextfield
-        id="search"
-        label="Cari"
-        placeholder="Cari berdasarkan ref# atau deskripsi"
-        className="w-full"
-        is_icon_left
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
+      <GenosSelect
+        label="Tipe Pembayaran"
+        options={[
+          { label: "PILIH SEMUA", value: "" },
+          { label: "TUNAI", value: "cash" },
+          { label: "TEMPO", value: "installment" },
+        ]}
+        value={paymentMetodeFilter}
+        onChange={(e) => {
+          console.log("Event:", e);
+          console.log("Value:", e.target.value);
+          setPaymentMetodeFilter(e.target.value);
+        }}
+      />
+
+      <GenosSelect
+        label="Status Pembayaran"
+        options={[
+          { label: "PILIH SEMUA", value: "" },
+          { label: "Belum Dibayar", value: "unpaid" },
+          { label: "Dibayar Sebagian", value: "partial" },
+          { label: "Lunas", value: "paid" },
+        ]}
+        value={statusFilter}
+        onChange={(e) => {
+          console.log("Event:", e);
+          console.log("Value:", e.target.value);
+          setStatusFilter(e.target.value);
+        }}
+        className="w-40"
+      />
+
+      <GenosDatepicker
+        id="tanggal-dari"
+        label="Dari Tanggal"
+        className="w-40"
+        selected={dateFromFilter}
+        onChange={(date) => setDateFromFilter(date)}
+      />
+
+      <GenosDatepicker
+        id="tanggal-sampai"
+        label="Sampai Tanggal"
+        className="w-40"
+        selected={dateToFilter}
+        onChange={(date) => setDateToFilter(date)}
       />
     </div>
   );

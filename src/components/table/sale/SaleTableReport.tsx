@@ -10,10 +10,14 @@ import { generateSaleExcel } from "@/components/excel/printSaleExcel";
 import SaleDetailModal from "@/components/form/sale/saleDetail";
 import { generateSalesListPDF } from "@/components/PDF/printSalesListPDF";
 import { generateSalesListExcel } from "@/components/excel/printSalesListExcel";
+import { dateRange } from "@/lib/helper";
+import { useDebounce } from "@/lib/utils/useDebounce";
+import GenosDatepicker from "@/components/form/GenosDatepicker";
+import GenosSelect from "@/components/form/GenosSelect";
+import GenosSearchSelectOutlet from "@/components/select-search/GenosSearchOutlet";
 
 const SaleTableReport = () => {
   const [data, setData] = useState([]);
-  const [outlets, setOutlets] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedOutlet, setSelectedOutlet] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,7 +28,6 @@ const SaleTableReport = () => {
   const [cartItems, setCartItems] = useState<any>([]);
 
   // State tambahan untuk modal simpan sale
-  const [outletId, setOutletId] = useState<string | null | number>(null);
 
   const [discountPercent, setDiscountPercent] = useState(0);
   const [taxPercent, setTaxPercent] = useState(0);
@@ -33,13 +36,7 @@ const SaleTableReport = () => {
     (acc: number, item: any) => acc + item.total,
     0
   );
-  const discountAmount = (subTotal * discountPercent) / 100;
-  const taxAmount = (subTotal * taxPercent) / 100;
-  const totalAmount = subTotal - discountAmount + taxAmount;
 
-  const [param, setparam] = useState<string>("");
-
-  const [modalViewId, setModalViewId] = useState<any>();
   const [saleDetail, setSaleDetail] = useState<any>();
   const [isModalViewOpen, setModalViewOpen] = useState(false);
 
@@ -49,13 +46,33 @@ const SaleTableReport = () => {
   const [saleId, setSaleId] = useState<string | null>(null);
   const [payAmount, setPayAmount] = useState(0);
 
+  // FILTER
+  const [statusFilter, setStatusFilter] = useState("");
+  const [dateFromFilter, setDateFromFilter] = useState<Date | null>(
+    dateRange.monthStart
+  );
+  const [dateToFilter, setDateToFilter] = useState<Date | null>(
+    dateRange.monthEnd
+  );
+  const [paymentMetodeFilter, setPaymentMetodeFilter] = useState("");
+  const debouncedSearch = useDebounce(search, 1000);
+
   const fetchSales = async () => {
     setIsLoading(true);
     try {
-      const res = await getSales(currentPage, limit, search, selectedOutlet);
+      const res = await getSales(
+        currentPage,
+        limit,
+        debouncedSearch,
+        selectedOutlet,
+        paymentMetodeFilter,
+        statusFilter,
+        dateFromFilter,
+        dateToFilter
+      );
 
       setData(res.data);
-      setTotalItems(res.data.total);
+      setTotalItems(res.meta.total_rows);
     } catch (err) {
       toast.error("Gagal mengambil data sale");
     } finally {
@@ -65,17 +82,37 @@ const SaleTableReport = () => {
 
   useEffect(() => {
     fetchSales();
-  }, [currentPage, limit, search, selectedOutlet]);
+  }, [
+    currentPage,
+    limit,
+    debouncedSearch,
+    selectedOutlet,
+    paymentMetodeFilter,
+    statusFilter,
+    dateFromFilter,
+    dateToFilter,
+  ]);
 
   const TABLE_HEAD = useMemo(
     () => [
       { key: "reference_number", label: "Ref#", sortable: true },
       { key: "date", label: "Tanggal", sortable: true },
       { key: "outlet_name", label: "Outlet", sortable: true },
-      { key: "sub_total", label: "Subtotal", sortable: false },
-      { key: "discount", label: "Diskon", sortable: false },
-      { key: "tax", label: "Pajak", sortable: false },
-      { key: "total", label: "Total", sortable: false },
+      {
+        key: "sub_total",
+        label: "Subtotal",
+        sortable: false,
+        type: "currency",
+      },
+      { key: "discount", label: "Diskon", sortable: false, type: "currency" },
+      { key: "tax", label: "Pajak", sortable: false, type: "currency" },
+      {
+        key: "total",
+        label: "Total",
+        sortable: false,
+        type: "currency",
+        fontweight: "bold",
+      },
       { key: "description", label: "Deskripsi", sortable: false },
       { key: "payment_type", label: "Tipe Bayar", sortable: false },
     ],
@@ -91,7 +128,6 @@ const SaleTableReport = () => {
 
   // LIHAT DETAIL
   const handleView = async (id: any) => {
-    setModalViewId(id);
     try {
       const response = await getSalesById(id);
       if (response === undefined) {
@@ -109,15 +145,69 @@ const SaleTableReport = () => {
   };
 
   const FILTER = (
-    <div className="flex gap-4 mb-4 items-end">
+    <div className="flex gap-4 mb-4 items-end flex-wrap">
       <GenosTextfield
         id="search"
-        label="Cari"
-        placeholder="Cari berdasarkan ref# atau deskripsi"
-        className="w-full"
+        label="Cari ref#"
+        placeholder="PRC/175....."
+        className="w-40 text-xs"
         is_icon_left
-        value={param}
+        value={search}
         onChange={(e) => setSearch(e.target.value)}
+      />
+      <GenosSearchSelectOutlet
+        value={selectedOutlet}
+        onChange={(val: any) => setSelectedOutlet(val)}
+        placeholder="Pilih outlet"
+        className="w-40"
+        label="Outlet"
+      />
+      <GenosSelect
+        label="Tipe Pembayaran"
+        options={[
+          { label: "PILIH SEMUA", value: "" },
+          { label: "TUNAI", value: "cash" },
+          { label: "TEMPO", value: "installment" },
+        ]}
+        value={paymentMetodeFilter}
+        onChange={(e) => {
+          console.log("Event:", e);
+          console.log("Value:", e.target.value);
+          setPaymentMetodeFilter(e.target.value);
+        }}
+      />
+
+      <GenosSelect
+        label="Status Pembayaran"
+        options={[
+          { label: "PILIH SEMUA", value: "" },
+          { label: "Belum Dibayar", value: "unpaid" },
+          { label: "Dibayar Sebagian", value: "partial" },
+          { label: "Lunas", value: "paid" },
+        ]}
+        value={statusFilter}
+        onChange={(e) => {
+          console.log("Event:", e);
+          console.log("Value:", e.target.value);
+          setStatusFilter(e.target.value);
+        }}
+        className="w-40"
+      />
+
+      <GenosDatepicker
+        id="tanggal-dari"
+        label="Dari Tanggal"
+        className="w-40"
+        selected={dateFromFilter}
+        onChange={(date) => setDateFromFilter(date)}
+      />
+
+      <GenosDatepicker
+        id="tanggal-sampai"
+        label="Sampai Tanggal"
+        className="w-40"
+        selected={dateToFilter}
+        onChange={(date) => setDateToFilter(date)}
       />
     </div>
   );

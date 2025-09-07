@@ -33,7 +33,6 @@ export default function GenosSearchSelectSupplier({
         value: o.id,
         label: o.name,
       }));
-      console.log(data);
     }
   );
 

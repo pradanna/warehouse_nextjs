@@ -4,7 +4,6 @@ import { getToken } from "@/app/config/config";
 import GenosPanel from "@/components/panel/GenosPanel";
 import ExpensesOutletTable from "@/components/table/expenseOutlet/ExpensesOutletTable";
 import OutletTabs from "@/components/tabs/OutletTab";
-import { WrenchScrewdriverIcon } from "@heroicons/react/24/outline";
 import React, { useState } from "react";
 
 export default function OutletExpense() {

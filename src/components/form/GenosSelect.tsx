@@ -42,7 +42,7 @@ export default function GenosSelect({
           value={value}
           onChange={onChange}
           disabled={disabled}
-          className="w-full bg-transparent focus:outline-none text-sm appearance-none"
+          className="w-full bg-transparent focus:outline-none text-sm appearance-none px-1"
         >
           <option value="" disabled hidden>
             {placeholder}

@@ -19,18 +19,7 @@ const InventoryTableReport = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [limit] = useState(10);
 
-  const [items, setItems] = useState([
-    { id: "item-1", name: "Item A" },
-    { id: "item-2", name: "Item B" },
-  ]);
-  const [units, setUnits] = useState([
-    { id: "unit-1", name: "PCS" },
-    { id: "unit-2", name: "BOX" },
-  ]);
-
   // Filter States
-  const [itemId, setItemId] = useState<string | number | null>("");
-  const [unitId, setUnitId] = useState<string | number | null>("");
   const [param, setparam] = useState("");
 
   const TABLE_HEAD = useMemo(
@@ -50,30 +39,30 @@ const InventoryTableReport = () => {
       const res = await getInventory(param, currentPage, 10);
       console.log(res.data);
       setTABLE_ROWS(res.data);
-      setTotalItems(res.total);
+      setTotalItems(res.meta.total_rows);
     } catch (err) {
       toast.error("Gagal mengambil data inventory");
     }
     setIsLoadingTable(false);
   };
 
-  const fetchItems = async () => {
-    try {
-      const res = await getItems("", 1, 1000);
-      setItems(res.data);
-    } catch (err) {
-      toast.error("Gagal mengambil data item");
-    }
-  };
+  // const fetchItems = async () => {
+  //   try {
+  //     const res = await getItems("", 1, 1000);
+  //     setItems(res.data);
+  //   } catch (err) {
+  //     toast.error("Gagal mengambil data item");
+  //   }
+  // };
 
-  const fetchUnit = async () => {
-    try {
-      const res = await getUnit("", 1, 1000);
-      setUnits(res.data);
-    } catch (err) {
-      toast.error("Gagal mengambil data item");
-    }
-  };
+  // const fetchUnit = async () => {
+  //   try {
+  //     const res = await getUnit("", 1, 1000);
+  //     setUnits(res.data);
+  //   } catch (err) {
+  //     toast.error("Gagal mengambil data item");
+  //   }
+  // };
 
   const handleDownloadPDF = () => {
     generateCurrentStockPDF(TABLE_ROWS);
@@ -84,10 +73,10 @@ const InventoryTableReport = () => {
   };
 
   useEffect(() => {
-    fetchUnit();
-    fetchItems();
+    // fetchUnit();
+    // fetchItems();
     fetchInventory();
-  }, [itemId, unitId, param]);
+  }, [param, currentPage]);
 
   return (
     <>

@@ -26,8 +26,7 @@ export default function GenosSearchSelect({
   value,
   onChange,
   placeholder = "Pilih...",
-  className,
-  name,
+  className = "w-full max-w-[500px]",
   disabled = false,
   isLoading = false,
 }: Props) {
@@ -72,7 +71,7 @@ export default function GenosSearchSelect({
   const selectedLabel = options.find((opt) => opt.value === value)?.label;
 
   return (
-    <div className={clsx("w-full max-w-[500px]", className)} ref={wrapperRef}>
+    <div className={clsx(className)} ref={wrapperRef}>
       <label className="block text-xs text-gray-700 mb-1">{label}</label>
       {isLoading ? (
         <div className="flex flex-row items-center gap-3">

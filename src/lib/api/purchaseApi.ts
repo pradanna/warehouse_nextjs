@@ -6,7 +6,11 @@ export async function getPurchases(
   currentPage: number,
   limit: number,
   search: string,
-  selectedSupplier: any
+  selectedSupplier: string,
+  type: string,
+  status: string,
+  date_start: Date,
+  date_end: Date
 ) {
   try {
     const res = await axiosInstance.get(`${baseUrl}/purchase`, {
@@ -15,6 +19,10 @@ export async function getPurchases(
         per_page: limit,
         param: search,
         supplier_id: selectedSupplier,
+        type,
+        status,
+        date_start,
+        date_end,
       },
       headers: {
         Authorization: `Bearer ${getToken()}`,

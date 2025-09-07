@@ -37,11 +37,8 @@ const ExpensesOutletTable = ({
   const [idForEdit, setIdForEdit] = useState("");
 
   // FILTER
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-
-  const todayEnd = new Date();
-  todayEnd.setHours(23, 59, 59, 999);
+  const todayStart = dayjs().startOf("day").toDate(); // 00:00:00 lokal
+  const todayEnd = dayjs().endOf("day").toDate(); // 23:59:59 lokal
 
   const [dateFrom, setDateFrom] = useState<Date | null>(todayStart);
   const [dateTo, setDateTo] = useState<Date | null>(todayEnd);

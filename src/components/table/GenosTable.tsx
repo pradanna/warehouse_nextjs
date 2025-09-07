@@ -15,7 +15,7 @@ import clsx from "clsx";
 import GenosPagination from "../pagination/GenosPagination";
 import GenosCheckbox from "../form/GenosCheckbox";
 import GenosButton from "../button/GenosButton";
-import { formatRupiah } from "@/lib/helper";
+import { formatNumber, formatRupiah } from "@/lib/helper";
 import GenosTextfield from "../form/GenosTextfield";
 
 type TableHead = {
@@ -197,7 +197,7 @@ export default function GenosTable({
 
   return (
     <div className="w-full transition-all duration-300 ease-in-out">
-      <div className="flex flex-wrap justify-between">
+      <div className="flex flex-nowrap justify-between">
         {FILTER && <div>{FILTER}</div>}
 
         <div className="flex gap-2 ">
@@ -395,6 +395,8 @@ export default function GenosTable({
                               />
                             ) : head.type === "currency" ? (
                               formatRupiah(getNestedValue(row, head.key))
+                            ) : head.type === "number" ? (
+                              formatNumber(getNestedValue(row, head.key))
                             ) : (
                               getNestedValue(row, head.key)
                             )}

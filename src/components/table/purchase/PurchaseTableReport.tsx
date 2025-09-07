@@ -10,59 +10,48 @@ import { generatePurchaseExcel } from "@/components/excel/printPurchaseExcel";
 import PurchaseDetailModal from "@/components/form/purchase/purchaseDetail";
 import { generatePurchaseListPDF } from "@/components/PDF/printPurchaseListPDF";
 import { generatePurchaseListExcel } from "@/components/excel/printPurchaseListExcel";
+import dayjs from "dayjs";
+import GenosSelect from "@/components/form/GenosSelect";
+import GenosDatepicker from "@/components/form/GenosDatepicker";
+import GenosSearchSelectSupplier from "@/components/select-search/SupplierSearch";
+import { dateRange } from "@/lib/helper";
+import { useDebounce } from "@/lib/utils/useDebounce";
 
 const PurchaseTableReport = () => {
   const [data, setData] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
   const [search, setSearch] = useState("");
-  const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isModalSupplierOpen, setIsModalSupplierOpen] = useState(false);
-  const [selectedCart, setSelectedCart] = useState<null | any>(null);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [selectedInventory, setSelectedInventory] = useState<null | any>(null);
-  const [quantity, setQuantity] = useState(1);
-  const [price, setPrice] = useState(0);
-  const [isSaving, setIsSaving] = useState(false);
   const [cartItems, setCartItems] = useState<any>([]);
 
-  const [inventories, setInventories] = useState([]);
-
   // State tambahan untuk modal simpan purchase
-  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
-  const [isPaymentMetodModalOpen, setPaymentMetodModalOpen] = useState(false);
+
   const [isPayFromDetaildModalOpen, setPayFromDetaildModalOpen] =
     useState(false);
   const [isModalViewOpen, setModalViewOpen] = useState(false);
-  const [modalViewId, setModalViewId] = useState<any>();
-  const [supplierId, setSupplierId] = useState<string | null | number>(null);
-  const [paymentType, setPaymentType] = useState("cash");
-  const [paymentMetode, setPaymentMetode] = useState("cash");
-  const [purchaseDescription, setPurchaseDescription] = useState("");
+
   const [purchaseDetail, setPurchaseDetail] = useState<any>();
 
-  const [discountPercent, setDiscountPercent] = useState(0);
-  const [taxPercent, setTaxPercent] = useState(0);
-
-  const subTotal = cartItems.reduce(
-    (acc: number, item: any) => acc + item.total,
-    0
-  );
-  const discountAmount = (subTotal * discountPercent) / 100;
-  const taxAmount = (subTotal * taxPercent) / 100;
-  const totalAmount = subTotal - discountAmount + taxAmount;
-  const [dpAmount, setDpAmount] = useState(0);
   const [payAmount, setPayAmount] = useState(0);
-  const [supplierName, setSupplierName] = useState<string | null>("");
-  const [param, setparam] = useState<string>("");
-  const [isFromTambah, setIsFromTambah] = useState(false);
 
   const [purchaseId, setPurchaseId] = useState<string | null>(null);
+
+  // FILTER
+  const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(
+    null
+  );
+  const [statusFilter, setStatusFilter] = useState("");
+  const [dateFromFilter, setDateFromFilter] = useState<Date | null>(
+    dateRange.monthStart
+  );
+  const [dateToFilter, setDateToFilter] = useState<Date | null>(
+    dateRange.monthEnd
+  );
+  const [paymentMetodeFilter, setPaymentMetodeFilter] = useState("");
+  const debouncedSearch = useDebounce(search, 1000);
 
   const fetchPurchases = async () => {
     setIsLoading(true);
@@ -70,12 +59,16 @@ const PurchaseTableReport = () => {
       const res = await getPurchases(
         currentPage,
         limit,
-        param,
-        selectedSupplier
+        debouncedSearch,
+        selectedSupplierId,
+        paymentMetodeFilter,
+        statusFilter,
+        dateFromFilter,
+        dateToFilter
       );
 
       setData(res.data);
-      setTotalItems(res.total);
+      setTotalItems(res.meta.total_rows);
     } catch (err) {
       toast.error("Gagal mengambil data purchase");
     } finally {
@@ -85,17 +78,37 @@ const PurchaseTableReport = () => {
 
   useEffect(() => {
     fetchPurchases();
-  }, [currentPage, limit, param, selectedSupplier]);
+  }, [
+    currentPage,
+    limit,
+    search,
+    selectedSupplierId,
+    dateFromFilter,
+    dateToFilter,
+    statusFilter,
+    paymentMetodeFilter,
+  ]);
 
   const TABLE_HEAD = useMemo(
     () => [
       { key: "reference_number", label: "Ref#", sortable: true },
       { key: "date", label: "Tanggal", sortable: true },
       { key: "supplier_name", label: "Supplier", sortable: true },
-      { key: "sub_total", label: "Subtotal", sortable: false },
-      { key: "discount", label: "Diskon", sortable: false },
-      { key: "tax", label: "Pajak", sortable: false },
-      { key: "total", label: "Total", sortable: false },
+      {
+        key: "sub_total",
+        label: "Subtotal",
+        sortable: false,
+        type: "currency",
+      },
+      { key: "discount", label: "Diskon", sortable: false, type: "currency" },
+      { key: "tax", label: "Pajak", sortable: false, type: "currency" },
+      {
+        key: "total",
+        label: "Total",
+        sortable: false,
+        type: "currency",
+        fontWeight: "bold",
+      },
       { key: "description", label: "Deskripsi", sortable: false },
       { key: "payment_type", label: "Tipe Bayar", sortable: false },
     ],
@@ -128,22 +141,75 @@ const PurchaseTableReport = () => {
   };
 
   const FILTER = (
-    <div className="flex gap-4 mb-4 items-end">
+    <div className="flex gap-4 mb-4 items-end flex-wrap">
       <GenosTextfield
         id="search"
-        label="Cari"
-        placeholder="Cari berdasarkan ref# atau deskripsi"
-        className="w-full"
+        label="Cari ref#"
+        placeholder="PRC/175....."
+        className="w-40 text-xs"
         is_icon_left
-        value={param}
-        onChange={(e) => setparam(e.target.value)}
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+      <GenosSearchSelectSupplier
+        value={selectedSupplierId}
+        onChange={(val: any) => setSelectedSupplierId(val)}
+        placeholder="Pilih supplier"
+        className="w-40"
+        label="Supplier"
+      />
+      <GenosSelect
+        label="Tipe Pembayaran"
+        options={[
+          { label: "PILIH SEMUA", value: "" },
+          { label: "TUNAI", value: "cash" },
+          { label: "TEMPO", value: "installment" },
+        ]}
+        value={paymentMetodeFilter}
+        onChange={(e) => {
+          console.log("Event:", e);
+          console.log("Value:", e.target.value);
+          setPaymentMetodeFilter(e.target.value);
+        }}
+      />
+
+      <GenosSelect
+        label="Status Pembayaran"
+        options={[
+          { label: "PILIH SEMUA", value: "" },
+          { label: "Belum Dibayar", value: "unpaid" },
+          { label: "Dibayar Sebagian", value: "partial" },
+          { label: "Lunas", value: "paid" },
+        ]}
+        value={statusFilter}
+        onChange={(e) => {
+          console.log("Event:", e);
+          console.log("Value:", e.target.value);
+          setStatusFilter(e.target.value);
+        }}
+        className="w-40"
+      />
+
+      <GenosDatepicker
+        id="tanggal-dari"
+        label="Dari Tanggal"
+        className="w-40"
+        selected={dateFromFilter}
+        onChange={(date) => setDateFromFilter(date)}
+      />
+
+      <GenosDatepicker
+        id="tanggal-sampai"
+        label="Sampai Tanggal"
+        className="w-40"
+        selected={dateToFilter}
+        onChange={(date) => setDateToFilter(date)}
       />
     </div>
   );
 
   // LIHAT DETAIL
   const handleView = async (id: any) => {
-    setModalViewId(id);
     try {
       const response = await getPurchasesById(id);
       if (response === undefined) {

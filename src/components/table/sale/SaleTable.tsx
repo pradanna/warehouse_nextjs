@@ -33,10 +33,12 @@ import {
 } from "@/lib/api/inventory/inventory-getbyid-api";
 import GenosSearchSelectInventory from "@/components/select-search/InventorySearch";
 import dayjs from "dayjs";
+import GenosDatepicker from "@/components/form/GenosDatepicker";
+import { dateRange } from "@/lib/helper";
+import { useDebounce } from "@/lib/utils/useDebounce";
 
 const SaleTable = () => {
   const [data, setData] = useState([]);
-  const [outlets, setOutlets] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedOutlet, setSelectedOutlet] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,8 +46,6 @@ const SaleTable = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingButton, setLoadingButton] = useState(false);
-
-  const [SaleItems, setSaleItems] = useState([]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCart, setSelectedCart] = useState(null);
@@ -58,11 +58,9 @@ const SaleTable = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [cartItems, setCartItems] = useState<any>([]);
   const [paymentMetode, setPaymentMetode] = useState("cash");
-  const [inventories, setInventories] = useState([]);
 
   // State tambahan untuk modal simpan sale
   const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
-  const [outletId, setOutletId] = useState<string | null | number>(null);
   const [paymentType, setPaymentType] = useState("cash");
   const [saleDescription, setSaleDescription] = useState("");
 
@@ -80,7 +78,6 @@ const SaleTable = () => {
   const [isModalOutletOpen, setIsModalOutletOpen] = useState(false);
 
   const [outletName, setOutletName] = useState<string | null>("");
-  const [param, setparam] = useState<string>("");
   const [isFromTambah, setIsFromTambah] = useState(false);
   const [isPaymentMetodModalOpen, setPaymentMetodModalOpen] = useState(false);
   const [dpAmount, setDpAmount] = useState(0);
@@ -95,11 +92,32 @@ const SaleTable = () => {
   const [saleId, setSaleId] = useState<string | null>(null);
   const [payAmount, setPayAmount] = useState(0);
 
+  // FILTER
+  const [outletId, setOutletId] = useState<string>(null);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [dateFromFilter, setDateFromFilter] = useState<Date | null>(
+    dateRange.todayStart
+  );
+  const [dateToFilter, setDateToFilter] = useState<Date | null>(
+    dateRange.todayEnd
+  );
+  const [paymentMetodeFilter, setPaymentMetodeFilter] = useState("");
+  const debouncedSearch = useDebounce(search, 1000);
+
   // FETCHSALES
   const fetchSales = async () => {
     setIsLoading(true);
     try {
-      const res = await getSales(currentPage, limit, search, selectedOutlet);
+      const res = await getSales(
+        currentPage,
+        limit,
+        debouncedSearch,
+        selectedOutlet,
+        paymentMetodeFilter,
+        statusFilter,
+        dateFromFilter,
+        dateToFilter
+      );
 
       setData(res.data);
       setTotalItems(res.meta.total_rows);
@@ -112,7 +130,16 @@ const SaleTable = () => {
 
   useEffect(() => {
     fetchSales();
-  }, [currentPage, limit, search, selectedOutlet]);
+  }, [
+    currentPage,
+    limit,
+    debouncedSearch,
+    selectedOutlet,
+    paymentMetodeFilter,
+    statusFilter,
+    dateFromFilter,
+    dateToFilter,
+  ]);
 
   const handleOpen = () => {
     const Outlet = getOutletFromLocal();
@@ -247,10 +274,21 @@ const SaleTable = () => {
       { key: "reference_number", label: "Ref#", sortable: true },
       { key: "date", label: "Tanggal", sortable: true },
       { key: "outlet_name", label: "Outlet", sortable: true },
-      { key: "sub_total", label: "Subtotal", sortable: false },
-      { key: "discount", label: "Diskon", sortable: false },
-      { key: "tax", label: "Pajak", sortable: false },
-      { key: "total", label: "Total", sortable: false },
+      {
+        key: "sub_total",
+        label: "Subtotal",
+        sortable: false,
+        type: "currency",
+      },
+      { key: "discount", label: "Diskon", sortable: false, type: "currency" },
+      { key: "tax", label: "Pajak", sortable: false, type: "currency" },
+      {
+        key: "total",
+        label: "Total",
+        sortable: false,
+        type: "currency",
+        fontWeight: "bold",
+      },
       { key: "description", label: "Deskripsi", sortable: false },
       { key: "payment_type", label: "Tipe Bayar", sortable: false },
     ],
@@ -365,20 +403,69 @@ const SaleTable = () => {
   };
 
   const FILTER = (
-    <div className="flex gap-4 mb-4 items-end">
-      <GenosSearchSelectOutlet
-        value={selectedOutlet}
-        onChange={(val: any) => setSelectedOutlet(val)}
-      />
-
+    <div className="flex gap-4 mb-4 items-end flex-wrap">
       <GenosTextfield
         id="search"
-        label="Cari"
-        placeholder="Cari berdasarkan ref# atau deskripsi"
-        className="w-full"
+        label="Cari ref#"
+        placeholder="PRC/175....."
+        className="w-40 text-xs"
         is_icon_left
         value={search}
         onChange={(e) => setSearch(e.target.value)}
+      />
+      <GenosSearchSelectOutlet
+        value={selectedOutlet}
+        onChange={(val: any) => setSelectedOutlet(val)}
+        placeholder="Pilih outlet"
+        className="w-40"
+        label="Outlet"
+      />
+      <GenosSelect
+        label="Tipe Pembayaran"
+        options={[
+          { label: "PILIH SEMUA", value: "" },
+          { label: "TUNAI", value: "cash" },
+          { label: "TEMPO", value: "installment" },
+        ]}
+        value={paymentMetodeFilter}
+        onChange={(e) => {
+          console.log("Event:", e);
+          console.log("Value:", e.target.value);
+          setPaymentMetodeFilter(e.target.value);
+        }}
+      />
+
+      <GenosSelect
+        label="Status Pembayaran"
+        options={[
+          { label: "PILIH SEMUA", value: "" },
+          { label: "Belum Dibayar", value: "unpaid" },
+          { label: "Dibayar Sebagian", value: "partial" },
+          { label: "Lunas", value: "paid" },
+        ]}
+        value={statusFilter}
+        onChange={(e) => {
+          console.log("Event:", e);
+          console.log("Value:", e.target.value);
+          setStatusFilter(e.target.value);
+        }}
+        className="w-40"
+      />
+
+      <GenosDatepicker
+        id="tanggal-dari"
+        label="Dari Tanggal"
+        className="w-40"
+        selected={dateFromFilter}
+        onChange={(date) => setDateFromFilter(date)}
+      />
+
+      <GenosDatepicker
+        id="tanggal-sampai"
+        label="Sampai Tanggal"
+        className="w-40"
+        selected={dateToFilter}
+        onChange={(date) => setDateToFilter(date)}
       />
     </div>
   );
@@ -407,15 +494,6 @@ const SaleTable = () => {
     setIsFromTambah(false);
     setIsModalOutletOpen(true);
   };
-
-  // AMBIL DATA SUPPLIER
-  useEffect(() => {
-    const outlet = getOutletFromLocal();
-    if (outlet) {
-      setOutletId(outlet.id);
-      setOutletName(outlet.name);
-    }
-  }, []);
 
   const handleDownloadPDF = () => {
     generateSalePDF(saleDetail);

@@ -38,22 +38,16 @@ const AdjustmentTableOutReport = ({
   const [adjustmentData, setAdjustmentData] = useState<Adjustment[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
-  const [type, setType] = useState("");
   const [TABLE_ROWS, setTABLE_ROWS] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [qty, setQty] = useState<string | number>(0);
   const [deskripsi, setDeskripsi] = useState<string>("");
-  const [totalSisaAdjustment, setTotalSisaAdjustment] = useState(0);
 
-  const [modalViewId, setModalViewId] = useState<any>();
-  const [isModalViewOpen, setModalViewOpen] = useState(false);
-  const [debtDetail, setAdjustmentDetail] = useState<any>();
   const [AdjustmentOutDetail, setAdjustmentOutDetail] = useState<any>();
   const [isModalAddOpen, setModalAddOpen] = useState(false);
 
   const [inventories, setInventories] = useState<any>();
   const [selectedItem, setSelectedItem] = useState<any>();
-  const [selectedInventory, setSelectedInventory] = useState<any>();
   const [param, setparam] = useState<string>("");
 
   const TABLE_HEAD = useMemo(
@@ -191,7 +185,6 @@ const AdjustmentTableOutReport = ({
               console.log("INV", inv);
               console.log("inv.item.name", inv.item.name);
               setSelectedItem(itemId);
-              setSelectedInventory(inv);
 
               // setUnit(inv?.unit.name || "-");
             }}

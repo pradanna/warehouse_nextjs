@@ -16,6 +16,7 @@ interface GenosSearchSelectOutletProps {
   onChange: (value: string | null) => void;
   placeholder?: string;
   label?: string;
+  className?: string;
 }
 
 export default function GenosSearchSelectOutlet({
@@ -23,6 +24,7 @@ export default function GenosSearchSelectOutlet({
   onChange,
   placeholder = "Cari Outlet...",
   label = "Outlet",
+  className = "",
 }: GenosSearchSelectOutletProps) {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
@@ -43,6 +45,7 @@ export default function GenosSearchSelectOutlet({
       placeholder={placeholder}
       options={data || []}
       isLoading={isLoading}
+      className={className}
     />
   );
 }

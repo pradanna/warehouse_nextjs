@@ -1,20 +1,29 @@
 import { baseUrl, getToken } from "@/app/config/config";
 import axios from "axios";
 import axiosInstance from "./axiosInstance";
+import qs from "qs";
 
 export async function getSales(
   currentPage: number,
   limit: number,
   search: string,
-  selectedSupplier: any
+  selectedOutlet: any,
+  type: string,
+  status: string,
+  date_start: Date,
+  date_end: Date
 ) {
   try {
     const res = await axiosInstance.get(`${baseUrl}/sale`, {
       params: {
         page: currentPage,
         per_page: limit,
-        search: search,
-        supplier_id: selectedSupplier,
+        param: search,
+        outlet_id: selectedOutlet,
+        type,
+        status,
+        date_start,
+        date_end,
       },
       headers: {
         Authorization: `Bearer ${getToken()}`,
@@ -23,7 +32,7 @@ export async function getSales(
 
     return res.data;
   } catch (err) {
-    console.error("Gagal mengambil data inventory:", err);
+    console.error("Gagal mengambil data Sales:", err);
   }
 }
 

@@ -38,7 +38,6 @@ const AdjustmentTableOut = ({ search, dateFrom, dateTo }: Props) => {
 
   const [AdjustmentOutDetail, setAdjustmentOutDetail] = useState<any>();
   const [isModalAddOpen, setModalAddOpen] = useState(false);
-
   const [selectedItemId, setSelectedItemId] = useState<string>("");
 
   const TABLE_HEAD = useMemo(

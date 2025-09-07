@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 export const formatTanggalIndo = (tanggal: string): string => {
   const bulanIndo = [
     "Januari",
@@ -30,6 +32,13 @@ export const formatRupiah = (value: number): string => {
   }).format(value);
 };
 
+export const formatNumber = (value: number): string => {
+  return new Intl.NumberFormat("id-ID", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
 export function addOneDay(date: Date | null): Date | null {
   if (!date) return null;
   const newDate = new Date(date);
@@ -59,3 +68,12 @@ export function parseError(err: any, unique: string): string {
 
   return "Terjadi kesalahan, silakan coba lagi.";
 }
+
+export const dateRange = {
+  todayStart: dayjs().startOf("day").toDate(),
+  todayEnd: dayjs().endOf("day").toDate(),
+  monthStart: dayjs().startOf("month").toDate(),
+  monthEnd: dayjs().endOf("month").toDate(),
+  yearStart: dayjs().startOf("year").toDate(),
+  yearEnd: dayjs().endOf("year").toDate(),
+};
