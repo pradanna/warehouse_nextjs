@@ -62,7 +62,7 @@ const AdjustmentTableInReport = ({
         key: "quantity",
         label: "Qty",
         sortable: false,
-        type: "nuumber",
+        type: "number",
       },
       {
         key: "date",

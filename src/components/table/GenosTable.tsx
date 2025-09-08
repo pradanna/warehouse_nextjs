@@ -55,9 +55,9 @@ type GenosTableProps = {
   onSortChange?: (key: string, order: "asc" | "desc") => void;
   totalRows?: number;
   rowsPerPage?: number;
-  isBelowStock?: (row: any) => boolean;
-  isAboveStock?: (row: any) => boolean;
-
+  isDanger?: (row: any) => boolean;
+  isWarning?: (row: any) => boolean;
+  isGreat?: (row: any) => boolean;
   loading?: boolean;
   error?: boolean;
 };
@@ -94,8 +94,9 @@ export default function GenosTable({
   ACTION_BUTTON,
   loading,
   error,
-  isBelowStock,
-  isAboveStock,
+  isDanger: isDanger,
+  isWarning: isWarning,
+  isGreat: isGreat,
   RIGHT_DIV,
   handleDeleteSelected,
   handleExportSelected,
@@ -344,8 +345,9 @@ export default function GenosTable({
                 </tr>
               ) : (
                 paginatedRows.map((row: any, index: number) => {
-                  const below = isBelowStock?.(row);
-                  const above = isAboveStock?.(row);
+                  const danger = isDanger?.(row);
+                  const great = isGreat?.(row);
+                  const warning = isWarning?.(row);
 
                   return (
                     <React.Fragment key={index}>
@@ -354,10 +356,12 @@ export default function GenosTable({
                           "transition-all duration-300 ease-in-out border-b border-light2 hover:bg-light2",
                           selectedRows.includes(row)
                             ? "bg-primary-light3"
-                            : below
-                            ? "bg-red-100"
-                            : above
-                            ? "bg-yellow-100"
+                            : danger
+                            ? "bg-red-50"
+                            : warning
+                            ? "bg-yellow-50"
+                            : great
+                            ? "bg-green-50"
                             : index % 2 === 0
                             ? "bg-white"
                             : "bg-light1"

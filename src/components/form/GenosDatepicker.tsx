@@ -16,14 +16,22 @@ type Props = {
 
 const GenosDatepicker = forwardRef<HTMLInputElement, Props>(
   (
-    { id, label, selected, onChange, className, name, disabled = false },
+    {
+      id,
+      label,
+      selected,
+      onChange,
+      className = "py-2 px-3 bg-transparent focus:outline-none text-sm w-full",
+      name,
+      disabled = false,
+    },
     ref: any
   ) => {
     const [isFocused, setIsFocused] = useState(false);
     const showFloatingLabel = isFocused || selected;
 
     return (
-      <div className={clsx("relative", className)}>
+      <div className={clsx("relative")}>
         {/* Floating Label */}
         <label
           htmlFor={id}
@@ -41,7 +49,8 @@ const GenosDatepicker = forwardRef<HTMLInputElement, Props>(
           className={clsx(
             "flex items-center border rounded-md transition-all duration-200 w-full",
             disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white",
-            "border-light2 focus-within:border-primary-light2"
+            "border-light2 focus-within:border-primary-light2",
+            className
           )}
         >
           <div className="pl-3 flex items-center pointer-events-none">
@@ -56,7 +65,7 @@ const GenosDatepicker = forwardRef<HTMLInputElement, Props>(
             onBlur={() => setIsFocused(false)}
             dateFormat="dd/MM/yyyy"
             placeholderText={showFloatingLabel ? "Pilih tanggal" : ""}
-            className="py-2 px-3 bg-transparent focus:outline-none text-sm w-full"
+            className="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
             popperClassName="z-[999]"
             portalId="root-portal"
             name={name}

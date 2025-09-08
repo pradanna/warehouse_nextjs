@@ -54,7 +54,7 @@ const AdjustmentTableOut = ({ search, dateFrom, dateTo }: Props) => {
         key: "quantity",
         label: "Qty",
         sortable: false,
-        type: "nuumber",
+        type: "number",
       },
       {
         key: "date",

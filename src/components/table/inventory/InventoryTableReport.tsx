@@ -89,8 +89,8 @@ const InventoryTableReport = () => {
         currentPage={currentPage}
         onPageChange={setCurrentPage}
         loading={isLoadingTable}
-        isBelowStock={(row) => row.current_stock < row.min_stock}
-        isAboveStock={(row) => row.current_stock > row.max_stock}
+        isDanger={(row) => row.current_stock < row.min_stock}
+        isGreat={(row) => row.current_stock > row.max_stock}
         FILTER={
           <div className="flex gap-4 mb-4 items-end w-full">
             <GenosTextfield

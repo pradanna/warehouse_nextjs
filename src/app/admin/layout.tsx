@@ -15,6 +15,7 @@ import {
   ChartBarSquareIcon,
   ShoppingBagIcon,
   CakeIcon,
+  ChartBarIcon,
 } from "@heroicons/react/24/outline";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import NavbarAdmin from "@/components/navbar/NavbarAdmin";
@@ -120,10 +121,11 @@ export default function DashboardLayout({
       href: "/admin/outlet-pastry",
       icon: <CakeIcon className="h-5 w-5" />,
     },
+
     {
-      name: "Cash Flow",
-      href: "/admin/cashflow",
-      icon: <FolderIcon className="h-5 w-5" />,
+      name: "Laporan",
+      href: "/admin/finance-report",
+      icon: <ChartBarIcon className="h-5 w-5" />,
     },
   ];
 

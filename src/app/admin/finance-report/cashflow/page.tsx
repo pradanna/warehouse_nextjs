@@ -1,10 +1,12 @@
 "use client";
 
 import GenosButton from "@/components/button/GenosButton";
-import CashFlowPerTanggal from "@/components/card/CashflowPertanggal";
+// import CashFlowPerTanggal from "@/components/card/CashflowPertanggal";
 import MonthDropdown from "@/components/dropdown-button/MonthDropDown";
 import YearDropdown from "@/components/dropdown-button/YearDropDown";
+import { generateCashflowExcel } from "@/components/excel/printCashflowExcel";
 import GenosPanel from "@/components/panel/GenosPanel";
+import GenosTable from "@/components/table/GenosTable";
 import OutletTabs from "@/components/tabs/OutletTab";
 import { getCashflow } from "@/lib/api/cashFlowApi";
 import { formatRupiah } from "@/lib/helper";
@@ -14,7 +16,7 @@ import {
   CurrencyDollarIcon,
   PrinterIcon,
 } from "@heroicons/react/24/outline";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 interface Props {
   outlet_id: string;
@@ -24,9 +26,16 @@ interface Props {
 interface CashflowItem {
   id: string;
   date: string;
-  type: "debit" | "credit";
-  name: string;
-  amount: number;
+  item: string;
+  debit: number;
+  credit: number;
+  description: string;
+  balance: number;
+}
+
+interface CashfflowData {
+  date: string;
+  data: CashflowItem[];
 }
 
 export default function Cashflow(Props) {
@@ -35,7 +44,7 @@ export default function Cashflow(Props) {
     null
   );
 
-  const [cashflowData, setCashflowData] = useState<CashflowItem[]>([]);
+  const [cashflowData, setCashflowData] = useState<CashfflowData[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalDebit, setTotalDebit] = useState(0);
   const [totalCredit, setTotalCredit] = useState(0);
@@ -49,41 +58,73 @@ export default function Cashflow(Props) {
 
   const [isCash, setIscash] = useState(true);
 
+  const TABLE_HEAD = [
+    { key: "date", label: "DATE", sortable: false },
+    { key: "item", label: "Item", type: "text", sortable: false },
+    { key: "debit", label: "DEBET", type: "currency", sortable: false },
+    { key: "credit", label: "KREDIT", type: "currency", sortable: false },
+    { key: "description", label: "DETAIL", type: "text", sortable: false },
+    { key: "balance", label: "BALANCE", type: "currency", sortable: false },
+  ];
+
+  const TABLE_ROWS = useMemo(() => {
+    return cashflowData.flatMap((cashflow) =>
+      cashflow.data.map((item: CashflowItem) => ({
+        id: item.id,
+        date: cashflow.date, // ambil tanggal parent
+        item: item.item,
+        debit: item.debit,
+        credit: item.credit,
+        description: item.description,
+        balance: item.balance,
+      }))
+    );
+  }, [cashflowData]);
+
+  // Cuma contoh, tidak wajib
   useEffect(() => {
+    let ignore = false;
+
     const fetchCashflow = async () => {
+      setLoading(true);
       try {
         const response = await getCashflow({
           outlet_id: selectedOutletId,
           year: selectedYear.toString(),
           month: selectedMonth.toString(),
-        });
-        const items = response?.data ?? [];
-
-        setCashflowData(items);
-
-        // Hitung total debit dan credit
-        let debit = 0;
-        let credit = 0;
-
-        items.forEach((item: any) => {
-          if (item.type === "debit") {
-            debit += item.amount;
-          } else if (item.type === "credit") {
-            credit += item.amount;
-          }
+          iscash: isCash,
         });
 
-        setTotalDebit(debit);
-        setTotalCredit(credit);
+        if (!ignore) {
+          const items = response?.data ?? [];
+          setCashflowData(items);
+
+          let debit = 0;
+          let credit = 0;
+
+          items.forEach((item: any) => {
+            item.data.forEach((i: any) => {
+              debit += i.debit;
+              credit += i.credit;
+            });
+          });
+
+          setTotalDebit(debit);
+          setTotalCredit(credit);
+        }
       } catch (error) {
         console.error("Gagal memuat data cashflow:", error);
       } finally {
-        setLoading(false);
+        if (!ignore) setLoading(false);
       }
     };
 
-    fetchCashflow();
-  }, [selectedOutletId, selectedYear, selectedMonth]);
+    if (selectedOutletId) fetchCashflow();
+
+    return () => {
+      ignore = true; // cegah update state kalau effect cleanup dipanggil
+    };
+  }, [selectedOutletId, selectedYear, selectedMonth, isCash]);
 
   return (
     <div>
@@ -130,6 +171,9 @@ export default function Cashflow(Props) {
               color="secondary"
               iconLeft={<PrinterIcon className="w-4 h-4" />}
               round="sm"
+              onClick={() =>
+                generateCashflowExcel(TABLE_ROWS, "cashflow-report.xlsx")
+              }
             />
           </div>
         }
@@ -140,7 +184,12 @@ export default function Cashflow(Props) {
           <div>Tidak ada data.</div>
         ) : (
           <>
-            <CashFlowPerTanggal data={cashflowData} />
+            <GenosTable
+              TABLE_HEAD={TABLE_HEAD}
+              TABLE_ROWS={TABLE_ROWS}
+              isDanger={(row) => row.debit === 0}
+              isGreat={(row) => row.credit === 0}
+            />
 
             <div className="mt-6  pt-4 text-sm">
               <div className="flex justify-between mb-1">

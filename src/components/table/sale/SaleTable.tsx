@@ -85,7 +85,7 @@ const SaleTable = () => {
   const [modalViewId, setModalViewId] = useState<any>();
   const [saleDetail, setSaleDetail] = useState<any>();
   const [isModalViewOpen, setModalViewOpen] = useState(false);
-
+  const [SaleItems, setSaleItems] = useState([]);
   const [isPayFromDetaildModalOpen, setPayFromDetaildModalOpen] =
     useState(false);
 
@@ -181,6 +181,14 @@ const SaleTable = () => {
       return null;
     }
   };
+
+  useEffect(() => {
+    const outlet = getOutletFromLocal();
+    if (outlet) {
+      setOutletId(outlet.id);
+      setOutletName(outlet.name);
+    }
+  }, []);
 
   const handleSetOutlet = async () => {
     const outlet = await getOutletrDatabyId(outletId.toString());
@@ -417,11 +425,12 @@ const SaleTable = () => {
         value={selectedOutlet}
         onChange={(val: any) => setSelectedOutlet(val)}
         placeholder="Pilih outlet"
-        className="w-40"
+        className="w-40 text-xs"
         label="Outlet"
       />
       <GenosSelect
         label="Tipe Pembayaran"
+        className="text-xs w-40"
         options={[
           { label: "PILIH SEMUA", value: "" },
           { label: "TUNAI", value: "cash" },
@@ -449,13 +458,13 @@ const SaleTable = () => {
           console.log("Value:", e.target.value);
           setStatusFilter(e.target.value);
         }}
-        className="w-40"
+        className="w-40 text-xs"
       />
 
       <GenosDatepicker
         id="tanggal-dari"
         label="Dari Tanggal"
-        className="w-40"
+        className="w-40 text-xs"
         selected={dateFromFilter}
         onChange={(date) => setDateFromFilter(date)}
       />
@@ -463,7 +472,7 @@ const SaleTable = () => {
       <GenosDatepicker
         id="tanggal-sampai"
         label="Sampai Tanggal"
-        className="w-40"
+        className="w-40 text-xs"
         selected={dateToFilter}
         onChange={(date) => setDateToFilter(date)}
       />

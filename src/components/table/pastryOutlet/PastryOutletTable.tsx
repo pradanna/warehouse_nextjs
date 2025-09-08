@@ -213,7 +213,7 @@ const PastrysOutletTable = ({
           view: (row) => {
             handleShow(row.id);
           },
-          edit: (row) => handleEdit(row.id),
+          // edit: (row) => handleEdit(row.id),
           // delete: (row) => handleDelete(row.id),
         }}
         FILTER={

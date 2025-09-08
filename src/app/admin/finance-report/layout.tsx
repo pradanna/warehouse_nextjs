@@ -1,40 +1,27 @@
 "use client";
 import {
-  ArchiveBoxIcon,
-  BanknotesIcon,
-  CurrencyDollarIcon,
-  ReceiptRefundIcon,
-  ShoppingBagIcon,
+  DocumentChartBarIcon,
+  FolderIcon,
+  PresentationChartBarIcon,
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 const tabs = [
   {
-    name: "Stok Saat Ini",
-    href: "/admin/report/current-stock",
-    icon: ArchiveBoxIcon,
+    name: "Cashflow",
+    href: "/admin/finance-report/cashflow",
+    icon: FolderIcon,
   },
   {
-    name: "Perpindahan Stock",
-    href: "/admin/report/stock-movement",
-    icon: ShoppingBagIcon,
-  },
-
-  {
-    name: "Riwayat Penyesuaian",
-    href: "/admin/report/stock-adjustment-history",
-    icon: ReceiptRefundIcon,
+    name: "Cashflow Summary",
+    href: "/admin/finance-report/cashflow-summary",
+    icon: DocumentChartBarIcon,
   },
   {
-    name: "Laporan Pembelian",
-    href: "/admin/report/purchase",
-    icon: CurrencyDollarIcon,
-  },
-  {
-    name: "Laporan Penjualan",
-    href: "/admin/report/sales",
-    icon: BanknotesIcon,
+    name: "General Ledger",
+    href: "/admin/finance-report/general-ledger",
+    icon: PresentationChartBarIcon,
   },
 ];
 
@@ -53,7 +40,7 @@ export default function ReportTabs({
 
   return (
     <div>
-      <div className="flex gap-4  rounded-xl">
+      <div className="flex gap-4   mb-5 border-b border-b-gray-300 pb-2">
         {tabs.map((tab) => {
           const isActive = active === tab.href;
           return (
