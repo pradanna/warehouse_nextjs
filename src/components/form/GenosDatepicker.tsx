@@ -16,15 +16,7 @@ type Props = {
 
 const GenosDatepicker = forwardRef<HTMLInputElement, Props>(
   (
-    {
-      id,
-      label,
-      selected,
-      onChange,
-      className = "py-2 px-3 bg-transparent focus:outline-none text-sm w-full",
-      name,
-      disabled = false,
-    },
+    { id, label, selected, onChange, className = "", name, disabled = false },
     ref: any
   ) => {
     const [isFocused, setIsFocused] = useState(false);
@@ -47,7 +39,7 @@ const GenosDatepicker = forwardRef<HTMLInputElement, Props>(
 
         <div
           className={clsx(
-            "flex items-center border rounded-md transition-all duration-200 w-full",
+            "flex items-center border rounded-md transition-all duration-200 ",
             disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white",
             "border-light2 focus-within:border-primary-light2",
             className

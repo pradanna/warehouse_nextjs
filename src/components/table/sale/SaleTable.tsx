@@ -464,7 +464,7 @@ const SaleTable = () => {
       <GenosDatepicker
         id="tanggal-dari"
         label="Dari Tanggal"
-        className="w-40 text-xs"
+        className="w-30 text-xs"
         selected={dateFromFilter}
         onChange={(date) => setDateFromFilter(date)}
       />
@@ -472,7 +472,7 @@ const SaleTable = () => {
       <GenosDatepicker
         id="tanggal-sampai"
         label="Sampai Tanggal"
-        className="w-40 text-xs"
+        className="w-30 text-xs"
         selected={dateToFilter}
         onChange={(date) => setDateToFilter(date)}
       />

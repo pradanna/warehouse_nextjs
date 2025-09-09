@@ -58,9 +58,13 @@ type GenosTableProps = {
   isDanger?: (row: any) => boolean;
   isWarning?: (row: any) => boolean;
   isGreat?: (row: any) => boolean;
+  isBold?: (row: any) => boolean;
   loading?: boolean;
   error?: boolean;
+  customMinheight?: string;
 };
+
+const customMinheight = {};
 
 const fontSizeMap = {
   xs: "text-xs",
@@ -97,9 +101,11 @@ export default function GenosTable({
   isDanger: isDanger,
   isWarning: isWarning,
   isGreat: isGreat,
+  isBold: isBold,
   RIGHT_DIV,
   handleDeleteSelected,
   handleExportSelected,
+  customMinheight = "min-h-[495px]",
   handleTableField,
 }: GenosTableProps) {
   const [expandedRowIndex, setExpandedRowIndex] = useState<number | null>(null);
@@ -252,7 +258,7 @@ export default function GenosTable({
         </div>
       </div>
 
-      <div className="overflow-auto min-h-[495px]">
+      <div className={clsx("overflow-auto ", customMinheight)}>
         <div className="w-full">
           <table
             className={clsx(
@@ -348,12 +354,14 @@ export default function GenosTable({
                   const danger = isDanger?.(row);
                   const great = isGreat?.(row);
                   const warning = isWarning?.(row);
+                  const bold = isBold?.(row);
 
                   return (
                     <React.Fragment key={index}>
                       <tr
                         className={clsx(
                           "transition-all duration-300 ease-in-out border-b border-light2 hover:bg-light2",
+                          isBold && bold ? "font-bold" : "",
                           selectedRows.includes(row)
                             ? "bg-primary-light3"
                             : danger

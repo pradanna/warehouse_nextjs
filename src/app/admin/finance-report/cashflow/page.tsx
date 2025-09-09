@@ -172,7 +172,12 @@ export default function Cashflow(Props) {
               iconLeft={<PrinterIcon className="w-4 h-4" />}
               round="sm"
               onClick={() =>
-                generateCashflowExcel(TABLE_ROWS, "cashflow-report.xlsx")
+                generateCashflowExcel(
+                  TABLE_ROWS,
+                  "cashflow-report.xlsx",
+                  selectedOutletName || "Unknown Outlet",
+                  isCash
+                )
               }
             />
           </div>
