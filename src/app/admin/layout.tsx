@@ -16,6 +16,8 @@ import {
   ShoppingBagIcon,
   CakeIcon,
   ChartBarIcon,
+  UserGroupIcon,
+  BanknotesIcon,
 } from "@heroicons/react/24/outline";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import NavbarAdmin from "@/components/navbar/NavbarAdmin";
@@ -102,6 +104,12 @@ export default function DashboardLayout({
     },
 
     {
+      name: "Data Karyawan",
+      href: "/admin/employee",
+      icon: <UserGroupIcon className="h-5 w-5" />,
+    },
+
+    {
       name: "Pemasukan Outlet",
       href: "/admin/outlet-income",
       icon: <PresentationChartBarIcon className="h-5 w-5" />,
@@ -115,6 +123,11 @@ export default function DashboardLayout({
       name: "Purchase Outlet ",
       href: "/admin/outlet-purchase",
       icon: <ShoppingBagIcon className="h-5 w-5" />,
+    },
+    {
+      name: "Payroll Outlet ",
+      href: "/admin/outlet-payroll",
+      icon: <BanknotesIcon className="h-5 w-5" />,
     },
     {
       name: "Pastry Outlet ",
