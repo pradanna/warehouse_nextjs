@@ -5,7 +5,7 @@ import axiosInstance from "./axiosInstance";
 export async function getcredit(
   currentPage: number,
   limit: number,
-  supplier_id: string,
+  outlet_id: string,
   status: any
 ) {
   try {
@@ -13,7 +13,7 @@ export async function getcredit(
       params: {
         page: currentPage,
         per_page: limit,
-        supplier_id: supplier_id,
+        outlet_id: outlet_id,
         status: status,
       },
       headers: {

@@ -69,16 +69,10 @@ const HutangTable = () => {
     setIsLoadingTable(true);
 
     try {
-      const res = await getDebt(
-        currentPage,
-        limit,
-        { supplier_id: "string", status: "any" },
-        supplier_id,
-        status
-      );
+      const res = await getDebt(currentPage, limit, supplier_id, status);
       setDebtData(res.data);
       setTABLE_ROWS(res.data);
-      setTotalItems(res.total);
+      setTotalItems(res.meta.total_rows);
 
       const totalAmountRest = res.data.reduce(
         (sum: number, item: any) => sum + Number(item.amount_rest || 0),
@@ -95,7 +89,7 @@ const HutangTable = () => {
 
   useEffect(() => {
     FetchDebt();
-  }, []);
+  }, [currentPage]);
 
   useEffect(() => {
     if (purchaseDetail) {
@@ -155,14 +149,14 @@ const HutangTable = () => {
         }}
       ></GenosTable>
 
-      <div className="mt-4 flex justify-end">
+      {/* <div className="mt-4 flex justify-end">
         <div className="bg-gray-100 px-4 py-2 rounded shadow text-right">
           <p className="text-sm text-gray-600">Total Sisa Hutang:</p>
           <p className="text-lg font-semibold text-red-600">
             Rp {totalSisaHutang.toLocaleString("id-ID")}
           </p>
         </div>
-      </div>
+      </div> */}
 
       {isModalViewOpen && (
         <PurchaseDetailModal

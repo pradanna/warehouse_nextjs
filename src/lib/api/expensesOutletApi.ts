@@ -79,7 +79,7 @@ export async function updateExpensesOutlet(unitId: string, unitData: any) {
   try {
     const response = await axiosInstance.put(
       baseUrl + "/outlet-expense/" + unitId,
-      { name: unitData },
+      unitData,
       {
         headers: {
           Authorization: `Bearer ${getToken()}`,

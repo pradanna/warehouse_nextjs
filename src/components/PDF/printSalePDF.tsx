@@ -61,7 +61,12 @@ export const generateSalePDF = (data: any) => {
   // Baris 2
   doc.setLineWidth(0.5); // ketebalan garis
   doc.line(leftX, y - 4, leftX + 100, y - 4);
-  doc.text(`${data.data.outlet.name}`, leftX, y);
+
+  // batasi lebar teks outlet name (misalnya 100px)
+  const outletName = doc.splitTextToSize(`${data.data.outlet.name}`, 100);
+  doc.text(outletName, leftX, y);
+
+  // tanggal tetap rata kanan
   doc.text(`Tanggal Penjualan: ${data.data.date}`, rightX, y, {
     align: "right",
   });
@@ -69,7 +74,8 @@ export const generateSalePDF = (data: any) => {
   y += lineSpacing;
 
   // Baris 3
-  doc.text(`${data.data.outlet.address}`, leftX, y);
+  const outletAddress = doc.splitTextToSize(`${data.data.outlet.address}`, 90);
+  doc.text(outletAddress, leftX, y);
   let statusText = "";
   let statusColor: [number, number, number] = [0, 0, 0]; // default hitam
 
@@ -174,6 +180,32 @@ export const generateSalePDF = (data: any) => {
     baseY + 30,
     { align: "right" }
   );
+
+  // Ambil posisi terakhir dari autoTable
+  const afterTableY = (doc as any).lastAutoTable.finalY || baseY + 40;
+
+  // Tambahkan jarak sedikit
+  const ttdStartY = afterTableY + 30; // jarak dari tabel terakhir
+
+  // Lebar area tanda tangan
+  const colWidth = 40;
+
+  // Posisi X
+  const leftX2 = 20;
+  const centerX2 = 80;
+  const rightX3 = 150;
+
+  // Label kolom
+  doc.text("Pengirim", leftX2, ttdStartY);
+  doc.text("Penerima", centerX2, ttdStartY);
+  doc.text("Mengetahui", rightX3, ttdStartY);
+
+  // Garis tanda tangan (sekitar 30px di bawah label)
+  const lineY = ttdStartY + 30;
+
+  doc.line(leftX2, lineY, leftX2 + colWidth, lineY);
+  doc.line(centerX2, lineY, centerX2 + colWidth, lineY);
+  doc.line(rightX3, lineY, rightX3 + colWidth, lineY);
 
   const blobUrl = doc.output("bloburl");
   window.open(blobUrl, "_blank");

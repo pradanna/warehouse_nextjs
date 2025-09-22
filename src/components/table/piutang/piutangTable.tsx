@@ -6,6 +6,9 @@ import { generateSalePDF } from "@/components/PDF/printSalePDF";
 import { generateSaleExcel } from "@/components/excel/printSaleExcel";
 import { getcredit, getcreditById } from "@/lib/api/piutangApi";
 import SaleDetailModal from "@/components/form/sale/saleDetail";
+import GenosSelect from "@/components/form/GenosSelect";
+import GenosTableFrontend from "../GenosTableFrontend";
+import GenosSearchSelectOutlet from "@/components/select-search/GenosSearchOutlet";
 
 const PiutangTable = () => {
   const [isLoadingTable, setIsLoadingTable] = useState(false);
@@ -13,14 +16,13 @@ const PiutangTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
   const [outlet_id, setoutlet_id] = useState("");
-  const [status, setStatus] = useState("");
   const [TABLE_ROWS, setTABLE_ROWS] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [totalSisaPiutang, setTotalSisaPiutang] = useState(0);
 
-  const [modalViewId, setModalViewId] = useState<any>();
+  const [selectedOutlet, setSelectedOutlet] = useState(null);
   const [isModalViewOpen, setModalViewOpen] = useState(false);
-  const [CreditDetail, setCreditDetail] = useState<any>();
+  const [creditStatusFilter, setCreditStatusFilter] = useState<string>();
   const [saleDetail, setSaleDetail] = useState<any>();
   const [payAmount, setPayAmount] = useState(0);
   const [isPayFromDetaildModalOpen, setPayFromDetaildModalOpen] =
@@ -28,18 +30,18 @@ const PiutangTable = () => {
   const [saleId, setSaleId] = useState<string | null>(null);
   const TABLE_HEAD = useMemo(
     () => [
-      { key: "outlet.name", label: "outlet", sortable: true, type: "text" },
+      { key: "outlet.name", label: "Outlet", sortable: true, type: "text" },
 
       {
         key: "amount_due",
         label: "Dari Total",
-        sortable: false,
+        sortable: true,
         type: "currency",
       },
       {
         key: "amount_paid",
         label: "Dibayarkan",
-        sortable: false,
+        sortable: true,
         type: "currency",
       },
       {
@@ -64,14 +66,18 @@ const PiutangTable = () => {
     setPayFromDetaildModalOpen(true);
   };
 
-  const FetchCredit = async () => {
+  const FetchCredit = async (
+    currentPage: number,
+    status?: string,
+    outlet_id?: string
+  ) => {
     setIsLoadingTable(true);
 
     try {
-      const res = await getcredit(currentPage, limit, outlet_id, status);
+      const res = await getcredit(currentPage, 1000000, outlet_id, status);
       setCreditData(res.data);
       setTABLE_ROWS(res.data);
-      setTotalItems(res.total);
+      setTotalItems(res.meta.total_rows);
 
       const totalAmountRest = res.data.reduce(
         (sum: number, item: any) => sum + Number(item.amount_rest || 0),
@@ -87,8 +93,8 @@ const PiutangTable = () => {
   };
 
   useEffect(() => {
-    FetchCredit();
-  }, []);
+    FetchCredit(currentPage ?? 1, creditStatusFilter, selectedOutlet);
+  }, [currentPage, creditStatusFilter, selectedOutlet]);
 
   useEffect(() => {
     if (saleDetail) {
@@ -97,7 +103,6 @@ const PiutangTable = () => {
   }, [saleDetail]);
 
   const handleView = async (id: any) => {
-    setModalViewId(id);
     try {
       const response = await getcreditById(id);
       if (response === undefined) {
@@ -129,22 +134,50 @@ const PiutangTable = () => {
 
   return (
     <>
-      <GenosTable
+      <GenosTableFrontend
         TABLE_HEAD={TABLE_HEAD}
         TABLE_ROWS={TABLE_ROWS}
         PAGINATION
         rowsPerPage={limit}
-        totalRows={totalItems}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
+        // totalRows={totalItems}
+        // currentPage={currentPage}
+        // onPageChange={setCurrentPage}
         loading={isLoadingTable}
+        SORT
+        FILTER={
+          <div className="flex gap-4 mb-4">
+            <GenosSearchSelectOutlet
+              value={selectedOutlet}
+              onChange={(val: any) => setSelectedOutlet(val)}
+              placeholder="Pilih outlet"
+              className="w-55 text-xs"
+              label="Outlet"
+            />
+
+            <GenosSelect
+              label="Status Piutang"
+              className="text-xs w-40"
+              options={[
+                { label: "PILIH SEMUA", value: "" },
+                { label: "LUNAS", value: "paid" },
+                { label: "BELUM LUNAS", value: "unpaid" },
+              ]}
+              value={creditStatusFilter}
+              onChange={(e) => {
+                console.log("Event:", e);
+                console.log("Value:", e.target.value);
+                setCreditStatusFilter(e.target.value);
+              }}
+            />
+          </div>
+        }
         ACTION_BUTTON={{
           view: (row) => {
             handleView(row.id);
             setSaleId(row.id);
           },
         }}
-      ></GenosTable>
+      ></GenosTableFrontend>
 
       <div className="mt-4 flex justify-end">
         <div className="bg-gray-100 px-4 py-2 rounded shadow text-right">

@@ -4,33 +4,27 @@ import GenosModal from "@/components/modal/GenosModal";
 import { RefObject, useEffect, useRef, useState } from "react";
 import GenosTextfield from "../GenosTextfield";
 import dayjs from "dayjs";
-import {
-  createExpensesOutlet,
-  getExpensesOutletbyId,
-  OutletExpenseInput,
-  updateExpensesOutlet,
-} from "@/lib/api/expensesOutletApi";
+
 import { toast } from "react-toastify";
-import GenosSearchSelectExpenseCategory from "@/components/select-search/ExpenseCategorySearchOutlet";
 import GenosDatepicker from "../GenosDatepicker";
 import GenosTextarea from "../GenosTextArea";
 import { formatDateToDateIndo } from "@/lib/helper";
+import { getWarehouseExpenseById } from "@/lib/api/pastryOutlet/PastryOutletApi";
+import { WarehouseExpenseInput } from "@/lib/api/warehouse-expenses/inputInterface";
+import { updateWarehouseExpense } from "@/lib/api/warehouse-expenses/warehouseExpensesApi";
+import GenosSearchSelectExpenseCategory from "@/components/select-search/ExpenseCategorySearchOutlet";
 
-type EditExpensesOutletModalProps = {
+type EditExpensesWarehouseModalProps = {
   show: boolean;
-  idOutlet: string;
-  NameOutlet: string;
   idExpense: string;
   onClose: () => void;
 };
 
-export default function EditExpensesOutletModal({
+export default function EditExpensesWarehouseModal({
   show,
   idExpense,
-  idOutlet,
-  NameOutlet,
   onClose,
-}: EditExpensesOutletModalProps) {
+}: EditExpensesWarehouseModalProps) {
   const [isLoadingButton, setIsLoadingButton] = useState(false);
   const [editCategoryId, setEditCategoryId] = useState<string>("");
   const [editDescription, setEditDescription] = useState<string | null>("");
@@ -43,13 +37,12 @@ export default function EditExpensesOutletModal({
   const fetchDataForEdit = async (id: string) => {
     setIsLoadingButton(true);
     try {
-      const response = await getExpensesOutletbyId(id);
+      const response = await getWarehouseExpenseById(id);
       if (!response) return;
 
       setEditCategoryId(response.data.category.id);
       setEditDescription(response.data.description);
-      setEditAmountCash(Number(response.data.cash));
-      setEditAmountDigital(Number(response.data.digital));
+      setEditAmountCash(Number(response.data.amount));
 
       console.log("Data pengeluaran untuk edit:", response.data.date);
       setExpenseDate(formatDateToDateIndo(response.data.date));
@@ -75,27 +68,23 @@ export default function EditExpensesOutletModal({
   const onSubmit = async () => {
     setIsLoadingButton(true);
     try {
-      const unitData: OutletExpenseInput = {
-        outlet_id: idOutlet,
+      const unitData: WarehouseExpenseInput = {
         expense_category_id: editCategoryId,
         date: dayjs(expenseDate).format("YYYY-MM-DD"),
-        amount: {
-          cash: editAmountCash ?? 0,
-          digital: editAmountDigital ?? 0,
-        },
+        amount: editAmountCash,
         description: editDescription ? editDescription : "",
       };
 
-      const response = await updateExpensesOutlet(idExpense, unitData);
+      const response = await updateWarehouseExpense(idExpense, unitData);
       // Lakukan aksi setelah berhasil (misalnya reset form atau tutup modal)
-      console.log("Berhasil merubah data:", response);
-      toast.success(response.message || "Data Berhasil dirubah", {
+      console.log("Berhasil menambahkan data:", response);
+      toast.success(response.message || "Data Berhasil ditambahkan", {
         autoClose: 1000,
       });
       onClose();
     } catch (err) {
-      console.error("Gagal merubah data:", err);
-      toast.error(err.message || "Data Gagal dirubah", {
+      console.error("Gagal menambahkan data:", err);
+      toast.error(err.message || "Data Gagal ditambahkan", {
         autoClose: 1000,
       });
     } finally {
@@ -105,7 +94,7 @@ export default function EditExpensesOutletModal({
 
   return (
     <GenosModal
-      title={`Tambah Pengeluaran di Outlet ` + NameOutlet}
+      title={`Tambah Pengeluaran di Warehouse `}
       show={show}
       onClose={onClose}
       onSubmit={onSubmit}
@@ -136,14 +125,6 @@ export default function EditExpensesOutletModal({
           onChange={(e) => setEditAmountCash(Number(e.target.value))}
         />
 
-        <GenosTextfield
-          id="edit-amount-expense"
-          label="Digital"
-          type="number"
-          value={editAmountDigital}
-          ref={inputRef}
-          onChange={(e) => setEditAmountDigital(Number(e.target.value))}
-        />
         <GenosTextarea
           label="Deskripsi"
           placeholder="Masukkan Deskripsi"

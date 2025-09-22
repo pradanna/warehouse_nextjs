@@ -6,6 +6,9 @@ import { getPurchasesById } from "@/lib/api/purchaseApi";
 import { generatePurchasePDF } from "@/components/PDF/printPurchasePDF";
 import { generatePurchaseExcel } from "@/components/excel/printPurchaseExcel";
 import PurchaseDetailModal from "@/components/form/purchase/purchaseDetail";
+import GenosTableFrontend from "../GenosTableFrontend";
+import GenosSearchSelectSupplier from "@/components/select-search/SupplierSearch";
+import GenosSelect from "@/components/form/GenosSelect";
 
 const HutangTable = () => {
   const [isLoadingTable, setIsLoadingTable] = useState(false);
@@ -18,6 +21,8 @@ const HutangTable = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [totalSisaHutang, setTotalSisaHutang] = useState(0);
 
+  const [selectedSupplier, setSelectedSupplier] = useState(null);
+  const [debtStatusFilter, setDebtStatusFilter] = useState<string>();
   const [modalViewId, setModalViewId] = useState<any>();
   const [isModalViewOpen, setModalViewOpen] = useState(false);
   const [debtDetail, setDebtDetail] = useState<any>();
@@ -34,13 +39,13 @@ const HutangTable = () => {
       {
         key: "amount_due",
         label: "Dari Total",
-        sortable: false,
+        sortable: true,
         type: "currency",
       },
       {
         key: "amount_paid",
         label: "Dibayarkan",
-        sortable: false,
+        sortable: true,
         type: "currency",
       },
       {
@@ -65,20 +70,18 @@ const HutangTable = () => {
     setPayFromDetaildModalOpen(true);
   };
 
-  const FetchDebt = async () => {
+  const FetchDebt = async (
+    currentPage: number,
+    status?: string,
+    supplier_id?: string
+  ) => {
     setIsLoadingTable(true);
 
     try {
-      const res = await getDebt(
-        currentPage,
-        limit,
-        { supplier_id: "string", status: "any" },
-        supplier_id,
-        status
-      );
+      const res = await getDebt(currentPage, limit, supplier_id, status);
       setDebtData(res.data);
       setTABLE_ROWS(res.data);
-      setTotalItems(res.total);
+      setTotalItems(res.meta.total_rows);
 
       const totalAmountRest = res.data.reduce(
         (sum: number, item: any) => sum + Number(item.amount_rest || 0),
@@ -94,8 +97,8 @@ const HutangTable = () => {
   };
 
   useEffect(() => {
-    FetchDebt();
-  }, []);
+    FetchDebt(1, debtStatusFilter, selectedSupplier);
+  }, [debtStatusFilter, selectedSupplier]);
 
   useEffect(() => {
     if (purchaseDetail) {
@@ -138,22 +141,50 @@ const HutangTable = () => {
 
   return (
     <>
-      <GenosTable
+      <GenosTableFrontend
         TABLE_HEAD={TABLE_HEAD}
         TABLE_ROWS={TABLE_ROWS}
         PAGINATION
         rowsPerPage={limit}
-        totalRows={totalItems}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
+        // totalRows={totalItems}
+        // currentPage={currentPage}
+        // onPageChange={setCurrentPage}
         loading={isLoadingTable}
+        SORT
+        FILTER={
+          <div className="flex gap-4 mb-4">
+            <GenosSearchSelectSupplier
+              value={selectedSupplier}
+              onChange={(val: any) => setSelectedSupplier(val)}
+              placeholder="Pilih Supplier"
+              className="w-55 text-xs"
+              label="Outlet"
+            />
+
+            <GenosSelect
+              label="Status Piutang"
+              className="text-xs w-40"
+              options={[
+                { label: "PILIH SEMUA", value: "" },
+                { label: "LUNAS", value: "paid" },
+                { label: "BELUM LUNAS", value: "unpaid" },
+              ]}
+              value={debtStatusFilter}
+              onChange={(e) => {
+                console.log("Event:", e);
+                console.log("Value:", e.target.value);
+                setDebtStatusFilter(e.target.value);
+              }}
+            />
+          </div>
+        }
         ACTION_BUTTON={{
           view: (row) => {
             handleView(row.id);
             setPurchaseId(row.id);
           },
         }}
-      ></GenosTable>
+      ></GenosTableFrontend>
 
       <div className="mt-4 flex justify-end">
         <div className="bg-gray-100 px-4 py-2 rounded shadow text-right">

@@ -38,7 +38,7 @@ export default function AddPastrysOutletModal({
   const [hargaPastry, setHargaPastry] = useState<number>(0);
 
   const TABLE_HEAD_CART_PASTRY = [
-    { key: "name", label: "Nama Pastry", sortable: false },
+    { key: "name", label: "Nama Items", sortable: false },
     { key: "qty", label: "Qty", type: "number", sortable: false },
     { key: "price", label: "Harga", type: "currency", sortable: false },
     { key: "total", label: "Total Harga", type: "currency", sortable: false },
@@ -168,7 +168,7 @@ export default function AddPastrysOutletModal({
         <div className="flex flex-col gap-5">
           <GenosTextfield
             id="nama-pastry"
-            label="Nama Pastry"
+            label="Nama Items"
             placeholder="Masukkan nama Pastry"
             type="text"
             value={namaPastry}

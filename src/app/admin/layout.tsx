@@ -18,6 +18,7 @@ import {
   ChartBarIcon,
   UserGroupIcon,
   BanknotesIcon,
+  CalculatorIcon,
 } from "@heroicons/react/24/outline";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import NavbarAdmin from "@/components/navbar/NavbarAdmin";
@@ -62,6 +63,12 @@ export default function DashboardLayout({
       name: "Master Data",
       href: "/admin/master-data",
       icon: <FolderIcon className="h-5 w-5" />,
+    },
+
+    {
+      name: "Pengeluaran Warehouse",
+      href: "/admin/warehouse-expense",
+      icon: <BanknotesIcon className="h-5 w-5" />,
     },
 
     {
@@ -129,12 +136,18 @@ export default function DashboardLayout({
       href: "/admin/outlet-payroll",
       icon: <BanknotesIcon className="h-5 w-5" />,
     },
+
     {
       name: "Pastry Outlet ",
       href: "/admin/outlet-pastry",
       icon: <CakeIcon className="h-5 w-5" />,
     },
 
+    {
+      name: "Pindah Dana",
+      href: "/admin/fund-movement",
+      icon: <CalculatorIcon className="h-5 w-5" />,
+    },
     {
       name: "Laporan",
       href: "/admin/finance-report",

@@ -105,7 +105,7 @@ const PastrysOutletTable = ({
   }, [pastrysOutlets]);
 
   const TABLE_HEAD_ITEMS = [
-    { key: "name", label: "Nama Pastry", sortable: false },
+    { key: "name", label: "Nama Items", sortable: false },
     { key: "qty", label: "Qty", type: "number", sortable: false },
     { key: "price", label: "Harga", type: "currency", sortable: false },
     { key: "total", label: "Total Harga", type: "currency", sortable: false },

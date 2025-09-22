@@ -20,7 +20,6 @@ const PiutangTable = () => {
 
   const [modalViewId, setModalViewId] = useState<any>();
   const [isModalViewOpen, setModalViewOpen] = useState(false);
-  const [CreditDetail, setCreditDetail] = useState<any>();
   const [saleDetail, setSaleDetail] = useState<any>();
   const [payAmount, setPayAmount] = useState(0);
   const [isPayFromDetaildModalOpen, setPayFromDetaildModalOpen] =
@@ -28,7 +27,7 @@ const PiutangTable = () => {
   const [saleId, setSaleId] = useState<string | null>(null);
   const TABLE_HEAD = useMemo(
     () => [
-      { key: "outlet.name", label: "outlet", sortable: true, type: "text" },
+      { key: "outlet.name", label: "Outlet", sortable: true, type: "text" },
 
       {
         key: "amount_due",
@@ -71,7 +70,9 @@ const PiutangTable = () => {
       const res = await getcredit(currentPage, limit, outlet_id, status);
       setCreditData(res.data);
       setTABLE_ROWS(res.data);
-      setTotalItems(res.total);
+      setTotalItems(res.meta.total_rows);
+
+      console.log(res);
 
       const totalAmountRest = res.data.reduce(
         (sum: number, item: any) => sum + Number(item.amount_rest || 0),
@@ -87,8 +88,9 @@ const PiutangTable = () => {
   };
 
   useEffect(() => {
+    console.log("USE EFFECT CREDIT");
     FetchCredit();
-  }, []);
+  }, [currentPage]);
 
   useEffect(() => {
     if (saleDetail) {
@@ -146,14 +148,14 @@ const PiutangTable = () => {
         }}
       ></GenosTable>
 
-      <div className="mt-4 flex justify-end">
+      {/* <div className="mt-4 flex justify-end">
         <div className="bg-gray-100 px-4 py-2 rounded shadow text-right">
           <p className="text-sm text-gray-600">Total Sisa Piutang:</p>
           <p className="text-lg font-semibold text-red-600">
             Rp {totalSisaPiutang.toLocaleString("id-ID")}
           </p>
         </div>
-      </div>
+      </div> */}
 
       {isModalViewOpen && (
         <SaleDetailModal

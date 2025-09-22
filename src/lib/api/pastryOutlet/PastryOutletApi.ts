@@ -2,6 +2,7 @@ import { baseUrl, getToken } from "@/app/config/config";
 import axiosInstance from "../axiosInstance";
 import { OutletPastriesResponse } from "./PastryOutletInterface";
 import { OutletPastryResponse } from "./PastryOutletInterfaceById";
+import { WarehouseExpenseByIdResponse } from "../warehouse-expenses/getInterface";
 
 export async function getPastrysOutlet({
   outlet_id,
@@ -114,5 +115,38 @@ export async function getPastrysOutletbyId(unitId: string) {
     return response.data;
   } catch (err) {
     console.error("Gagal mengambil data pastrysOutlet untuk edit:", err);
+  }
+}
+
+export async function deleteWarehouseExpense(expenseId: string) {
+  try {
+    const response = await axiosInstance.delete(
+      `${baseUrl}/warehouse-expense/${expenseId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (err) {
+    console.error("Gagal menghapus warehouse expense:", err);
+  }
+}
+
+export async function getWarehouseExpenseById(expenseId: string) {
+  try {
+    const response = await axiosInstance.get<WarehouseExpenseByIdResponse>(
+      `${baseUrl}/warehouse-expense/${expenseId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (err) {
+    console.error("Gagal mengambil data warehouse expense untuk edit:", err);
   }
 }

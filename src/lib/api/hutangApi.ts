@@ -6,14 +6,14 @@ import axiosInstance from "./axiosInstance";
 export const getDebt = (
   currentPage: number,
   limit: number,
-  param,
   supplier_id,
   status
 ) =>
   apiGet("/debt", {
     page: currentPage,
     per_page: limit,
-    param,
+    supplier_id,
+    status,
   });
 
 export async function createDebt(payload: any) {

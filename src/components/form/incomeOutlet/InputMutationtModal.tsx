@@ -6,9 +6,7 @@ import GenosTextfield from "../GenosTextfield";
 import dayjs from "dayjs";
 
 import { toast } from "react-toastify";
-import GenosSearchSelectOutlet from "@/components/select-search/GenosSearchOutlet";
 import GenosDatepicker from "../GenosDatepicker";
-import GenosTextarea from "../GenosTextArea";
 import { formatDateToDateIndo, formatRupiah } from "@/lib/helper";
 import {
   createIncomesOutlet,

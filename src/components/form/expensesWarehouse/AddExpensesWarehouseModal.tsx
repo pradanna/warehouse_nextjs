@@ -1,36 +1,31 @@
 "use client";
 
 import GenosModal from "@/components/modal/GenosModal";
+import { RefObject, useRef, useState } from "react";
 import GenosTextfield from "../GenosTextfield";
+import GenosSearchSelect from "../GenosSearchSelect";
 import GenosDatepicker from "../GenosDatepicker";
-import GenosSearchSelectExpenseCategory from "@/components/select-search/ExpenseCategorySearchOutlet";
 import GenosTextarea from "../GenosTextArea";
-import {
-  createExpensesOutlet,
-  OutletExpenseInput,
-} from "@/lib/api/expensesOutletApi";
+
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
-import { useRef, useState } from "react";
+import { createWarehouseExpense } from "@/lib/api/warehouse-expenses/warehouseExpensesApi";
+import GenosSearchSelectExpenseCategory from "@/components/select-search/ExpenseCategorySearchOutlet";
+import { WarehouseExpenseInput } from "@/lib/api/warehouse-expenses/inputInterface";
 
-type AddExpensesOutletModalProps = {
-  idOutlet: string;
-  NameOutlet: string;
+type AddExpensesWarehouseModalProps = {
   show: boolean;
   onClose: () => void;
 };
 
-export default function AddExpensesOutletModal({
+export default function AddExpensesWarehouseModal({
   show,
   onClose,
-  idOutlet,
-  NameOutlet,
-}: AddExpensesOutletModalProps) {
+}: AddExpensesWarehouseModalProps) {
   const [addCategoryId, setAddCategoryId] = useState<string>("");
   const [addDescription, setAddDescription] = useState<string | null>("");
   const [expenseDate, setExpenseDate] = useState<Date>(new Date());
   const [addAmountCash, setAddAmountCash] = useState<number>(0);
-  const [addAmountDigital, setAddAmountDigital] = useState<number>(0);
   const [isLoadingButton, setIsLoadingButton] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const ref = useRef<HTMLTextAreaElement>(null);
@@ -45,18 +40,14 @@ export default function AddExpensesOutletModal({
     setIsLoadingButton(true);
 
     try {
-      const unitData: OutletExpenseInput = {
-        outlet_id: idOutlet,
+      const unitData: WarehouseExpenseInput = {
         expense_category_id: addCategoryId,
         date: dayjs(expenseDate).format("YYYY-MM-DD"),
-        amount: {
-          cash: addAmountCash,
-          digital: addAmountDigital,
-        },
+        amount: addAmountCash,
         description: addDescription,
       };
 
-      const response = await createExpensesOutlet(unitData);
+      const response = await createWarehouseExpense(unitData);
       // Lakukan aksi setelah berhasil (misalnya reset form atau tutup modal)
       console.log("Berhasil menambahkan data:", response);
       toast.success(response.message || "Data Berhasil ditambahkan", {
@@ -75,7 +66,7 @@ export default function AddExpensesOutletModal({
 
   return (
     <GenosModal
-      title={`Tambah Pengeluaran di Outlet ` + NameOutlet}
+      title={`Tambah Pengeluaran di Warehouse `}
       show={show}
       onClose={onClose}
       onSubmit={onSubmit}
@@ -106,14 +97,6 @@ export default function AddExpensesOutletModal({
           onChange={(e) => setAddAmountCash(Number(e.target.value))}
         />
 
-        <GenosTextfield
-          id="add-amount-expense"
-          label="Digital"
-          type="number"
-          value={addAmountDigital}
-          ref={inputRef}
-          onChange={(e) => setAddAmountDigital(Number(e.target.value))}
-        />
         <GenosTextarea
           label="Deskripsi"
           placeholder="Masukkan Deskripsi"
