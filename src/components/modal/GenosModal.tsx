@@ -3,7 +3,10 @@
 import React, { useEffect } from "react";
 import clsx from "clsx";
 import GenosButton from "../button/GenosButton";
-import { InboxArrowDownIcon } from "@heroicons/react/24/outline";
+import {
+  InboxArrowDownIcon,
+  PencilSquareIcon,
+} from "@heroicons/react/24/outline";
 
 type ModalSize = "md" | "lg" | "xl" | "full" | "xl2";
 
@@ -19,6 +22,11 @@ type GenosModalProps = {
   cancelLabel?: string;
   withCloseButton?: boolean;
   isLoading?: boolean;
+
+  // tambahan
+  withChangeButton?: boolean;
+  onChangeButton?: () => void;
+  changeButtonLabel?: string;
 };
 
 const sizeClasses = {
@@ -41,6 +49,11 @@ export default function GenosModal({
   cancelLabel = "Cancel",
   withCloseButton = true,
   isLoading = false,
+
+  // default false
+  withChangeButton = false,
+  onChangeButton,
+  changeButtonLabel = "Change",
 }: GenosModalProps) {
   useEffect(() => {
     if (show && onOpen) onOpen();
@@ -55,7 +68,7 @@ export default function GenosModal({
     >
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black/30 dark:bg-gray-800 "
+        className="fixed inset-0 bg-black/30 dark:bg-gray-800"
         onClick={onClose}
       />
 
@@ -68,9 +81,23 @@ export default function GenosModal({
       >
         {/* Modal Header */}
         <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="font-semibold text-gray-800 dark:text-white">
-            {title}
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="font-semibold text-gray-800 dark:text-white">
+              {title}
+            </h2>
+
+            {withChangeButton && (
+              <GenosButton
+                label={changeButtonLabel}
+                color="gray"
+                size="sm"
+                round="md"
+                outlined
+                onClick={onChangeButton}
+              />
+            )}
+          </div>
+
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-white cursor-pointer"
@@ -90,9 +117,8 @@ export default function GenosModal({
               color="gray"
               onClick={onClose}
               outlined
-              className=""
               round="lg"
-            ></GenosButton>
+            />
           )}
           {onSubmit && (
             <GenosButton
@@ -104,7 +130,7 @@ export default function GenosModal({
               size="md"
               loading={isLoading}
               iconLeft={<InboxArrowDownIcon className="w-4 h-4" />}
-            ></GenosButton>
+            />
           )}
         </div>
       </div>

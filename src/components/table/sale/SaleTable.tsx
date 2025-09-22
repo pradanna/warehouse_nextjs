@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import GenosTable from "@/components/table/GenosTable";
 import GenosTextfield from "@/components/form/GenosTextfield";
@@ -10,7 +10,10 @@ import GenosSearchSelect from "@/components/form/GenosSearchSelect";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import GenosButton from "@/components/button/GenosButton";
 import { createSalePayment, getSales, getSalesById } from "@/lib/api/saleApi";
-import { getInventory } from "@/lib/api/inventory/inventoryApi";
+import {
+  getInventory,
+  getInventoryById,
+} from "@/lib/api/inventory/inventoryApi";
 import { getOutlet } from "@/lib/api/outletApi";
 import {
   getOutletFromLocal,
@@ -36,6 +39,10 @@ import dayjs from "dayjs";
 import GenosDatepicker from "@/components/form/GenosDatepicker";
 import { dateRange } from "@/lib/helper";
 import { useDebounce } from "@/lib/utils/useDebounce";
+import {
+  fetchInventoryBySKU,
+  InventoryDataBySku,
+} from "@/lib/api/inventory/inventory-getbysku-api";
 
 const SaleTable = () => {
   const [data, setData] = useState([]);
@@ -48,10 +55,15 @@ const SaleTable = () => {
   const [loadingButton, setLoadingButton] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalBySKU, setIsModalByPKU] = useState(false);
+  const [sku, setSku] = useState("");
+
   const [selectedCart, setSelectedCart] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedInventory, setSelectedInventory] =
     useState<InventoryData | null>(null);
+  const [selectedInventoryBySKU, setSelectedInventoryBySKU] =
+    useState<InventoryDataBySku | null>(null);
   const [unit, setUnit] = useState("-");
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
@@ -104,6 +116,9 @@ const SaleTable = () => {
   const [paymentMetodeFilter, setPaymentMetodeFilter] = useState("");
   const debouncedSearch = useDebounce(search, 1000);
 
+  const skuRef = useRef<HTMLInputElement | null>(null);
+  const qtyRef = useRef<HTMLInputElement | null>(null);
+
   // FETCHSALES
   const fetchSales = async () => {
     setIsLoading(true);
@@ -141,6 +156,13 @@ const SaleTable = () => {
     dateToFilter,
   ]);
 
+  // Fokus otomatis ke SKU saat modal bySKU dibuka
+  useEffect(() => {
+    if (isModalBySKU && skuRef.current) {
+      skuRef.current.focus();
+    }
+  }, [isModalBySKU]);
+
   const handleOpen = () => {
     const Outlet = getOutletFromLocal();
     setIsFromTambah(true);
@@ -159,6 +181,17 @@ const SaleTable = () => {
     setPrice(0);
     setUnit("-");
     setSelectedCart(null);
+  };
+
+  const handleCloseBySKU = () => {
+    setIsModalByPKU(false);
+    setSelectedItem(null);
+    setSelectedInventoryBySKU(null);
+    setQuantity(1);
+    setPrice(0);
+    setUnit("-");
+    setSelectedCart(null);
+    setSku("");
   };
 
   // GETDATABYID
@@ -273,9 +306,48 @@ const SaleTable = () => {
     setIsSaving(false);
   };
 
-  useEffect(() => {
+  const handleSaveCartBySKU = () => {
+    const existingCart = getItemsFromLocal();
+
+    if (!selectedInventoryBySKU) {
+      toast.error("Item belum dipilih");
+      return;
+    }
+
+    setIsSaving(true);
+
+    const newItem: SaleCartItem = {
+      inventory_id: selectedInventoryBySKU?.id || "-",
+      item_id: selectedInventoryBySKU?.item.id || "-",
+      name: selectedInventoryBySKU?.item.name || "-",
+      unit_id: selectedInventoryBySKU?.unit.id || "-",
+      unit_name: selectedInventoryBySKU?.unit.name || "-",
+      quantity: quantity,
+      price,
+      total: quantity * price,
+    };
+
+    console.log("newItem:", newItem);
+
+    const itemIndex = existingCart.findIndex(
+      (item) => item.inventory_id === newItem.inventory_id
+    );
+
+    if (itemIndex !== -1) {
+      // Jika sudah ada, update
+      existingCart[itemIndex] = newItem;
+    } else {
+      // Jika belum ada, tambahkan
+      existingCart.push(newItem);
+    }
+
+    setItemsToLocal(existingCart);
+
     setCartItems(getItemsFromLocal());
-  }, []);
+    handleCloseBySKU();
+    setIsSaving(false);
+    toast.success("Item berhasil ditambahkan ke cart");
+  };
 
   const TABLE_HEAD = useMemo(
     () => [
@@ -590,7 +662,14 @@ const SaleTable = () => {
             title={
               selectedCart ? "Edit Item Penjualan" : "Tambah Item Penjualan"
             }
+            size="lg"
             onClose={() => setIsModalOpen(false)}
+            withChangeButton
+            onChangeButton={() => {
+              setIsModalByPKU(true);
+              setIsModalOpen(false);
+            }}
+            changeButtonLabel="Cari barang berdasarkan SKU"
             onSubmit={handleSaveCart}
           >
             <div className="grid grid-cols-1 gap-4 text-xs">
@@ -610,34 +689,6 @@ const SaleTable = () => {
                   setSelectedInventory(res);
                 }}
               />
-              {/* <GenosSearchSelect
-                label="Item"
-                placeholder="Pilih item"
-                className="w-full"
-                options={inventories.map((inv: any) => ({
-                  value: inv.item.id,
-                  label: `${inv.item.name} - ${inv.unit.name || "-"}`,
-                }))}
-                value={selectedItem}
-                onChange={(itemId: any) => {
-                  const inv = inventories.find(
-                    (i: any) => i.item.id === itemId
-                  ) as any;
-                  console.log("INV", inv);
-                  console.log("inv.item.name", inv.item.name);
-                  setSelectedItem(itemId);
-                  setSelectedInventory(inv);
-                  console.log("outlet id: " + outletId);
-                  const selectedPrice = inv?.prices?.find(
-                    (p: any) => p.outlet?.id === outletId
-                  );
-
-                  console.log("Selected Price Object: ", selectedPrice);
-
-                  setPrice(selectedPrice?.price || 0);
-                  // setUnit(inv?.unit.name || "-");
-                }}
-              /> */}
 
               <div className="grid grid-cols-2 gap-4">
                 <GenosTextfield
@@ -659,6 +710,114 @@ const SaleTable = () => {
               <div className="text-right font-bold">
                 Total: Rp {(quantity * price || 0).toLocaleString("id-ID")}
               </div>
+            </div>
+          </GenosModal>
+        )}
+
+        {isModalBySKU && (
+          <GenosModal
+            show
+            title={
+              selectedCart ? "Edit Item Penjualan" : "Tambah Item Penjualan"
+            }
+            onClose={() => setIsModalByPKU(false)}
+            withChangeButton
+            size="lg"
+            onChangeButton={() => {
+              setIsModalByPKU(false);
+              setIsModalOpen(true);
+            }}
+            changeButtonLabel="Cari barang berdasarkan Nama Item"
+            onSubmit={handleSaveCartBySKU}
+          >
+            <div className="grid grid-cols-1 gap-4 text-xs">
+              {/* Scan SKU */}
+              <GenosTextfield
+                ref={skuRef}
+                id="scan-sku"
+                label="Scan / Input SKU"
+                value={sku}
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => setSku(e.target.value)}
+                onKeyDown={async (e) => {
+                  if (e.key === "Enter" && sku.trim().length > 0) {
+                    try {
+                      const res = await fetchInventoryBySKU(sku.trim());
+                      if (res?.data) {
+                        console.log("res", res.data);
+                        setSelectedInventoryBySKU(res.data);
+                        setSelectedItem(res.data.item);
+
+                        const selectedPrice = res?.data.prices?.find(
+                          (p: any) => p.outlet?.id === outletId
+                        );
+
+                        setPrice(selectedPrice?.price || 0);
+                        setQuantity(1); // default qty
+
+                        // ✅ pindahkan fokus ke Qty
+                        setTimeout(() => {
+                          qtyRef.current?.focus();
+                        }, 100);
+                      } else {
+                        toast.error("Data tidak ditemukan");
+                        setSelectedInventoryBySKU(null);
+                      }
+                    } catch (err) {
+                      toast.error("Data tidak ditemukan");
+                      setSelectedInventoryBySKU(null);
+                    }
+                  }
+                }}
+              />
+
+              {/* Detail Barang */}
+              {selectedInventoryBySKU && (
+                <div className="border rounded p-3 bg-gray-50">
+                  <p>
+                    <span className="font-bold">Nama:</span>{" "}
+                    {selectedInventoryBySKU?.item?.name || "-"}
+                  </p>
+                  <p>
+                    <span className="font-bold">Unit:</span>{" "}
+                    {selectedInventoryBySKU?.unit.name || "-"}
+                  </p>
+                  <p>
+                    <span className="font-bold">Stok:</span>{" "}
+                    {selectedInventoryBySKU?.current_stock || 0}
+                  </p>
+                </div>
+              )}
+
+              {/* Input Qty & Harga */}
+              {selectedInventoryBySKU && (
+                <div className="grid grid-cols-2 gap-4">
+                  <GenosTextfield
+                    ref={qtyRef}
+                    id="tambah-qty"
+                    label="Qty"
+                    type="number"
+                    value={quantity}
+                    onFocus={(e) => e.target.select()}
+                    onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
+                  />
+                  <GenosTextfield
+                    id="tambah-price"
+                    label="Harga"
+                    type="number"
+                    value={price}
+                    onFocus={(e) => e.target.select()}
+                    onChange={(e) => setPrice(parseInt(e.target.value) || 0)}
+                  />
+                </div>
+              )}
+
+              {/* Total */}
+              {selectedInventoryBySKU && (
+                <div className="text-right font-bold">
+                  Total: Rp {(quantity * price || 0).toLocaleString("id-ID")}
+                </div>
+              )}
             </div>
           </GenosModal>
         )}

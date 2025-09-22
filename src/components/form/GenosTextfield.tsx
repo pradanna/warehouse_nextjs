@@ -21,6 +21,7 @@ type Props = {
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   onClick?: (e: React.MouseEvent<HTMLInputElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
 };
 
 // 👉 helper format angka dengan titik
@@ -50,6 +51,7 @@ const GenosTextfield = forwardRef<HTMLInputElement, Props>(
       readOnly = false,
       onBlur,
       onClick,
+      onFocus,
     },
     ref
   ) => {
@@ -123,7 +125,10 @@ const GenosTextfield = forwardRef<HTMLInputElement, Props>(
             onChange={handleChange}
             name={name}
             placeholder={showFloatingLabel ? placeholder : ""}
-            onFocus={() => setIsFocused(true)}
+            onFocus={(e) => {
+              setIsFocused(true);
+              onFocus?.(e);
+            }}
             onBlur={(e) => {
               setIsFocused(false);
               if (onBlur) {
@@ -136,7 +141,7 @@ const GenosTextfield = forwardRef<HTMLInputElement, Props>(
             readOnly={readOnly}
             ref={ref}
             className={clsx(
-              "py-2 px-3 bg-transparent focus:outline-none text-sm w-full cursor-pointer"
+              "py-2 px-3 bg-transparent focus:outline-none text-sm w-full cursor-text"
             )}
           />
 

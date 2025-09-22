@@ -8,8 +8,14 @@ import { formatTanggalIndo } from "@/lib/helper";
 import GenosButton from "@/components/button/GenosButton";
 import PaymentModal from "../debt/debtPayment";
 import { toast } from "react-toastify";
-import { createSalePayment } from "@/lib/api/saleApi";
+import { appendSales, createSalePayment } from "@/lib/api/saleApi";
 import dayjs from "dayjs";
+import GenosSearchSelectInventory from "@/components/select-search/InventorySearch";
+import {
+  fetchInventoryById,
+  InventoryData,
+} from "@/lib/api/inventory/inventory-getbyid-api";
+import GenosTextfield from "../GenosTextfield";
 
 const SaleDetailModal = ({
   show,
@@ -44,6 +50,62 @@ const SaleDetailModal = ({
 
   const [paymentMetode, setPaymentMetode] = useState("");
   const [isLoadingButton, setIsLoadingButton] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedInventory, setSelectedInventory] =
+    useState<InventoryData | null>(null);
+  const [quantity, setQuantity] = useState(1);
+  const [price, setPrice] = useState(0);
+  const [outletId, setOutletId] = useState("");
+
+  const getInventoryDatabyId = async (id: string) => {
+    try {
+      const res = await fetchInventoryById(id);
+      return res.data;
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
+  };
+
+  const handleSaveAppend = async () => {
+    if (!selectedItem) {
+      toast.error("Item belum dipilih");
+      return;
+    }
+
+    const isConfirm = window.confirm("Yakin ingin menambahkan item ini?");
+    if (!isConfirm) return;
+
+    try {
+      await appendSales(saleId, [
+        {
+          inventory_id: selectedInventory?.id || "-",
+          item_id: selectedItem,
+          quantity: quantity,
+          price: price,
+        },
+      ]);
+
+      // ✅ Reload data sale detail biar daftar item langsung update
+      if (saleId) {
+        await handleView(saleId);
+      }
+
+      // ✅ Tutup modal tambah item
+      setIsModalOpen(false);
+
+      // ✅ Reset form tambah item
+      setSelectedItem(null);
+      setSelectedInventory(null);
+      setQuantity(1);
+      setPrice(0);
+
+      toast.success("Item berhasil ditambahkan ke penjualan");
+    } catch (err) {
+      toast.error("Gagal menambahkan item");
+    }
+  };
 
   const handleSavePayDebt = async () => {
     setIsLoadingButton(true);
@@ -143,9 +205,19 @@ const SaleDetailModal = ({
 
           {/* Daftar Item */}
           <div className="md:col-span-8 bg-white border border-gray-200 p-4 rounded-md">
-            <h2 className="text-md font-semibold text-gray-700 mb-2">
-              Daftar Item
-            </h2>
+            <div className="flex justify-between items-center">
+              <h2 className="text-md font-semibold text-gray-700 mb-2">
+                Daftar Item
+              </h2>
+              <GenosButton
+                label="Tambah Barang"
+                color="warning"
+                round="sm"
+                onClick={() => {
+                  setIsModalOpen(true);
+                }}
+              />
+            </div>
             <hr className="my-4 border-gray-200" />
             <div className="overflow-auto">
               <table className="w-full text-sm text-left">
@@ -304,6 +376,61 @@ const SaleDetailModal = ({
           payAmount={payAmount}
           setPayAmount={setPayAmount}
         />
+      )}
+
+      {isModalOpen && (
+        <GenosModal
+          show
+          title={"Tambah Item Penjualan"}
+          size="lg"
+          onClose={() => setIsModalOpen(false)}
+          withChangeButton
+          onChangeButton={() => {
+            setIsModalOpen(false);
+          }}
+          changeButtonLabel="Cari barang berdasarkan SKU"
+          onSubmit={handleSaveAppend}
+        >
+          <div className="grid grid-cols-1 gap-4 text-xs">
+            <GenosSearchSelectInventory
+              value={selectedItem}
+              onChange={async (val: any) => {
+                setSelectedItem(val);
+                const res = await getInventoryDatabyId(val);
+                console.log("res", res);
+
+                const selectedPrice = res?.prices?.find(
+                  (p: any) => p.outlet?.id === outletId
+                );
+
+                setPrice(selectedPrice?.price || 0);
+
+                setSelectedInventory(res);
+              }}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <GenosTextfield
+                id="tambah-qty"
+                label="Qty"
+                type="number"
+                value={quantity}
+                onChange={(e) => setQuantity(parseInt(e.target.value))}
+              />
+              <GenosTextfield
+                id="tambah-price"
+                label="Harga"
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(parseInt(e.target.value))}
+              />
+            </div>
+
+            <div className="text-right font-bold">
+              Total: Rp {(quantity * price || 0).toLocaleString("id-ID")}
+            </div>
+          </div>
+        </GenosModal>
       )}
     </div>
   );

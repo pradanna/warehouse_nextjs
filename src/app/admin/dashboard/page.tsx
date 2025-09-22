@@ -9,7 +9,7 @@ import PiutangTable from "@/components/table/dashboard/piutangTable";
 export default function DashboardPage() {
   return (
     <div>
-      <div className="flex flex-row gap-4">
+      {/* <div className="flex flex-row gap-4">
         <CardDashboard
           title="Data Inventory"
           href="/admin/inventory"
@@ -75,18 +75,18 @@ export default function DashboardPage() {
             },
           ]}
         />
-      </div>
+      </div> */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
         <GenosPanel
-          title="Data Hutang"
+          title="Data Hutang yang belum lunas"
           subtitle="Daftar seluruh transaksi hutang supplier"
         >
           <HutangTable />
         </GenosPanel>
 
         <GenosPanel
-          title="Data Piutang"
+          title="Data Piutang yang belum lunas"
           subtitle="Daftar seluruh transaksi piutang pelanggan"
         >
           <PiutangTable />

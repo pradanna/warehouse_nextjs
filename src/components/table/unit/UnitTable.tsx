@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { deleteUnit, getUnit } from "@/lib/api/unitApi";
 import AddUnitModal from "../../form/unit/AddUnitModal";
 import EditUnitModal from "../../form/unit/EditUnitModal";
+import GenosTableFrontend from "../GenosTableFrontend";
 
 const UnitTable = () => {
   const [units, setUnits] = useState<any[]>([]);
@@ -80,7 +81,7 @@ const UnitTable = () => {
     setIsLoadingTable(true);
 
     try {
-      const response = await getUnit(search, page, limit);
+      const response = await getUnit(search, page, 100000000000);
 
       setUnits(response.data);
       setTotalUnits(response.meta.total_rows);
@@ -118,14 +119,15 @@ const UnitTable = () => {
 
   return (
     <div>
-      <GenosTable
+      <GenosTableFrontend
         TABLE_HEAD={TABLE_HEAD}
         TABLE_ROWS={TABLE_ROWS}
         PAGINATION
         rowsPerPage={limit}
-        totalRows={totalUnits}
-        currentPage={currentPage}
-        onPageChange={(page) => setCurrentPage(page)}
+        SORT
+        // totalRows={totalUnits}
+        // currentPage={currentPage}
+        // onPageChange={(page) => setCurrentPage(page)}
         onAddData={handleOpen}
         loading={isLoadingTable}
         ACTION_BUTTON={{
@@ -138,7 +140,7 @@ const UnitTable = () => {
               id="searh-unit"
               label="Cari Unit"
               placeholder="Nama unit"
-              className="w-full"
+              className="w-50"
               value={search}
               is_icon_left={true}
               onChange={(e) => {

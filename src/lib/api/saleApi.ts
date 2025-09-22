@@ -80,3 +80,19 @@ export async function getSalesById(id: any) {
     console.error(error);
   }
 }
+
+export async function appendSales(id: string, items: any[]) {
+  try {
+    const response = await axiosInstance.put(
+      `${baseUrl}/sale/${id}/append`,
+      { items }, // payload
+      {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("appendSales error:", error);
+    throw error;
+  }
+}
