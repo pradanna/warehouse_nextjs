@@ -13,10 +13,7 @@ import GenosSelect from "@/components/form/GenosSelect";
 const HutangTable = () => {
   const [isLoadingTable, setIsLoadingTable] = useState(false);
   const [debtData, setDebtData] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
-  const [supplier_id, setSupplier_id] = useState("");
-  const [status, setStatus] = useState("");
   const [TABLE_ROWS, setTABLE_ROWS] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
   const [totalSisaHutang, setTotalSisaHutang] = useState(0);
