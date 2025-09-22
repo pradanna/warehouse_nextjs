@@ -38,6 +38,7 @@ import { fetchSupplierById } from "@/lib/api/supplier/supplier-getbyid-api";
 import dayjs from "dayjs";
 import GenosDatepicker from "@/components/form/GenosDatepicker";
 import { useDebounce } from "@/lib/utils/useDebounce";
+import GenosTextfieldNumber from "@/components/form/GenosTextfield_number";
 
 const PurchaseTable = () => {
   const [data, setData] = useState([]);
@@ -551,12 +552,11 @@ const PurchaseTable = () => {
                   value={quantity}
                   onChange={(e) => setQuantity(parseInt(e.target.value))}
                 />
-                <GenosTextfield
+                <GenosTextfieldNumber
                   id="tambah-harga"
                   label="Harga"
-                  type="number"
                   value={price}
-                  onChange={(e) => setPrice(parseInt(e.target.value))}
+                  onChange={(val) => setPrice(val)} // langsung dapat number
                 />
               </div>
 
