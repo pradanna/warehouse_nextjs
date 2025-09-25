@@ -118,6 +118,7 @@ const InventoryTable = () => {
         TABLE_HEAD={TABLE_HEAD}
         TABLE_ROWS={FILTERED_ROWS}
         PAGINATION
+        SORT
         rowsPerPage={limit}
         onAddData={handleOpen}
         loading={isLoadingTable}

@@ -84,4 +84,6 @@ export const dateRange = {
   monthEnd: dayjs().endOf("month").toDate(),
   yearStart: dayjs().startOf("year").toDate(),
   yearEnd: dayjs().endOf("year").toDate(),
+  lastMonthStart: dayjs().subtract(1, "month").startOf("month").toDate(),
+  lastMonthEnd: dayjs().subtract(1, "month").endOf("month").toDate(),
 };
