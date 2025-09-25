@@ -29,8 +29,8 @@ const InventoryTableReport = () => {
       { key: "sku", label: "SKU", sortable: true },
       { key: "item.name", label: "Name", sortable: true },
       { key: "description", label: "Deskripsi", sortable: false },
-      { key: "current_stock", label: "Stok", sortable: false },
-      { key: "unit.name", label: "Unit", sortable: false },
+      { key: "current_stock", label: "Stok", sortable: true },
+      { key: "unit.name", label: "Unit", sortable: true },
     ],
     []
   );
@@ -97,6 +97,7 @@ const InventoryTableReport = () => {
       TABLE_HEAD={TABLE_HEAD}
       TABLE_ROWS={TABLE_ROWS}
       PAGINATION
+      SORT
       rowsPerPage={limit}
       loading={isLoadingTable}
       isDanger={(row) => row.current_stock < row.min_stock}

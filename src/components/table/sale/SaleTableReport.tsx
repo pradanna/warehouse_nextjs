@@ -114,7 +114,7 @@ const SaleTableReport = () => {
       {
         key: "total",
         label: "Total",
-        sortable: false,
+        sortable: true,
         type: "currency",
         fontweight: "bold",
       },
@@ -281,6 +281,7 @@ const SaleTableReport = () => {
           TABLE_HEAD={TABLE_HEAD}
           TABLE_ROWS={TABLE_ROWS}
           PAGINATION
+          SORT
           rowsPerPage={limit}
           loading={isLoading}
           FILTER={FILTER}

@@ -106,7 +106,7 @@ const PurchaseTableReport = () => {
       {
         key: "total",
         label: "Total",
-        sortable: false,
+        sortable: true,
         type: "currency",
         fontWeight: "bold",
       },
