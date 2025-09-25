@@ -393,7 +393,7 @@ const PurchaseTable = () => {
       />
       <GenosSearchSelectSupplier
         value={selectedSupplierId}
-        onChange={(val: any) => setSelectedSupplierId(val)}
+        onChange={(val: any) => setSelectedSupplierId(val?.id)}
         placeholder="Pilih supplier"
         className="w-40"
         label="Supplier"
@@ -663,7 +663,7 @@ const PurchaseTable = () => {
         >
           <GenosSearchSelectSupplier
             value={supplierId?.toString()}
-            onChange={(val: any) => setSupplierId(val)}
+            onChange={(val: any) => setSupplierId(val?.id)}
             placeholder="Pilih supplier"
             label="Item"
           />

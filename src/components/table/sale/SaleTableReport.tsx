@@ -15,11 +15,16 @@ import { useDebounce } from "@/lib/utils/useDebounce";
 import GenosDatepicker from "@/components/form/GenosDatepicker";
 import GenosSelect from "@/components/form/GenosSelect";
 import GenosSearchSelectOutlet from "@/components/select-search/GenosSearchOutlet";
+import GenosTableFrontend from "../GenosTableFrontend";
 
 const SaleTableReport = () => {
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
-  const [selectedOutlet, setSelectedOutlet] = useState(null);
+  const [selectedOutletId, setSelectedOutletId] = useState<string | null>(null);
+  const [selectedOutletName, setSelectedOutletName] = useState<string | null>(
+    null
+  );
+
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
@@ -62,9 +67,9 @@ const SaleTableReport = () => {
     try {
       const res = await getSales(
         currentPage,
-        limit,
+        100000000000,
         debouncedSearch,
-        selectedOutlet,
+        selectedOutletId,
         paymentMetodeFilter,
         statusFilter,
         dateFromFilter,
@@ -86,7 +91,7 @@ const SaleTableReport = () => {
     currentPage,
     limit,
     debouncedSearch,
-    selectedOutlet,
+    selectedOutletId,
     paymentMetodeFilter,
     statusFilter,
     dateFromFilter,
@@ -156,12 +161,17 @@ const SaleTableReport = () => {
         onChange={(e) => setSearch(e.target.value)}
       />
       <GenosSearchSelectOutlet
-        value={selectedOutlet}
-        onChange={(val: any) => setSelectedOutlet(val)}
+        value={selectedOutletId}
+        onChange={(val) => {
+          // val adalah OutletOption | null
+          setSelectedOutletId(val?.id ?? null); // simpan ID (string|null)
+          setSelectedOutletName(val?.name ?? null); // simpan nama (string|null)
+        }}
         placeholder="Pilih outlet"
         className="w-40"
         label="Outlet"
       />
+
       <GenosSelect
         label="Tipe Pembayaran"
         options={[
@@ -243,24 +253,35 @@ const SaleTableReport = () => {
   };
 
   const handleDownloadListPDF = () => {
-    generateSalesListPDF(TABLE_ROWS);
+    generateSalesListPDF(TABLE_ROWS, {
+      search: search,
+      selectedOutlet: selectedOutletName,
+      paymentMetodeFilter: paymentMetodeFilter,
+      statusFilter: statusFilter,
+      dateFromFilter: dateFromFilter,
+      dateToFilter: dateToFilter,
+    });
   };
 
   const handleDownloadListExcel = () => {
-    generateSalesListExcel(TABLE_ROWS);
+    generateSalesListExcel(TABLE_ROWS, {
+      search,
+      selectedOutlet: selectedOutletName,
+      paymentMetodeFilter,
+      statusFilter,
+      dateFromFilter,
+      dateToFilter,
+    });
   };
 
   return (
     <div className="flex gap-4">
       <div className="flex-grow">
-        <GenosTable
+        <GenosTableFrontend
           TABLE_HEAD={TABLE_HEAD}
           TABLE_ROWS={TABLE_ROWS}
           PAGINATION
           rowsPerPage={limit}
-          totalRows={totalItems}
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
           loading={isLoading}
           FILTER={FILTER}
           RIGHT_DIV={

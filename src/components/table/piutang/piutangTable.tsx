@@ -148,7 +148,7 @@ const PiutangTable = () => {
           <div className="flex gap-4 mb-4">
             <GenosSearchSelectOutlet
               value={selectedOutlet}
-              onChange={(val: any) => setSelectedOutlet(val)}
+              onChange={(val: any) => setSelectedOutlet(val?.id)}
               placeholder="Pilih outlet"
               className="w-55 text-xs"
               label="Outlet"

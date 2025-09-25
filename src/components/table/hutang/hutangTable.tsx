@@ -152,7 +152,7 @@ const HutangTable = () => {
           <div className="flex gap-4 mb-4">
             <GenosSearchSelectSupplier
               value={selectedSupplier}
-              onChange={(val: any) => setSelectedSupplier(val)}
+              onChange={(val: any) => setSelectedSupplier(val?.id)}
               placeholder="Pilih Supplier"
               className="w-55 text-xs"
               label="Outlet"

@@ -1,7 +1,15 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-export const generateCurrentStockPDF = (data: any[]) => {
+export const generateCurrentStockPDF = (
+  data: any[],
+  filters: {
+    sku?: string;
+    itemName?: string;
+    unitName?: string;
+    dangerOnly?: boolean;
+  }
+) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -48,9 +56,25 @@ export const generateCurrentStockPDF = (data: any[]) => {
   doc.setFont("helvetica", "normal");
   doc.text(`Tanggal Cetak: ${printDate}`, 12, 43);
 
+  // 🔹 Tambahkan keterangan filter
+  let filterText = "Filter: ";
+  const appliedFilters: string[] = [];
+
+  if (filters.sku) appliedFilters.push(`SKU = ${filters.sku}`);
+  if (filters.itemName) appliedFilters.push(`Item = ${filters.itemName}`);
+  if (filters.unitName) appliedFilters.push(`Unit = ${filters.unitName}`);
+  if (filters.dangerOnly) appliedFilters.push("Hanya stok mau habis");
+
+  filterText +=
+    appliedFilters.length > 0 ? appliedFilters.join(", ") : "Tidak ada filter";
+
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "italic");
+  doc.text(filterText, 12, 48);
+
   // Tabel stok
   autoTable(doc, {
-    startY: 50,
+    startY: 55, // geser ke bawah supaya tidak tabrakan dengan filter
     theme: "grid",
     head: [["Nama Item", "SKU", "Unit", "Stok Saat Ini", "Status"]],
     body: data.map((item: any) => {

@@ -1,7 +1,8 @@
+// components/pdfGenerator.ts
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-export const generatePurchaseListPDF = (data: any[]) => {
+export const generatePurchaseListPDF = (data: any[], filter?: any) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -46,6 +47,34 @@ export const generatePurchaseListPDF = (data: any[]) => {
   doc.setFont("helvetica", "normal");
   doc.text(`Tanggal Cetak: ${printDate}`, 12, 43);
 
+  // === KETERANGAN FILTER
+  let y = 48;
+  if (filter) {
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("Filter Data:", 12, y);
+
+    doc.setFont("helvetica", "normal");
+    y += 5;
+
+    const filters = [
+      `Tanggal Dari: ${filter.startDate || "-"}`,
+      `Tanggal Sampai: ${filter.endDate || "-"}`,
+      `Supplier: ${filter.supplierName || "-"}`,
+      `Tipe Bayar: ${filter.paymentType || "-"}`,
+      `Status Bayar: ${filter.paymentStatus || "-"}`,
+    ];
+
+    filters.forEach((f) => {
+      doc.text(f, 16, y);
+      y += 5;
+    });
+
+    doc.setDrawColor(200);
+    doc.line(10, y, pageWidth - 10, y);
+    y += 5;
+  }
+
   // === HITUNG TOTAL
   const totalSubtotal = data.reduce(
     (sum, item) => sum + (item.sub_total || 0),
@@ -63,23 +92,21 @@ export const generatePurchaseListPDF = (data: any[]) => {
     item.reference_number || "-",
     item.date || "-",
     item.supplier_name || "-",
-
+    `Rp ${item.sub_total?.toLocaleString("id-ID") || "0"}`,
+    `Rp ${item.discount?.toLocaleString("id-ID") || "0"}`,
+    `Rp ${item.tax?.toLocaleString("id-ID") || "0"}`,
+    `Rp ${item.total?.toLocaleString("id-ID") || "0"}`,
     item.description || "-",
     item.payment_type || "-",
-    `Rp ${item.sub_total.toLocaleString("id-ID")}`,
-    `Rp ${item.discount.toLocaleString("id-ID")}`,
-    `Rp ${item.tax.toLocaleString("id-ID")}`,
-    `Rp ${item.total.toLocaleString("id-ID")}`,
   ]);
 
   // === ROW TOTAL di dalam tabel
   tableBody.push([
     {
       content: "TOTAL",
-      colSpan: 5,
+      colSpan: 3,
       styles: { halign: "right", fontStyle: "bold" },
     },
-
     {
       content: `Rp ${totalSubtotal.toLocaleString("id-ID")}`,
       styles: { fontStyle: "bold" },
@@ -96,10 +123,12 @@ export const generatePurchaseListPDF = (data: any[]) => {
       content: `Rp ${totalTotal.toLocaleString("id-ID")}`,
       styles: { fontStyle: "bold" },
     },
+    { content: "", styles: {} },
+    { content: "", styles: {} },
   ]);
 
   autoTable(doc, {
-    startY: 50,
+    startY: y,
     theme: "grid",
     head: [
       [

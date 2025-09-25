@@ -495,7 +495,7 @@ const SaleTable = () => {
       />
       <GenosSearchSelectOutlet
         value={selectedOutlet}
-        onChange={(val: any) => setSelectedOutlet(val)}
+        onChange={(val: any) => setSelectedOutlet(val?.id)}
         placeholder="Pilih outlet"
         className="w-40 text-xs"
         label="Outlet"
@@ -952,8 +952,8 @@ const SaleTable = () => {
             onSubmit={handleSetOutlet}
           >
             <GenosSearchSelectOutlet
-              value={outletId?.toString()}
-              onChange={(val: any) => setOutletId(val)}
+              value={outletId.toString()}
+              onChange={(val: any) => setOutletId(val?.id)}
             />
           </GenosModal>
         )}

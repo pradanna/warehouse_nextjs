@@ -51,6 +51,14 @@ export function formatDateToDateIndo(dateStr: string): Date {
   return new Date(Number(year), Number(month) - 1, Number(day));
 }
 
+export function formatDateToDateIndoFromDate(date: Date): string {
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // bulan dimulai dari 0
+  const year = date.getFullYear();
+
+  return `${year}-${month}-${day}`;
+}
+
 // ERROR HELPER
 export function parseError(err: any, unique: string): string {
   if (err?.response?.data?.message) {

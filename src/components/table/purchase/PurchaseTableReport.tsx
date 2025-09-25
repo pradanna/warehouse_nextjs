@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import GenosTable from "@/components/table/GenosTable";
 import GenosTextfield from "@/components/form/GenosTextfield";
 import { toast } from "react-toastify";
 import { getPurchases, getPurchasesById } from "@/lib/api/purchaseApi";
@@ -10,12 +9,12 @@ import { generatePurchaseExcel } from "@/components/excel/printPurchaseExcel";
 import PurchaseDetailModal from "@/components/form/purchase/purchaseDetail";
 import { generatePurchaseListPDF } from "@/components/PDF/printPurchaseListPDF";
 import { generatePurchaseListExcel } from "@/components/excel/printPurchaseListExcel";
-import dayjs from "dayjs";
 import GenosSelect from "@/components/form/GenosSelect";
 import GenosDatepicker from "@/components/form/GenosDatepicker";
 import GenosSearchSelectSupplier from "@/components/select-search/SupplierSearch";
-import { dateRange } from "@/lib/helper";
+import { dateRange, formatDateToDateIndoFromDate } from "@/lib/helper";
 import { useDebounce } from "@/lib/utils/useDebounce";
+import GenosTableFrontend from "../GenosTableFrontend";
 
 const PurchaseTableReport = () => {
   const [data, setData] = useState([]);
@@ -24,8 +23,6 @@ const PurchaseTableReport = () => {
   const [limit, setLimit] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-
-  const [cartItems, setCartItems] = useState<any>([]);
 
   // State tambahan untuk modal simpan purchase
 
@@ -43,6 +40,10 @@ const PurchaseTableReport = () => {
   const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(
     null
   );
+  const [selectedSuppliername, setSelectedSupplierName] = useState<
+    string | null
+  >(null);
+
   const [statusFilter, setStatusFilter] = useState("");
   const [dateFromFilter, setDateFromFilter] = useState<Date | null>(
     dateRange.monthStart
@@ -58,7 +59,7 @@ const PurchaseTableReport = () => {
     try {
       const res = await getPurchases(
         currentPage,
-        limit,
+        10000000000,
         debouncedSearch,
         selectedSupplierId,
         paymentMetodeFilter,
@@ -133,11 +134,23 @@ const PurchaseTableReport = () => {
   };
 
   const handleDownloadListPDF = () => {
-    generatePurchaseListPDF(TABLE_ROWS);
+    generatePurchaseListPDF(TABLE_ROWS, {
+      startDate: formatDateToDateIndoFromDate(dateFromFilter),
+      endDate: formatDateToDateIndoFromDate(dateToFilter),
+      supplierName: selectedSuppliername,
+      paymentType: paymentMetodeFilter,
+      paymentStatus: statusFilter,
+    });
   };
 
   const handleDownloadListExcel = () => {
-    generatePurchaseListExcel(TABLE_ROWS);
+    generatePurchaseListExcel(TABLE_ROWS, {
+      startDate: dateFromFilter,
+      endDate: dateToFilter,
+      supplierName: selectedSuppliername,
+      paymentType: paymentMetodeFilter,
+      paymentStatus: statusFilter,
+    });
   };
 
   const FILTER = (
@@ -153,7 +166,10 @@ const PurchaseTableReport = () => {
       />
       <GenosSearchSelectSupplier
         value={selectedSupplierId}
-        onChange={(val: any) => setSelectedSupplierId(val)}
+        onChange={(val: any) => {
+          setSelectedSupplierId(val?.id);
+          setSelectedSupplierName(val?.name);
+        }}
         placeholder="Pilih supplier"
         className="w-40"
         label="Supplier"
@@ -229,16 +245,14 @@ const PurchaseTableReport = () => {
   return (
     <div className="flex gap-4">
       <div className="flex-grow">
-        <GenosTable
+        <GenosTableFrontend
           TABLE_HEAD={TABLE_HEAD}
           TABLE_ROWS={TABLE_ROWS}
           PAGINATION
           rowsPerPage={limit}
-          totalRows={totalItems}
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
           loading={isLoading}
           FILTER={FILTER}
+          SORT
           RIGHT_DIV={
             <GenosDropdown
               iconLeft={<PrinterIcon className="w-5 h-5" />}

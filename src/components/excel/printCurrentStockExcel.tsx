@@ -2,9 +2,32 @@
 import dayjs from "dayjs";
 import * as XLSX from "xlsx";
 
-export const generateCurrentStockExcel = (data: any[]) => {
+export const generateCurrentStockExcel = (
+  data: any[],
+  filters: {
+    sku?: string;
+    itemName?: string;
+    unitName?: string;
+    dangerOnly?: boolean;
+  }
+) => {
+  // 🔹 Susun filter text
+  const appliedFilters: string[] = [];
+  if (filters.sku) appliedFilters.push(`SKU = ${filters.sku}`);
+  if (filters.itemName) appliedFilters.push(`Item = ${filters.itemName}`);
+  if (filters.unitName) appliedFilters.push(`Unit = ${filters.unitName}`);
+  if (filters.dangerOnly) appliedFilters.push("Hanya stok mau habis");
+
+  const filterRow =
+    appliedFilters.length > 0
+      ? [`Filter: ${appliedFilters.join(", ")}`]
+      : ["Filter: Tidak ada filter"];
+
+  // 🔹 Susun data worksheet
   const worksheetData = [
-    ["Nama Item", "SKU", "Stok Saat Ini", "Unit", "Status"],
+    filterRow, // baris keterangan filter
+    [], // baris kosong biar rapi
+    ["Nama Item", "SKU", "Stok Saat Ini", "Unit", "Status"], // header
     ...data.map((item: any) => {
       const stock = item.current_stock;
       const min = item.min_stock;

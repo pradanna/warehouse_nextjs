@@ -1,7 +1,17 @@
+import { formatDateToDateIndoFromDate } from "@/lib/helper";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-export const generateSalesListPDF = (data: any[]) => {
+type SalesFilter = {
+  search?: string;
+  selectedOutlet?: string | null;
+  paymentMetodeFilter?: string;
+  statusFilter?: string;
+  dateFromFilter?: Date | null;
+  dateToFilter?: Date | null;
+};
+
+export const generateSalesListPDF = (data: any[], filter: SalesFilter) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -46,6 +56,42 @@ export const generateSalesListPDF = (data: any[]) => {
   doc.setFont("helvetica", "normal");
   doc.text(`Tanggal Cetak: ${printDate}`, 12, 43);
 
+  // === FILTER INFO
+  let filterY = 50;
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.text("Filter:", 12, filterY);
+
+  doc.setFont("helvetica", "normal");
+  filterY += 5;
+
+  if (filter.search) {
+    doc.text(`Ref#: ${filter.search}`, 12, filterY);
+    filterY += 5;
+  }
+  if (filter.selectedOutlet) {
+    doc.text(`Outlet: ${filter.selectedOutlet}`, 12, filterY);
+    filterY += 5;
+  }
+  if (filter.paymentMetodeFilter) {
+    doc.text(`Tipe Pembayaran: ${filter.paymentMetodeFilter}`, 12, filterY);
+    filterY += 5;
+  }
+  if (filter.statusFilter) {
+    doc.text(`Status Pembayaran: ${filter.statusFilter}`, 12, filterY);
+    filterY += 5;
+  }
+  if (filter.dateFromFilter || filter.dateToFilter) {
+    const from = filter.dateFromFilter
+      ? formatDateToDateIndoFromDate(filter.dateFromFilter)
+      : "-";
+    const to = filter.dateToFilter
+      ? formatDateToDateIndoFromDate(filter.dateToFilter)
+      : "-";
+    doc.text(`Periode: ${from} s/d ${to}`, 12, filterY);
+    filterY += 5;
+  }
+
   // === HITUNG TOTAL
   const totalSubtotal = data.reduce(
     (sum, item) => sum + (item.sub_total || 0),
@@ -63,7 +109,6 @@ export const generateSalesListPDF = (data: any[]) => {
     item.reference_number || "-",
     item.date || "-",
     item.outlet_name || "-",
-
     item.description || "-",
     item.payment_type || "-",
     `Rp ${item.sub_total.toLocaleString("id-ID")}`,
@@ -98,19 +143,19 @@ export const generateSalesListPDF = (data: any[]) => {
   ]);
 
   autoTable(doc, {
-    startY: 50,
+    startY: filterY + 5,
     theme: "grid",
     head: [
       [
         "Ref#",
         "Tanggal",
         "Outlet",
+        "Deskripsi",
+        "Tipe Bayar",
         "Subtotal",
         "Diskon",
         "Pajak",
         "Total",
-        "Deskripsi",
-        "Tipe Bayar",
       ],
     ],
     body: tableBody,

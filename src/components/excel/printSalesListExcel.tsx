@@ -1,10 +1,39 @@
 // components/excelGenerator.ts
 import * as XLSX from "xlsx";
+import { format } from "date-fns";
+import { id as localeId } from "date-fns/locale";
 
-export const generateSalesListExcel = (data: any[]) => {
-  const wsData = [];
+export const generateSalesListExcel = (
+  data: any[],
+  filters: {
+    search?: string;
+    selectedOutlet?: string | null;
+    paymentMetodeFilter?: string | null;
+    statusFilter?: string | null;
+    dateFromFilter?: Date | null;
+    dateToFilter?: Date | null;
+  }
+) => {
+  const wsData: any[][] = [];
 
-  // Header
+  // === Filter info section ===
+  wsData.push([`Search`, filters.search || "-"]);
+  wsData.push([`Outlet`, filters.selectedOutlet || "-"]);
+  wsData.push([`Metode Bayar`, filters.paymentMetodeFilter || "-"]);
+  wsData.push([`Status`, filters.statusFilter || "-"]);
+
+  const dateFrom = filters.dateFromFilter
+    ? format(filters.dateFromFilter, "dd MMMM yyyy", { locale: localeId })
+    : "-";
+  const dateTo = filters.dateToFilter
+    ? format(filters.dateToFilter, "dd MMMM yyyy", { locale: localeId })
+    : "-";
+  wsData.push([`Periode`, `${dateFrom} s/d ${dateTo}`]);
+
+  // kosong 1 baris pemisah
+  wsData.push([]);
+
+  // === Header ===
   wsData.push([
     "Ref#",
     "Tanggal",
@@ -17,7 +46,7 @@ export const generateSalesListExcel = (data: any[]) => {
     "Tipe Bayar",
   ]);
 
-  // Body
+  // === Body ===
   data.forEach((item) => {
     wsData.push([
       item.reference_number || "-",
@@ -32,7 +61,7 @@ export const generateSalesListExcel = (data: any[]) => {
     ]);
   });
 
-  // Total Row
+  // === Total Row ===
   const totalSubtotal = data.reduce(
     (sum, item) => sum + (item.sub_total || 0),
     0
@@ -46,8 +75,8 @@ export const generateSalesListExcel = (data: any[]) => {
 
   wsData.push([
     "TOTAL",
-    "", // tanggal
-    "", // outlet
+    "",
+    "",
     totalSubtotal,
     totalDiscount,
     totalTax,
@@ -56,11 +85,11 @@ export const generateSalesListExcel = (data: any[]) => {
     "",
   ]);
 
-  // Worksheet & Workbook
+  // === Worksheet & Workbook ===
   const ws = XLSX.utils.aoa_to_sheet(wsData);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "SalesReport");
 
-  // Export file
+  // === Export file ===
   XLSX.writeFile(wb, `Laporan-Penjualan.xlsx`);
 };
