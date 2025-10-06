@@ -11,6 +11,7 @@ import GenosTextfield from "@/components/form/GenosTextfield";
 import GenosDatepicker from "@/components/form/GenosDatepicker";
 import { generateMovementPDF } from "@/components/PDF/printMovementStock";
 import { generateMovementExcel } from "@/components/excel/printMovementStock";
+import { dateRange } from "@/lib/helper";
 
 const MovementTableReport = () => {
   const [TABLE_ROWS_ORI, setTABLE_ROWS_ORI] = useState<any[]>([]);
@@ -24,8 +25,8 @@ const MovementTableReport = () => {
   const [type, setType] = useState("");
   const [movementType, setMovementType] = useState("");
   const [itemName, setItemName] = useState("");
-  const [dateFrom, setDateFrom] = useState<Date | null>(null);
-  const [dateTo, setDateTo] = useState<Date | null>(null);
+  const [dateFrom, setDateFrom] = useState<Date | null>(dateRange.todayStart);
+  const [dateTo, setDateTo] = useState<Date | null>(dateRange.todayEnd);
 
   const TABLE_HEAD = useMemo(
     () => [
