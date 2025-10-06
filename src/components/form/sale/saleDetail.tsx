@@ -16,6 +16,7 @@ import {
   InventoryData,
 } from "@/lib/api/inventory/inventory-getbyid-api";
 import GenosTextfield from "../GenosTextfield";
+import GenosTextfieldNumber from "../GenosTextfield_number";
 
 const SaleDetailModal = ({
   show,
@@ -417,12 +418,11 @@ const SaleDetailModal = ({
                 value={quantity}
                 onChange={(e) => setQuantity(parseInt(e.target.value))}
               />
-              <GenosTextfield
+              <GenosTextfieldNumber
                 id="tambah-price"
                 label="Harga"
-                type="number"
                 value={price}
-                onChange={(e) => setPrice(parseInt(e.target.value))}
+                onChange={(val) => setPrice(val)}
               />
             </div>
 

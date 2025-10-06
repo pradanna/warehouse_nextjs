@@ -43,6 +43,7 @@ import {
   fetchInventoryBySKU,
   InventoryDataBySku,
 } from "@/lib/api/inventory/inventory-getbysku-api";
+import GenosTextfieldNumber from "@/components/form/GenosTextfield_number";
 
 const SaleTable = () => {
   const [data, setData] = useState([]);
@@ -698,12 +699,11 @@ const SaleTable = () => {
                   value={quantity}
                   onChange={(e) => setQuantity(parseInt(e.target.value))}
                 />
-                <GenosTextfield
+                <GenosTextfieldNumber
                   id="tambah-price"
                   label="Harga"
-                  type="number"
                   value={price}
-                  onChange={(e) => setPrice(parseInt(e.target.value))}
+                  onChange={(e) => setPrice(e)}
                 />
               </div>
 
