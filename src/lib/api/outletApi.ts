@@ -33,7 +33,7 @@ export async function createOutlet(
 export async function getOutlet(search: string, page: number, limit: number) {
   try {
     const response = await axiosInstance.get(
-      `${baseUrl}/outlet?param=${search}&page=${page}&per_page=${limit}`,
+      `${baseUrl}/outlet?param=${search}&page=${page}&per_page=100000000`,
       {
         headers: {
           Authorization: `Bearer ${getToken()}`,

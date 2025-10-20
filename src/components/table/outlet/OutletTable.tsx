@@ -10,6 +10,7 @@ import {
 } from "@/lib/api/outletApi";
 import AddOutletModal from "@/components/form/outlet/AddOutletModal";
 import EditOutletModal from "@/components/form/outlet/EditOutletModal";
+import GenosTableFrontend from "../GenosTableFrontend";
 
 const OutletTable = () => {
   const [outlets, setOutlets] = useState<any[]>([]);
@@ -40,10 +41,6 @@ const OutletTable = () => {
   };
   // EDIT
   const [editId, setEditId] = useState("");
-  const [editName, setEditName] = useState("");
-  const [editAddress, setEditAddress] = useState("");
-  const [editContact, setEditContact] = useState("");
-  const inputEditRefName = useRef<HTMLInputElement>(null);
 
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
 
@@ -55,9 +52,6 @@ const OutletTable = () => {
   const handleEditClose = () => {
     setIsModalEditOpen(false);
     setEditId("");
-    setEditName("");
-    setEditAddress("");
-    setEditContact("");
   };
 
   // TABEL
@@ -127,14 +121,15 @@ const OutletTable = () => {
 
   return (
     <div>
-      <GenosTable
+      <GenosTableFrontend
         TABLE_HEAD={TABLE_HEAD}
         TABLE_ROWS={TABLE_ROWS}
         PAGINATION
         rowsPerPage={limit}
-        totalRows={totalOutlets}
-        currentPage={currentPage}
-        onPageChange={(page) => setCurrentPage(page)}
+        // totalRows={totalOutlets}
+        // currentPage={currentPage}
+        // onPageChange={(page) => setCurrentPage(page)}
+        // SORT
         onAddData={handleOpen}
         loading={isLoadingTable}
         ACTION_BUTTON={{
@@ -147,7 +142,7 @@ const OutletTable = () => {
               id="search-outlet"
               label="Cari Outlet"
               placeholder="Nama outlet"
-              className="w-full"
+              className="w-100"
               is_icon_left={true}
               value={search}
               onChange={(e) => setSearch(e.target.value)}

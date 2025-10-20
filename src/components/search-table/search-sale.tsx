@@ -66,7 +66,7 @@ export default function SalesPicker({
       const data = await getSalesByOutlet({
         outlet_id: outlet_id,
         page: 1,
-        limit: 10,
+        limit: 10000000,
         date_start: dayjs(dateFrom).format("YYYY-MM-DD"),
         date_end: dayjs(dateTo).format("YYYY-MM-DD"),
       });
