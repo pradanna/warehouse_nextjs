@@ -11,8 +11,8 @@ export default function WarehouseExpenses() {
   return (
     <div>
       <GenosPanel
-        title="Pengeluaran Outlet"
-        subtitle="Data Pengeluaran Outlet"
+        title="Pengeluaran Warehouse"
+        subtitle="Data Pengeluaran Warehouse"
         className="mt-3"
       >
         <ExpensesWarehouseTable />

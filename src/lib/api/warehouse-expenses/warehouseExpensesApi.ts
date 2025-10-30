@@ -7,7 +7,7 @@ export async function getWarehouseExpenses({
   expense_category_id,
   date_start,
   date_end,
-  page = 1,
+  page,
   per_page = 10,
 }: {
   expense_category_id?: string;

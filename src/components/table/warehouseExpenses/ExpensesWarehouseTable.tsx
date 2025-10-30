@@ -129,7 +129,7 @@ const ExpensesWarehouseTable = () => {
 
   useEffect(() => {
     console.log("USE EFFECT EXPENSES WAREHOUSES");
-    fetchExpensesWarehouse(1);
+    fetchExpensesWarehouse(currentPage);
   }, [idExpense, dateFrom, dateTo, currentPage]);
 
   const handleDelete = async (id: string) => {
