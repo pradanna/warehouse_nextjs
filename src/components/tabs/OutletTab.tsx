@@ -64,7 +64,7 @@ export default function OutletTabs({
   }
 
   return (
-    <div className="flex gap-4 mb-4 rounded-xl">
+    <div className="flex gap-4 mb-4 rounded-xl flex-wrap">
       {outlets.map((outlet) => (
         <button
           key={outlet.id}

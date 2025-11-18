@@ -31,6 +31,9 @@ export default function AddIncomeOutletModal({
 
   const [totalAmount, setTotalAmount] = useState<number>(0);
 
+  const [incomeType, setIncomeType] = useState("Omzet");
+  const [name, setName] = useState("");
+
   const onSubmit = async () => {
     setIsLoadingButton(true);
 
@@ -40,14 +43,21 @@ export default function AddIncomeOutletModal({
         return;
       }
 
+      const expensesName =
+        incomeType === "Lainnya" && name.trim() !== "" ? name : null; // untuk Omzet → null → backend pakai default
+
       const payload = {
         outlet_id: idOutlet,
-        date: dayjs(incomeDate).format("YYYY-MM-DD"), // Format YYYY-MM-DD
+        date: dayjs(incomeDate).format("YYYY-MM-DD"),
+        name: expensesName,
+        description: expensesName, // ikut sama
         income: {
           cash: addCashAmount,
           digital: addDigitalAmount,
         },
       };
+
+      console.log("Payload:", payload);
 
       const response = await createIncomesOutlet(payload); // ganti `createIncome` dengan fungsi API-mu
       console.log("Berhasil menambahkan data:", response);
@@ -81,6 +91,8 @@ export default function AddIncomeOutletModal({
     >
       <div className="flex flex-col gap-5">
         <div className="fixed z-[9998]" id="root-portal"></div>
+
+        {/* Date Picker */}
         <GenosDatepicker
           id="income-date"
           label="Tanggal"
@@ -88,6 +100,48 @@ export default function AddIncomeOutletModal({
           onChange={(date) => setIncomeDate(date)}
         />
 
+        {/* Radio Button - Jenis Pemasukan */}
+        <div>
+          <label className="block text-sm font-medium mb-2">
+            Jenis Pemasukan
+          </label>
+          <div className="flex gap-4">
+            {["Omzet", "Lainnya"].map((option) => (
+              <label
+                key={option}
+                className={`flex items-center gap-2 px-4 py-1 rounded-full border cursor-pointer transition-all ${
+                  incomeType === option
+                    ? "bg-blue-100 border-blue-400 text-blue-700"
+                    : "bg-white border-gray-300 text-gray-600 hover:border-blue-300"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="incomeType"
+                  value={option}
+                  checked={incomeType === option}
+                  onChange={(e) => setIncomeType(e.target.value)}
+                  className="accent-blue-500"
+                />
+                {option}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Jika pilih Lainnya → tampilkan deskripsi */}
+        {incomeType === "Lainnya" && (
+          <GenosTextfield
+            id="description"
+            label="Deskripsi"
+            placeholder="Masukkan deskripsi pemasukan"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        )}
+
+        {/* Input Tunai */}
         <GenosTextfield
           id="cash"
           label="Jumlah Pemasukan Tunai"
@@ -98,6 +152,7 @@ export default function AddIncomeOutletModal({
           onChange={(e) => setAddCashAmount(Number(e.target.value))}
         />
 
+        {/* Input Digital */}
         <GenosTextfield
           id="digital"
           label="Jumlah Pemasukan Digital"
@@ -108,6 +163,7 @@ export default function AddIncomeOutletModal({
           onChange={(e) => setAddDigitalAmount(Number(e.target.value))}
         />
 
+        {/* Total */}
         <GenosTextfield
           id="by_mutation"
           label="Jumlah"

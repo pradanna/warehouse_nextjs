@@ -17,6 +17,10 @@ import {
 } from "@/lib/api/pastryOutlet/PastryOutletApi";
 import AddExpensesWarehouseModal from "@/components/form/expensesWarehouse/AddExpensesWarehouseModal";
 import EditExpensesWarehouseModal from "@/components/form/expensesWarehouse/EditExpensesWarehouseModal";
+import GenosDropdown from "@/components/button/GenosDropdown";
+import { PrinterIcon } from "@heroicons/react/24/outline";
+import { generateExpensesWarehousePDF } from "@/components/PDF/printExpensesWarehouse";
+import { generateExpensesWarehouseExcel } from "@/components/excel/printExpensesWarehouse";
 
 const ExpensesWarehouseTable = () => {
   const [expensesWarehouses, setExpensesWarehouses] = useState<
@@ -39,6 +43,20 @@ const ExpensesWarehouseTable = () => {
 
   const [dateFrom, setDateFrom] = useState<Date | null>(todayStart);
   const [dateTo, setDateTo] = useState<Date | null>(todayEnd);
+
+  const handleDownloadPDF = () => {
+    generateExpensesWarehousePDF(TABLE_ROWS, {
+      date_from: dateFrom,
+      date_to: dateTo,
+    });
+  };
+
+  const handleDownloadExcel = () => {
+    generateExpensesWarehouseExcel(TABLE_ROWS, {
+      date_from: dateFrom,
+      date_to: dateTo,
+    });
+  };
 
   const fetchExpensesWarehouse = async (page: number) => {
     setIsLoadingTable(true);
@@ -110,7 +128,7 @@ const ExpensesWarehouseTable = () => {
   const TABLE_HEAD = [
     { key: "date", label: "Tanggal", sortable: true },
     { key: "category.name", label: "Kategori", sortable: true },
-    { key: "amount", label: "Jumlah", sortable: true },
+    { key: "amount", label: "Jumlah", sortable: true, formatRupiah: true },
     { key: "description", label: "Keterangan", sortable: true },
     { key: "author.username", label: "Input By", sortable: true },
   ];
@@ -121,7 +139,7 @@ const ExpensesWarehouseTable = () => {
       id: expensesWarehouse.id,
       date: expensesWarehouse.date,
       category: expensesWarehouse.category.name,
-      amount: formatRupiah(expensesWarehouse.amount),
+      amount: expensesWarehouse.amount,
       description: expensesWarehouse.description,
       author: expensesWarehouse.author,
     }));
@@ -186,6 +204,27 @@ const ExpensesWarehouseTable = () => {
               onChange={(date) => setDateTo(date)}
             />
           </div>
+        }
+        RIGHT_DIV={
+          <GenosDropdown
+            iconLeft={<PrinterIcon className="w-5 h-5" />}
+            round="md"
+            color="gray"
+            outlined
+            align="right"
+            options={[
+              {
+                label: "Download PDF",
+                icon: <i className="fa-regular fa-file-pdf text-red-500" />,
+                onClick: handleDownloadPDF,
+              },
+              {
+                label: "Download Excel",
+                icon: <i className="fa-regular fa-file-excel text-green-500" />,
+                onClick: handleDownloadExcel,
+              },
+            ]}
+          />
         }
       />
 

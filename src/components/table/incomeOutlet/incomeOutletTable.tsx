@@ -15,6 +15,7 @@ import EditIncomeOutletModal from "@/components/form/incomeOutlet/EditIncomeOutl
 import YearDropdown from "@/components/dropdown-button/YearDropDown";
 import MonthDropdown from "@/components/dropdown-button/MonthDropDown";
 import InputMutationtModalModal from "@/components/form/incomeOutlet/InputMutationtModal";
+import GenosButton from "@/components/button/GenosButton";
 
 interface IncomesOutletTableProps {
   outletId: string;
@@ -72,6 +73,7 @@ const IncomesOutletTable = ({
     { key: "date", label: "Tanggal", sortable: true, fontWeight: "bold" },
     { key: "cash", label: "Cash", sortable: true, type: "currency" },
     { key: "digital", label: "Digital", sortable: true, type: "currency" },
+    { key: "name", label: "name", sortable: true },
     { key: "total", label: "Total", sortable: true, type: "currency" },
     { key: "author.username", label: "Input By", sortable: true },
     {
@@ -93,6 +95,7 @@ const IncomesOutletTable = ({
       id: incomeOutlet.id,
       date: incomeOutlet.date,
       cash: incomeOutlet.cash,
+      name: incomeOutlet.name,
       digital: incomeOutlet.digital,
       total: incomeOutlet.total,
       by_mutation: incomeOutlet.by_mutation,
@@ -173,14 +176,27 @@ const IncomesOutletTable = ({
         rowsPerPage={limit}
         totalRows={totalIncomesOutlets}
         currentPage={currentPage}
-        onPageChange={(page) => setCurrentPage(page)}
         onAddData={handleOpen}
+        onPageChange={(page) => setCurrentPage(page)}
+        // RIGHT_DIV={
+        //   <div>
+        //     <GenosButton
+        //       color="success"
+        //       round="sm"
+        //       label="Tambah Pemasukan Omzet"
+        //       onClick={handleOpen}
+        //     />
+        //     <GenosButton
+        //       className="ms-2"
+        //       color="warning"
+        //       round="sm"
+        //       label="Tambah Pemasukan Lainya"
+        //       onClick={handleOpenLainya}
+        //     />
+        //   </div>
+        // }
         loading={isLoadingTable}
         handleTableField={(row, key, value) => {
-          console.log("Row:", row); // seluruh data row
-          console.log("Key:", key); // misalnya "cash"
-          console.log("Value:", value); // value baru yang diinput user
-
           // Contoh: update state lokal
           setIncomesOutlets((prev) =>
             prev.map((r) =>
