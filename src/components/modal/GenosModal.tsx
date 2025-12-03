@@ -67,24 +67,19 @@ export default function GenosModal({
       )}
     >
       {/* Overlay */}
-      <div
-        className="fixed inset-0 bg-black/30 dark:bg-gray-800"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 bg-black/30 " onClick={onClose} />
 
       {/* Modal container */}
       <div
         className={clsx(
-          "bg-gray-50 dark:bg-gray-900 rounded-lg shadow-xl transform transition-all duration-300 relative",
+          "bg-gray-50  rounded-lg shadow-xl transform transition-all duration-300 relative",
           sizeClasses[size]
         )}
       >
         {/* Modal Header */}
-        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex justify-between items-center p-4 border-b border-gray-200 ">
           <div className="flex items-center gap-2">
-            <h2 className="font-semibold text-gray-800 dark:text-white">
-              {title}
-            </h2>
+            <h2 className="font-semibold text-gray-800 ">{title}</h2>
 
             {withChangeButton && (
               <GenosButton
@@ -100,7 +95,7 @@ export default function GenosModal({
 
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-white cursor-pointer"
+            className="text-gray-400 hover:text-gray-600  cursor-pointer"
           >
             &times;
           </button>
@@ -110,7 +105,7 @@ export default function GenosModal({
         <div className="p-4 overflow-y-auto max-h-[70vh]">{children}</div>
 
         {/* Modal Footer */}
-        <div className="flex justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex justify-end gap-2 p-4 border-t border-gray-200 ">
           {withCloseButton && (
             <GenosButton
               label={cancelLabel}

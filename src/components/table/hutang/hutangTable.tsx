@@ -19,7 +19,7 @@ const HutangTable = () => {
   const [totalSisaHutang, setTotalSisaHutang] = useState(0);
 
   const [selectedSupplier, setSelectedSupplier] = useState(null);
-  const [debtStatusFilter, setDebtStatusFilter] = useState<string>();
+  const [debtStatusFilter, setDebtStatusFilter] = useState<string>("unpaid");
   const [modalViewId, setModalViewId] = useState<any>();
   const [isModalViewOpen, setModalViewOpen] = useState(false);
   const [debtDetail, setDebtDetail] = useState<any>();
@@ -32,6 +32,12 @@ const HutangTable = () => {
   const TABLE_HEAD = useMemo(
     () => [
       { key: "supplier.name", label: "Supplier", sortable: true, type: "text" },
+      {
+        key: "purchase.date",
+        label: "Tanggal Pembelian",
+        sortable: true,
+        type: "text",
+      },
 
       {
         key: "amount_due",
@@ -77,6 +83,7 @@ const HutangTable = () => {
     try {
       const res = await getDebt(currentPage, limit, supplier_id, status);
       setDebtData(res.data);
+      console.log(res.data);
       setTABLE_ROWS(res.data);
       setTotalItems(res.meta.total_rows);
 
@@ -162,9 +169,9 @@ const HutangTable = () => {
               label="Status Piutang"
               className="text-xs w-40"
               options={[
-                { label: "PILIH SEMUA", value: "" },
-                { label: "LUNAS", value: "paid" },
                 { label: "BELUM LUNAS", value: "unpaid" },
+                { label: "LUNAS", value: "paid" },
+                { label: "PILIH SEMUA", value: "" },
               ]}
               value={debtStatusFilter}
               onChange={(e) => {

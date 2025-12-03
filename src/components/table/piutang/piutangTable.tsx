@@ -22,7 +22,8 @@ const PiutangTable = () => {
 
   const [selectedOutlet, setSelectedOutlet] = useState(null);
   const [isModalViewOpen, setModalViewOpen] = useState(false);
-  const [creditStatusFilter, setCreditStatusFilter] = useState<string>();
+  const [creditStatusFilter, setCreditStatusFilter] =
+    useState<string>("unpaid");
   const [saleDetail, setSaleDetail] = useState<any>();
   const [payAmount, setPayAmount] = useState(0);
   const [isPayFromDetaildModalOpen, setPayFromDetaildModalOpen] =
@@ -31,6 +32,12 @@ const PiutangTable = () => {
   const TABLE_HEAD = useMemo(
     () => [
       { key: "outlet.name", label: "Outlet", sortable: true, type: "text" },
+      {
+        key: "sale.date",
+        label: "Tanggal Penjualan",
+        sortable: true,
+        type: "text",
+      },
 
       {
         key: "amount_due",
@@ -76,6 +83,7 @@ const PiutangTable = () => {
     try {
       const res = await getcredit(currentPage, 1000000, outlet_id, status);
       setCreditData(res.data);
+      console.log(res.data);
       setTABLE_ROWS(res.data);
       setTotalItems(res.meta.total_rows);
 
@@ -158,9 +166,9 @@ const PiutangTable = () => {
               label="Status Piutang"
               className="text-xs w-40"
               options={[
-                { label: "PILIH SEMUA", value: "" },
-                { label: "LUNAS", value: "paid" },
                 { label: "BELUM LUNAS", value: "unpaid" },
+                { label: "LUNAS", value: "paid" },
+                { label: "PILIH SEMUA", value: "" },
               ]}
               value={creditStatusFilter}
               onChange={(e) => {

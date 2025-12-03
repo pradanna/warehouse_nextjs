@@ -138,7 +138,7 @@ const ExpensesWarehouseTable = () => {
     return expensesWarehouses.map((expensesWarehouse) => ({
       id: expensesWarehouse.id,
       date: expensesWarehouse.date,
-      category: expensesWarehouse.category.name,
+      category: expensesWarehouse.category,
       amount: expensesWarehouse.amount,
       description: expensesWarehouse.description,
       author: expensesWarehouse.author,
