@@ -212,7 +212,7 @@ const IncomesOutletTable = ({
         }}
         ACTION_BUTTON={{
           edit: (row) => handleEdit(row.id),
-          delete: (row) => handleDelete(row.id),
+          // delete: (row) => handleDelete(row.id),
         }}
         FILTER={
           <div className="flex gap-4 mb-4">

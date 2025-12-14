@@ -44,7 +44,7 @@ export default function AddIncomeOutletModal({
       }
 
       const expensesName =
-        incomeType === "Lainnya" && name.trim() !== "" ? name : null; // untuk Omzet → null → backend pakai default
+        incomeType === "Lainnya" && name.trim() !== "" ? name : null;
 
       const payload = {
         outlet_id: idOutlet,
